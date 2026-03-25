@@ -4,7 +4,7 @@ import 'package:kali_studio/theme/kali_theme.dart';
 class KaliTextField extends StatelessWidget {
   final String label;
   final String hint;
-  final IconData suffixIcon;
+  final IconData? suffixIcon;
   final bool obscureText;
   final TextEditingController? controller;
   final VoidCallback? onSuffixTap;
@@ -15,7 +15,7 @@ class KaliTextField extends StatelessWidget {
     super.key,
     required this.label,
     required this.hint,
-    required this.suffixIcon,
+    this.suffixIcon,
     this.obscureText = false,
     this.controller,
     this.onSuffixTap,
@@ -59,14 +59,14 @@ class KaliTextField extends StatelessWidget {
             fillColor: KaliColors.sand,
 
             // Icono derecho
-            suffixIcon: GestureDetector(
+            suffixIcon: suffixIcon != null ? GestureDetector(
               onTap: onSuffixTap,
               child: Icon(
                 suffixIcon,
                 color: KaliColors.clayDark,
                 size: 18,
               ),
-            ),
+            ) : null,
 
             border: _border(KaliColors.sand2),
             enabledBorder: _border(KaliColors.sand2),
