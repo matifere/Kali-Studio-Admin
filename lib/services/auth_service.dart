@@ -50,7 +50,7 @@ class SupaAuthClass {
             return 'Acceso denegado: No tienes permisos de administrador.';
           }
         } catch (e) {
-          print('Error obteniendo el rol: $e');
+          //print('Error obteniendo el rol: $e');
         }
         return 'Ok';
       } else {

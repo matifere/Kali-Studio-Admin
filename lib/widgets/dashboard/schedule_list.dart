@@ -90,7 +90,7 @@ class DashboardScheduleList extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -111,7 +111,7 @@ class DashboardScheduleList extends StatelessWidget {
                 ),
                 Text(
                   period,
-                  style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+                  style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ],
             ),
@@ -141,7 +141,7 @@ class DashboardScheduleList extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   coach,
-                  style: KaliText.body(KaliColors.espresso.withOpacity(0.6), size: 13),
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6), size: 13),
                 ),
               ],
             ),
@@ -175,7 +175,7 @@ class DashboardScheduleList extends StatelessWidget {
                     )
                   : Text(
                       '$occupancyPercent OCUPACIÓN',
-                      style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+                      style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
                     ),
             ],
           )

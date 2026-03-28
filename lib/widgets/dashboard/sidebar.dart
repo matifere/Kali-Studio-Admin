@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 class DashboardSidebar extends StatelessWidget {
-  const DashboardSidebar({super.key});
+  final String currentPage;
+  final void Function(String page) onNavigate;
+
+  const DashboardSidebar({
+    super.key,
+    required this.currentPage,
+    required this.onNavigate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +22,7 @@ class DashboardSidebar extends StatelessWidget {
         children: [
           _buildLogo(),
           const SizedBox(height: 48),
-          _buildMenuItem(Icons.grid_view_rounded, 'Panel', isActive: true),
+          _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
           _buildMenuItem(Icons.people_outline, 'Alumnos'),
           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
           _buildMenuItem(Icons.payment_outlined, 'Pagos'),
@@ -49,26 +56,27 @@ class DashboardSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, {bool isActive = false}) {
+  Widget _buildMenuItem(IconData icon, String title) {
+    final isActive = currentPage == title;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isActive ? Colors.black.withOpacity(0.05) : Colors.transparent,
+        color: isActive ? Colors.black.withValues(alpha: 0.05) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
         leading: Icon(
           icon,
-          color: isActive ? KaliColors.espresso : KaliColors.espresso.withOpacity(0.6),
+          color: isActive ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.6),
         ),
         title: Text(
           title,
           style: KaliText.body(
-            isActive ? KaliColors.espresso : KaliColors.espresso.withOpacity(0.6),
+            isActive ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.6),
             weight: isActive ? FontWeight.bold : FontWeight.w500,
           ),
         ),
-        onTap: () {},
+        onTap: () => onNavigate(title),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
@@ -101,11 +109,11 @@ class DashboardSidebar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         child: Row(
           children: [
-            Icon(icon, color: KaliColors.espresso.withOpacity(0.5), size: 18),
+            Icon(icon, color: KaliColors.espresso.withValues(alpha: 0.5), size: 18),
             const SizedBox(width: 12),
             Text(
               title,
-              style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+              style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
             ),
           ],
         ),

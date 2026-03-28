@@ -16,7 +16,7 @@ class DashboardStatCards extends StatelessWidget {
             bottomWidget: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: KaliColors.clay.withOpacity(0.4),
+                color: KaliColors.clay.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -34,7 +34,7 @@ class DashboardStatCards extends StatelessWidget {
             icon: Icons.event_available_outlined,
             bottomWidget: Text(
               '8 sesiones completadas',
-              style: KaliText.body(KaliColors.espresso.withOpacity(0.6)),
+              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
             ),
           ),
         ),
@@ -65,7 +65,7 @@ class DashboardStatCards extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -77,7 +77,7 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.espresso.withOpacity(0.5))),
+              Text(title, style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
               Icon(icon, color: KaliColors.espresso, size: 20),
             ],
           ),
@@ -109,7 +109,7 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.warmWhite.withOpacity(0.6))),
+              Text(title, style: KaliText.label(KaliColors.warmWhite.withValues(alpha: 0.6))),
               Icon(icon, color: KaliColors.warmWhite, size: 20),
             ],
           ),
@@ -120,13 +120,13 @@ class DashboardStatCards extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(KaliColors.sand),
               minHeight: 4,
             ),
           ),
           const SizedBox(height: 8),
-          Text(capacityText, style: KaliText.body(KaliColors.warmWhite.withOpacity(0.6))),
+          Text(capacityText, style: KaliText.body(KaliColors.warmWhite.withValues(alpha: 0.6))),
         ],
       ),
     );

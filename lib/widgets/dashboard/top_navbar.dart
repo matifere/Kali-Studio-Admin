@@ -21,7 +21,7 @@ class DashboardTopNavBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.search, color: KaliColors.espresso.withOpacity(0.4)),
+                  Icon(Icons.search, color: KaliColors.espresso.withValues(alpha: 0.4)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
@@ -29,7 +29,7 @@ class DashboardTopNavBar extends StatelessWidget {
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Buscar alumnos, pagos...',
-                        hintStyle: KaliText.body(KaliColors.espresso.withOpacity(0.4)),
+                        hintStyle: KaliText.body(KaliColors.espresso.withValues(alpha: 0.4)),
                       ),
                     ),
                   ),
@@ -40,11 +40,11 @@ class DashboardTopNavBar extends StatelessWidget {
           const SizedBox(width: 24),
           // Icons
           IconButton(
-            icon: Icon(Icons.notifications, color: KaliColors.espresso.withOpacity(0.6)),
+            icon: Icon(Icons.notifications, color: KaliColors.espresso.withValues(alpha: 0.6)),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.settings, color: KaliColors.espresso.withOpacity(0.6)),
+            icon: Icon(Icons.settings, color: KaliColors.espresso.withValues(alpha: 0.6)),
             onPressed: () {},
           ),
           const SizedBox(width: 16),
@@ -62,7 +62,7 @@ class DashboardTopNavBar extends StatelessWidget {
                   ),
                   Text(
                     'GESTOR DEL ESTUDIO',
-                    style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+                    style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
                   ),
                 ],
               ),

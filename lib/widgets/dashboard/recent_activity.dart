@@ -47,7 +47,7 @@ class DashboardRecentActivity extends StatelessWidget {
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(color: KaliColors.espresso.withOpacity(0.1)),
+                side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -55,7 +55,7 @@ class DashboardRecentActivity extends StatelessWidget {
               onPressed: () {},
               child: Text(
                 'VER TODA LA ACTIVIDAD',
-                style: KaliText.label(KaliColors.espresso.withOpacity(0.6)),
+                style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.6)),
               ),
             ),
           )
@@ -92,7 +92,7 @@ class DashboardRecentActivity extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 1,
-                      color: KaliColors.espresso.withOpacity(0.1),
+                      color: KaliColors.espresso.withValues(alpha: 0.1),
                     ),
                   ),
               ],
@@ -108,7 +108,7 @@ class DashboardRecentActivity extends StatelessWidget {
                 children: [
                   Text(
                     timeLabel,
-                    style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+                    style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -118,7 +118,7 @@ class DashboardRecentActivity extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: KaliText.body(KaliColors.espresso.withOpacity(0.7)),
+                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7)),
                   ),
                 ],
               ),

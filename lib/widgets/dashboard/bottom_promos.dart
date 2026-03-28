@@ -42,7 +42,7 @@ class DashboardBottomPromos extends StatelessWidget {
                       children: [
                         Text(
                           'ESTADO DE INSTALACIONES',
-                          style: KaliText.label(KaliColors.espresso.withOpacity(0.5)),
+                          style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -52,7 +52,7 @@ class DashboardBottomPromos extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           'El espacio de tu estudio se usa de manera más eficiente entre las 8 AM y 11 AM.',
-                          style: KaliText.body(KaliColors.espresso.withOpacity(0.7), size: 13),
+                          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7), size: 13),
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -79,7 +79,7 @@ class DashboardBottomPromos extends StatelessWidget {
           child: Container(
             height: 200,
             decoration: BoxDecoration(
-              color: KaliColors.clayDark.withOpacity(0.8), // Using a dark clay color as in image
+              color: KaliColors.clayDark.withValues(alpha: 0.8), // Using a dark clay color as in image
               borderRadius: BorderRadius.circular(16),
             ),
             padding: const EdgeInsets.all(32),
@@ -97,7 +97,7 @@ class DashboardBottomPromos extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Tu proporción alumno-profesor es 18:1. Considerá agregar un nuevo profesor por la mañana.',
-                        style: KaliText.body(KaliColors.warmWhite.withOpacity(0.9), size: 14),
+                        style: KaliText.body(KaliColors.warmWhite.withValues(alpha: 0.9), size: 14),
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
@@ -124,7 +124,7 @@ class DashboardBottomPromos extends StatelessWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
                   ),
                   child: const Center(
                     child: Icon(
