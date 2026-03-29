@@ -8,6 +8,7 @@ import 'package:kali_studio/widgets/dashboard/schedule_list.dart';
 import 'package:kali_studio/widgets/dashboard/recent_activity.dart';
 import 'package:kali_studio/widgets/dashboard/bottom_promos.dart';
 import 'package:kali_studio/screens/alumnos_screen.dart';
+import 'package:kali_studio/screens/turnos_screen.dart';
 
 enum _NavPage { dashboard, alumnos, turnos, pagos }
 
@@ -28,11 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case _NavPage.alumnos:
         return const AlumnosScreen();
       case _NavPage.turnos:
-        return const _PlaceholderPage(
-          title: 'Turnos',
-          subtitle: 'Gestión de clases y horarios.',
-          icon: Icons.calendar_today_outlined,
-        );
+        return const TurnosScreen();
       case _NavPage.pagos:
         return const _PlaceholderPage(
           title: 'Pagos',
