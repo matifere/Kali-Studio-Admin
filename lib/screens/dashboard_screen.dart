@@ -9,6 +9,7 @@ import 'package:kali_studio/widgets/dashboard/recent_activity.dart';
 import 'package:kali_studio/widgets/dashboard/bottom_promos.dart';
 import 'package:kali_studio/screens/alumnos_screen.dart';
 import 'package:kali_studio/screens/turnos_screen.dart';
+import 'package:kali_studio/screens/pagos_screen.dart';
 
 enum _NavPage { dashboard, alumnos, turnos, pagos }
 
@@ -31,11 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case _NavPage.turnos:
         return const TurnosScreen();
       case _NavPage.pagos:
-        return const _PlaceholderPage(
-          title: 'Pagos',
-          subtitle: 'Historial y cobros del estudio.',
-          icon: Icons.payment_outlined,
-        );
+        return const PagosScreen();
     }
   }
 
@@ -120,67 +117,6 @@ class _DashboardHome extends StatelessWidget {
                 const SizedBox(height: 32),
                 const DashboardBottomPromos(),
                 const SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Placeholder for future pages ─────────────────────────────────────────────
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  const _PlaceholderPage({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const DashboardTopNavBar(),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon,
-                    size: 56, color: KaliColors.espresso.withValues(alpha: 0.15)),
-                const SizedBox(height: 20),
-                Text(
-                  title,
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w600,
-                    color: KaliColors.espresso,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5),
-                      size: 15),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: KaliColors.sand,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'Próximamente',
-                    style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
-                  ),
-                ),
               ],
             ),
           ),
