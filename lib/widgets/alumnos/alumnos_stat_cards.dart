@@ -1,33 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AlumnosStatCards extends StatelessWidget {
   const AlumnosStatCards({super.key});
+  Future<int> getTotalClientsCount() async {
+    // El método .count() devuelve directamente un int
+    final count = await Supabase.instance.client
+        .from('profiles')
+        .count() // Por defecto esto ya aplica CountOption.exact
+        .eq('role', 'client');
+
+    return count;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         // Total Alumnos Activos (white card, wider)
-        Expanded(
-          flex: 5,
-          child: _buildWhiteCard(
-            title: 'TOTAL ALUMNOS ACTIVOS',
-            value: '124',
-            badge: Row(
-              children: [
-                const Icon(Icons.trending_up,
-                    size: 14, color: Color(0xFF5C9E6C)),
-                const SizedBox(width: 4),
-                Text(
-                  '+12% este mes',
-                  style: KaliText.body(const Color(0xFF5C9E6C),
-                      weight: FontWeight.w600),
+        FutureBuilder(
+            future: getTotalClientsCount(),
+            builder: (context, asyncSnapshot) {
+              return Expanded(
+                flex: 5,
+                child: _buildWhiteCard(
+                  title: 'TOTAL ALUMNOS ACTIVOS',
+                  value: asyncSnapshot.data.toString(),
+                  badge: Row(
+                    children: [
+                      const Icon(Icons.trending_up,
+                          size: 14, color: Color(0xFF5C9E6C)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '+12% este mes',
+                        style: KaliText.body(const Color(0xFF5C9E6C),
+                            weight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              );
+            }),
         const SizedBox(width: 20),
 
         // Membresía Premium (clay warm card)
@@ -81,14 +95,16 @@ class AlumnosStatCards extends StatelessWidget {
               style:
                   KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
-          Text(
-            value,
-            style: KaliText.display(KaliColors.espresso).copyWith(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.normal,
-            ),
-          ),
+          value != 'null'
+              ? Text(
+                  value,
+                  style: KaliText.display(KaliColors.espresso).copyWith(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                  ),
+                )
+              : const LinearProgressIndicator(),
           const SizedBox(height: 12),
           badge,
         ],

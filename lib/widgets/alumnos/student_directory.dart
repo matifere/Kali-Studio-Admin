@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/data/mock_students.dart';
 import 'package:kali_studio/models/student.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/alumnos/student_row.dart';
@@ -13,13 +12,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Recibe una lista de [Student] y se encarga de la paginación,
 /// los headers de columna y el estado vacío.
 class StudentDirectory extends StatefulWidget {
-  final List<Student> students;
-
   const StudentDirectory({
     super.key,
-    this.students = kMockStudents,
   });
-
   @override
   State<StudentDirectory> createState() => _StudentDirectoryState();
 }
@@ -45,7 +40,7 @@ class _StudentDirectoryState extends State<StudentDirectory> {
       *, 
       subscriptions!subscriptions_user_id_fkey(*, plans(*)), 
       reservations!reservations_user_id_fkey(*, class_sessions(*))
-    ''');
+    ''').eq('role', 'client');
 
     return response.map((data) => Student.fromJson(data)).toList();
   }
