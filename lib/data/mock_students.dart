@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:kali_studio/models/student.dart';
 
 /// Datos de ejemplo para desarrollo y testing.
@@ -7,8 +6,6 @@ import 'package:kali_studio/models/student.dart';
 const List<Student> kMockStudents = [
   // ── Página 1 ──
   Student(
-    initials: 'LV',
-    avatarColor: Color(0xFFB5C9B0),
     name: 'Lucía Valenzuela',
     email: 'lucia.v@email.com',
     plan: 'PREMIUM ANUAL',
@@ -17,8 +14,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'YOGA FLOW',
   ),
   Student(
-    initials: 'MR',
-    avatarColor: Color(0xFFD4B896),
     avatarImage: 'https://i.pravatar.cc/150?img=12',
     name: 'Mateo Rodriguez',
     email: 'mateo.r@email.com',
@@ -28,8 +23,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'PILATES MAT',
   ),
   Student(
-    initials: 'CP',
-    avatarColor: Color(0xFFE8C4A0),
     name: 'Camila Paredes',
     email: 'cami.paredes@email.com',
     plan: 'PREMIUM ANUAL',
@@ -39,8 +32,6 @@ const List<Student> kMockStudents = [
     reactivate: true,
   ),
   Student(
-    initials: 'JS',
-    avatarColor: Color(0xFF9EAFC2),
     avatarImage: 'https://i.pravatar.cc/150?img=8',
     name: 'Julián Soto',
     email: 'j.soto@email.com',
@@ -51,8 +42,6 @@ const List<Student> kMockStudents = [
   ),
   // ── Página 2 ──
   Student(
-    initials: 'AF',
-    avatarColor: Color(0xFFC2A8D4),
     name: 'Ana Fernández',
     email: 'ana.fernandez@email.com',
     plan: 'PREMIUM ANUAL',
@@ -61,8 +50,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'BARRE',
   ),
   Student(
-    initials: 'DG',
-    avatarColor: Color(0xFFA8C2B8),
     avatarImage: 'https://i.pravatar.cc/150?img=15',
     name: 'Diego García',
     email: 'diego.g@email.com',
@@ -72,8 +59,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'STRETCHING',
   ),
   Student(
-    initials: 'SM',
-    avatarColor: Color(0xFFD4A8A8),
     name: 'Sofía Martínez',
     email: 'sofia.m@email.com',
     plan: 'INTERMEDIO X12',
@@ -82,8 +67,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'YOGA FLOW',
   ),
   Student(
-    initials: 'RL',
-    avatarColor: Color(0xFFB8C9D4),
     name: 'Rodrigo López',
     email: 'rodrigo.l@email.com',
     plan: 'BÁSICO X8',
@@ -94,8 +77,6 @@ const List<Student> kMockStudents = [
   ),
   // ── Página 3 ──
   Student(
-    initials: 'VR',
-    avatarColor: Color(0xFFD4C9A8),
     avatarImage: 'https://i.pravatar.cc/150?img=20',
     name: 'Valentina Ruiz',
     email: 'vale.ruiz@email.com',
@@ -105,8 +86,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'PILATES MAT',
   ),
   Student(
-    initials: 'NC',
-    avatarColor: Color(0xFFA8B8D4),
     name: 'Nicolás Castro',
     email: 'nico.castro@email.com',
     plan: 'INTERMEDIO X12',
@@ -115,8 +94,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'FUNCTIONAL',
   ),
   Student(
-    initials: 'IT',
-    avatarColor: Color(0xFFD4B8C9),
     name: 'Isabella Torres',
     email: 'isa.torres@email.com',
     plan: 'PREMIUM ANUAL',
@@ -125,8 +102,6 @@ const List<Student> kMockStudents = [
     shiftClass: 'BARRE',
   ),
   Student(
-    initials: 'FH',
-    avatarColor: Color(0xFFC9D4A8),
     avatarImage: 'https://i.pravatar.cc/150?img=33',
     name: 'Francisco Herrera',
     email: 'fran.herrera@email.com',
