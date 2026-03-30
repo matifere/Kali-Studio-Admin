@@ -67,7 +67,7 @@ class _StudentDirectoryState extends State<StudentDirectory> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
               padding: EdgeInsets.all(40.0),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: LinearProgressIndicator()),
             );
           }
 
