@@ -128,6 +128,7 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
+          curve: Curves.decelerate,
           width: 32,
           height: 32,
           decoration: BoxDecoration(
@@ -140,9 +141,7 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
           child: Text(
             '${widget.page}',
             style: KaliText.body(
-              widget.isActive
-                  ? KaliColors.warmWhite
-                  : KaliColors.espresso.withValues(alpha: 0.6),
+              widget.isActive ? KaliColors.warmWhite : KaliColors.sand,
               weight: widget.isActive ? FontWeight.w700 : FontWeight.w400,
             ),
           ),

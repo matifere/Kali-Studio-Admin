@@ -26,9 +26,8 @@ class _StudentRowState extends State<StudentRow> {
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        color: _hovered
-            ? KaliColors.sand.withValues(alpha: 0.4)
-            : Colors.transparent,
+        curve: Curves.bounceInOut,
+        color: _hovered ? KaliColors.warmWhite : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         child: Row(
           children: [
