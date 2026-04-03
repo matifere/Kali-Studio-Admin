@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
 import 'package:kali_studio/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:kali_studio/widgets/alumnos/student_directory.dart';
 
-class AlumnosScreen extends StatelessWidget {
+/// Pantalla de gestión de alumnos.
+///
+/// Es [StatefulWidget] para poder disparar [AlumnosLoadRequested] exactamente
+/// una vez cuando se monta — carga lazy que evita peticiones en background
+/// que interfieren con el hot reload de Flutter.
+class AlumnosScreen extends StatefulWidget {
   const AlumnosScreen({super.key});
+
+  @override
+  State<AlumnosScreen> createState() => _AlumnosScreenState();
+}
+
+class _AlumnosScreenState extends State<AlumnosScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Solo carga si el bloc todavía no tiene datos (evita re-fetch al volver).
+    final bloc = context.read<AlumnosBloc>();
+    if (bloc.state is AlumnosInitial) {
+      bloc.add(AlumnosLoadRequested());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +70,7 @@ class AlumnosScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    _AddStudentButton(),
+                    const _AddStudentButton(),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -70,6 +92,8 @@ class AlumnosScreen extends StatelessWidget {
 }
 
 class _AddStudentButton extends StatefulWidget {
+  const _AddStudentButton();
+
   @override
   State<_AddStudentButton> createState() => _AddStudentButtonState();
 }

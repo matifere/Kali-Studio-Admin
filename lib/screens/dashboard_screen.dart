@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kali_studio/bloc/navigation/navigation_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/dashboard/sidebar.dart';
 import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
@@ -11,73 +13,51 @@ import 'package:kali_studio/screens/alumnos_screen.dart';
 import 'package:kali_studio/screens/turnos_screen.dart';
 import 'package:kali_studio/screens/pagos_screen.dart';
 
-enum _NavPage { dashboard, alumnos, turnos, pagos }
-
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  _NavPage _currentPage = _NavPage.dashboard;
-
-  Widget _buildCurrentPage() {
-    switch (_currentPage) {
-      case _NavPage.dashboard:
-        return _DashboardHome();
-      case _NavPage.alumnos:
+  Widget _buildCurrentPage(String page) {
+    switch (page) {
+      case 'Alumnos':
         return const AlumnosScreen();
-      case _NavPage.turnos:
+      case 'Turnos':
         return const TurnosScreen();
-      case _NavPage.pagos:
+      case 'Pagos':
         return const PagosScreen();
+      default:
+        return const _DashboardHome();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: KaliColors.warmWhite,
-      body: Row(
-        children: [
-          DashboardSidebar(
-            currentPage: _currentPage == _NavPage.dashboard
-                ? 'Panel'
-                : _currentPage == _NavPage.alumnos
-                    ? 'Alumnos'
-                    : _currentPage == _NavPage.turnos
-                        ? 'Turnos'
-                        : 'Pagos',
-            onNavigate: (page) {
-              setState(() {
-                switch (page) {
-                  case 'Panel':
-                    _currentPage = _NavPage.dashboard;
-                    break;
-                  case 'Alumnos':
-                    _currentPage = _NavPage.alumnos;
-                    break;
-                  case 'Turnos':
-                    _currentPage = _NavPage.turnos;
-                    break;
-                  case 'Pagos':
-                    _currentPage = _NavPage.pagos;
-                    break;
-                }
-              });
-            },
+    return BlocBuilder<NavigationBloc, NavigationState>(
+      builder: (context, navState) {
+        return Scaffold(
+          backgroundColor: KaliColors.warmWhite,
+          body: Row(
+            children: [
+              DashboardSidebar(
+                currentPage: navState.currentPage,
+                onNavigate: (page) {
+                  context.read<NavigationBloc>().add(
+                        NavigationPageChanged(page),
+                      );
+                },
+              ),
+              Expanded(child: _buildCurrentPage(navState.currentPage)),
+            ],
           ),
-          Expanded(child: _buildCurrentPage()),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
 // ─── Dashboard home content ───────────────────────────────────────────────────
 class _DashboardHome extends StatelessWidget {
+  const _DashboardHome();
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -90,7 +70,7 @@ class _DashboardHome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Buenos días, Studio.',
+                  'Buenos días, booa',
                   style: GoogleFonts.cormorantGaramond(
                     fontSize: 40,
                     fontWeight: FontWeight.w600,
@@ -100,8 +80,10 @@ class _DashboardHome extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Esto es lo que está pasando en Kali Studio hoy.',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6),
-                      size: 16),
+                  style: KaliText.body(
+                    KaliColors.espresso.withValues(alpha: 0.6),
+                    size: 16,
+                  ),
                 ),
                 const SizedBox(height: 40),
                 const DashboardStatCards(),

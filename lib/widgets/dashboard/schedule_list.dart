@@ -20,11 +20,8 @@ class DashboardScheduleList extends StatelessWidget {
             children: [
               Text(
                 "Cronograma de Hoy",
-                style: KaliText.headingItalic(KaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w600),
-              ),
-              Text(
-                "VER CALENDARIO COMPLETO",
-                style: KaliText.label(KaliColors.clayDark),
+                style: KaliText.headingItalic(KaliColors.espresso, size: 28)
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -107,11 +104,13 @@ class DashboardScheduleList extends StatelessWidget {
               children: [
                 Text(
                   time,
-                  style: KaliText.heading(KaliColors.espresso, size: 20).copyWith(fontWeight: FontWeight.bold),
+                  style: KaliText.heading(KaliColors.espresso, size: 20)
+                      .copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   period,
-                  style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
+                  style: KaliText.label(
+                      KaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ],
             ),
@@ -136,12 +135,15 @@ class DashboardScheduleList extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: KaliText.body(KaliColors.espresso, weight: FontWeight.bold, size: 15),
+                  style: KaliText.body(KaliColors.espresso,
+                      weight: FontWeight.bold, size: 15),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   coach,
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6), size: 13),
+                  style: KaliText.body(
+                      KaliColors.espresso.withValues(alpha: 0.6),
+                      size: 13),
                 ),
               ],
             ),
@@ -154,7 +156,8 @@ class DashboardScheduleList extends StatelessWidget {
                 children: [
                   Text(
                     occupancy,
-                    style: KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
+                    style: KaliText.body(KaliColors.espresso,
+                        weight: FontWeight.bold),
                   ),
                   const SizedBox(width: 6),
                   Container(
@@ -175,7 +178,8 @@ class DashboardScheduleList extends StatelessWidget {
                     )
                   : Text(
                       '$occupancyPercent OCUPACIÓN',
-                      style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
+                      style: KaliText.label(
+                          KaliColors.espresso.withValues(alpha: 0.5)),
                     ),
             ],
           )

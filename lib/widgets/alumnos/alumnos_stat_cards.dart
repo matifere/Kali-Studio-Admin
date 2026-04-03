@@ -1,78 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
 
 class AlumnosStatCards extends StatelessWidget {
   const AlumnosStatCards({super.key});
-  Future<int> getTotalClientsCount() async {
-    // El método .count() devuelve directamente un int
-    final count = await Supabase.instance.client
-        .from('profiles')
-        .count() // Por defecto esto ya aplica CountOption.exact
-        .eq('role', 'client');
-
-    return count;
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Total Alumnos Activos (white card, wider)
-        FutureBuilder(
-            future: getTotalClientsCount(),
-            builder: (context, asyncSnapshot) {
-              return Expanded(
-                flex: 5,
-                child: _buildWhiteCard(
-                  title: 'TOTAL ALUMNOS ACTIVOS',
-                  value: asyncSnapshot.data.toString(),
-                  badge: Row(
-                    children: [
-                      const Icon(Icons.trending_up,
-                          size: 14, color: Color(0xFF5C9E6C)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '+12% este mes',
-                        style: KaliText.body(const Color(0xFF5C9E6C),
-                            weight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
+    return BlocBuilder<AlumnosBloc, AlumnosState>(
+      builder: (context, state) {
+        String? activeCount;
+        if (state is AlumnosLoaded) {
+          activeCount = state.students.length.toString();
+        } else if (state is AlumnosError) {
+          activeCount = '0';
+        }
+
+        return Row(
+          children: [
+            // Total Alumnos Activos (white card, wider)
+            Expanded(
+              flex: 5,
+              child: _buildWhiteCard(
+                title: 'TOTAL ALUMNOS ACTIVOS',
+                value: activeCount,
+                badge: Row(
+                  children: [
+                    const Icon(Icons.trending_up,
+                        size: 14, color: Color(0xFF5C9E6C)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '+12% este mes',
+                      style: KaliText.body(const Color(0xFF5C9E6C),
+                          weight: FontWeight.w600),
+                    ),
+                  ],
                 ),
-              );
-            }),
-        const SizedBox(width: 20),
-
-        // Membresía Premium (clay warm card)
-        Expanded(
-          flex: 4,
-          child: _buildClayCard(
-            title: 'MEMBRESÍA PREMIUM',
-            value: '48',
-          ),
-        ),
-        const SizedBox(width: 20),
-
-        // Próximos Vencimientos (white card)
-        Expanded(
-          flex: 4,
-          child: _buildWhiteCard(
-            title: 'PRÓXIMOS VENCIMIENTOS',
-            value: '12',
-            badge: Text(
-              'En los próximos 7 días',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+              ),
             ),
-          ),
-        ),
-      ],
+            const SizedBox(width: 20),
+
+            // Membresía Premium (clay warm card)
+            Expanded(
+              flex: 4,
+              child: _buildClayCard(
+                title: 'MEMBRESÍA PREMIUM',
+                value: '48', // FIXME: Add logic to calculate premium members
+              ),
+            ),
+            const SizedBox(width: 20),
+
+            // Próximos Vencimientos (white card)
+            Expanded(
+              flex: 4,
+              child: _buildWhiteCard(
+                title: 'PRÓXIMOS VENCIMIENTOS',
+                value: '12', // FIXME: Add logic to calculate expiring members
+                badge: Text(
+                  'En los próximos 7 días',
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildWhiteCard({
     required String title,
-    required String value,
+    required String? value,
     required Widget badge,
   }) {
     return Container(
@@ -95,7 +94,7 @@ class AlumnosStatCards extends StatelessWidget {
               style:
                   KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
-          value != 'null'
+          value != null
               ? Text(
                   value,
                   style: KaliText.display(KaliColors.espresso).copyWith(
