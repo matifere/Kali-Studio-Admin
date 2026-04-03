@@ -11,8 +11,34 @@ class AlumnosStatCards extends StatelessWidget {
     return BlocBuilder<AlumnosBloc, AlumnosState>(
       builder: (context, state) {
         String? activeCount;
+        String percentGrowthStr = '0%';
+        bool isPositive = true;
+
         if (state is AlumnosLoaded) {
           activeCount = state.students.length.toString();
+
+          final now = DateTime.now();
+          int thisMonthCount = 0;
+          for (var s in state.students) {
+            if (s.createdAt.year == now.year && s.createdAt.month == now.month) {
+              thisMonthCount++;
+            }
+          }
+
+          int previousTotal = state.students.length - thisMonthCount;
+          if (previousTotal == 0) {
+            if (thisMonthCount > 0) {
+              percentGrowthStr = '100+%';
+              isPositive = true;
+            } else {
+              percentGrowthStr = '0%';
+              isPositive = true;
+            }
+          } else {
+            double percent = (thisMonthCount / previousTotal) * 100;
+            percentGrowthStr = '${percent.toStringAsFixed(1).replaceAll('.0', '')}%';
+            isPositive = percent >= 0;
+          }
         } else if (state is AlumnosError) {
           activeCount = '0';
         }
@@ -27,12 +53,19 @@ class AlumnosStatCards extends StatelessWidget {
                 value: activeCount,
                 badge: Row(
                   children: [
-                    const Icon(Icons.trending_up,
-                        size: 14, color: Color(0xFF5C9E6C)),
+                    Icon(
+                        isPositive ? Icons.trending_up : Icons.trending_down,
+                        size: 14,
+                        color: isPositive
+                            ? const Color(0xFF5C9E6C)
+                            : const Color(0xFFD4685C)),
                     const SizedBox(width: 4),
                     Text(
-                      '+12% este mes',
-                      style: KaliText.body(const Color(0xFF5C9E6C),
+                      '${isPositive ? '+' : ''}$percentGrowthStr este mes',
+                      style: KaliText.body(
+                          isPositive
+                              ? const Color(0xFF5C9E6C)
+                              : const Color(0xFFD4685C),
                           weight: FontWeight.w600),
                     ),
                   ],

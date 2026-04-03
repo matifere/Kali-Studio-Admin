@@ -10,6 +10,7 @@ class Student {
   final String nextShift;
   final String shiftClass;
   final bool reactivate;
+  final DateTime createdAt;
 
   const Student({
     this.avatarImage,
@@ -19,6 +20,7 @@ class Student {
     required this.isActive,
     required this.nextShift,
     required this.shiftClass,
+    required this.createdAt,
     this.reactivate = false,
   });
   String get initials {
@@ -87,6 +89,7 @@ class Student {
       isActive: json['is_active'] ?? false,
       nextShift: nextShiftDate,
       shiftClass: shiftClassName,
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now() : DateTime.now(),
       reactivate:
           false, // Asumo que esto es puramente para la UI y no viene de la DB
     );

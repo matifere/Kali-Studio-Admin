@@ -3,7 +3,7 @@ import 'package:kali_studio/models/student.dart';
 /// Datos de ejemplo para desarrollo y testing.
 ///
 /// En producción esto vendría de Supabase u otro backend.
-const List<Student> kMockStudents = [
+List<Student> kMockStudents = [
   // ── Página 1 ──
   Student(
     name: 'Lucía Valenzuela',
@@ -11,7 +11,7 @@ const List<Student> kMockStudents = [
     plan: 'PREMIUM ANUAL',
     isActive: true,
     nextShift: 'Mañana, 09:00',
-    shiftClass: 'YOGA FLOW',
+    createdAt: DateTime.now(), shiftClass: 'YOGA FLOW',
   ),
   Student(
     avatarImage: 'https://i.pravatar.cc/150?img=12',
@@ -20,7 +20,7 @@ const List<Student> kMockStudents = [
     plan: 'BÁSICO X8',
     isActive: true,
     nextShift: 'Jueves, 18:30',
-    shiftClass: 'PILATES MAT',
+    createdAt: DateTime.now(), shiftClass: 'PILATES MAT',
   ),
   Student(
     name: 'Camila Paredes',
@@ -28,7 +28,7 @@ const List<Student> kMockStudents = [
     plan: 'PREMIUM ANUAL',
     isActive: false,
     nextShift: 'Sin turnos',
-    shiftClass: 'REACTIVAR',
+    createdAt: DateTime.now(), shiftClass: 'REACTIVAR',
     reactivate: true,
   ),
   Student(
@@ -38,7 +38,7 @@ const List<Student> kMockStudents = [
     plan: 'INTERMEDIO X12',
     isActive: true,
     nextShift: 'Hoy, 20:00',
-    shiftClass: 'FUNCTIONAL',
+    createdAt: DateTime.now(), shiftClass: 'FUNCTIONAL',
   ),
   // ── Página 2 ──
   Student(
@@ -47,7 +47,7 @@ const List<Student> kMockStudents = [
     plan: 'PREMIUM ANUAL',
     isActive: true,
     nextShift: 'Viernes, 10:00',
-    shiftClass: 'BARRE',
+    createdAt: DateTime.now(), shiftClass: 'BARRE',
   ),
   Student(
     avatarImage: 'https://i.pravatar.cc/150?img=15',
@@ -56,7 +56,7 @@ const List<Student> kMockStudents = [
     plan: 'BÁSICO X8',
     isActive: true,
     nextShift: 'Lunes, 17:00',
-    shiftClass: 'STRETCHING',
+    createdAt: DateTime.now(), shiftClass: 'STRETCHING',
   ),
   Student(
     name: 'Sofía Martínez',
@@ -64,7 +64,7 @@ const List<Student> kMockStudents = [
     plan: 'INTERMEDIO X12',
     isActive: true,
     nextShift: 'Miércoles, 08:30',
-    shiftClass: 'YOGA FLOW',
+    createdAt: DateTime.now(), shiftClass: 'YOGA FLOW',
   ),
   Student(
     name: 'Rodrigo López',
@@ -72,7 +72,7 @@ const List<Student> kMockStudents = [
     plan: 'BÁSICO X8',
     isActive: false,
     nextShift: 'Sin turnos',
-    shiftClass: 'REACTIVAR',
+    createdAt: DateTime.now(), shiftClass: 'REACTIVAR',
     reactivate: true,
   ),
   // ── Página 3 ──
@@ -83,7 +83,7 @@ const List<Student> kMockStudents = [
     plan: 'PREMIUM ANUAL',
     isActive: true,
     nextShift: 'Mañana, 11:00',
-    shiftClass: 'PILATES MAT',
+    createdAt: DateTime.now(), shiftClass: 'PILATES MAT',
   ),
   Student(
     name: 'Nicolás Castro',
@@ -91,7 +91,7 @@ const List<Student> kMockStudents = [
     plan: 'INTERMEDIO X12',
     isActive: true,
     nextShift: 'Jueves, 19:30',
-    shiftClass: 'FUNCTIONAL',
+    createdAt: DateTime.now(), shiftClass: 'FUNCTIONAL',
   ),
   Student(
     name: 'Isabella Torres',
@@ -99,7 +99,7 @@ const List<Student> kMockStudents = [
     plan: 'PREMIUM ANUAL',
     isActive: true,
     nextShift: 'Sábado, 09:00',
-    shiftClass: 'BARRE',
+    createdAt: DateTime.now(), shiftClass: 'BARRE',
   ),
   Student(
     avatarImage: 'https://i.pravatar.cc/150?img=33',
@@ -108,7 +108,7 @@ const List<Student> kMockStudents = [
     plan: 'BÁSICO X8',
     isActive: false,
     nextShift: 'Sin turnos',
-    shiftClass: 'REACTIVAR',
+    createdAt: DateTime.now(), shiftClass: 'REACTIVAR',
     reactivate: true,
   ),
 ];
