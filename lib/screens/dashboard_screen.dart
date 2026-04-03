@@ -70,7 +70,7 @@ class _DashboardHome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Buenos días, booa',
+                  'Buenos días,',
                   style: GoogleFonts.cormorantGaramond(
                     fontSize: 40,
                     fontWeight: FontWeight.w600,
