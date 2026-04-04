@@ -20,6 +20,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   List<Map<String, dynamic>> _filteredProfiles = [];
   bool _isLoading = true;
   String? _error;
+  bool _enrollInFuture = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -82,7 +83,11 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
 
   void _assign(String userId) {
     context.read<TurnosBloc>().add(
-      TurnoStudentAssigned(userId: userId, sessionId: widget.session.id)
+      TurnoStudentAssigned(
+        userId: userId, 
+        session: widget.session,
+        enrollInFuture: _enrollInFuture,
+      )
     );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alumno inscripto correctamente')));
@@ -136,6 +141,17 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               ),
             ),
             const SizedBox(height: 16),
+            if (widget.session.templateId != null) ...[
+              CheckboxListTile(
+                title: Text('Proyectar e inscribir al alumno también en estas clases durante todo el mes', style: KaliText.body(KaliColors.espresso, size: 14)),
+                value: _enrollInFuture,
+                onChanged: (v) => setState(() => _enrollInFuture = v ?? false),
+                activeColor: KaliColors.espresso,
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 8),
+            ],
             Expanded(
               child: _isLoading
                 ? const Center(child: CircularProgressIndicator())

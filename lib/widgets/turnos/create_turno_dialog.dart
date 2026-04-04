@@ -22,6 +22,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
 
   ScheduleTemplate? _selectedTemplate;
   DateTime? _selectedDate;
+  int _recurrenceWeeks = 1;
 
   @override
   void initState() {
@@ -70,14 +71,13 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
         return;
       }
 
-      // 2. Check overlap
+      // 2. Check basic overlapping logic locally (only checks first week conceptually since subsequent occur next weeks)
       final sessions = context.read<TurnosBloc>().state.sessions;
       final newStartMins = int.parse(parts[0]) * 60 + int.parse(parts[1]);
       final endParts = _selectedTemplate!.endTime.split(':');
       final newEndMins = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
 
       final hasOverlap = sessions.any((session) {
-        // Compare same day
         if (session.date.year != _selectedDate!.year || 
             session.date.month != _selectedDate!.month || 
             session.date.day != _selectedDate!.day) {
@@ -89,13 +89,12 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
         final existingStartMins = int.parse(existingStartParts[0]) * 60 + int.parse(existingStartParts[1]);
         final existingEndMins = int.parse(existingEndParts[0]) * 60 + int.parse(existingEndParts[1]);
         
-        // Return true if they overlap
         return newStartMins < existingEndMins && newEndMins > existingStartMins;
       });
 
       if (hasOverlap) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ya existe un turno en este mismo horario.')),
+          const SnackBar(content: Text('Ya existe un turno en este mismo horario esta semana. Revísalo antes de crear múltiples.')),
         );
         return;
       }
@@ -104,6 +103,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
       context.read<TurnosBloc>().add(TurnoCreated(
         template: _selectedTemplate!, 
         date: _selectedDate!,
+        recurrenceWeeks: _recurrenceWeeks,
       ));
       
       Navigator.of(context).pop();
@@ -214,6 +214,30 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                     ),
                   ),
 
+                  const SizedBox(height: 20),
+
+                  // Frecuencia
+                  Text('Frecuencia de Repetición', style: KaliText.label(KaliColors.espresso)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: _recurrenceWeeks,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text('Solo esta semana (1 clase)')),
+                      DropdownMenuItem(value: 4, child: Text('Mismo día / Todo el mes (4 clases)')),
+                      DropdownMenuItem(value: 8, child: Text('Mismo día / Dos meses (8 clases)')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setState(() => _recurrenceWeeks = val);
+                    },
+                  ),
+                  
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,

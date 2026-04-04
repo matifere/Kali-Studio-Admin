@@ -18,7 +18,13 @@ class TurnosWeekChanged extends TurnosEvent {
 class TurnoCreated extends TurnosEvent {
   final ScheduleTemplate template;
   final DateTime date;
-  TurnoCreated({required this.template, required this.date});
+  final int recurrenceWeeks;
+
+  TurnoCreated({
+    required this.template, 
+    required this.date,
+    this.recurrenceWeeks = 1,
+  });
 }
 
 /// El usuario tocó una tarjeta de turno en el calendario.
@@ -47,8 +53,14 @@ class TurnoEdited extends TurnosEvent {
 /// Se inscribe a un alumno a un turno
 class TurnoStudentAssigned extends TurnosEvent {
   final String userId;
-  final String sessionId;
-  TurnoStudentAssigned({required this.userId, required this.sessionId});
+  final ClassSession session;
+  final bool enrollInFuture;
+
+  TurnoStudentAssigned({
+    required this.userId, 
+    required this.session,
+    this.enrollInFuture = false,
+  });
 }
 
 /// Se des-inscribe/remueve a un alumno de un turno

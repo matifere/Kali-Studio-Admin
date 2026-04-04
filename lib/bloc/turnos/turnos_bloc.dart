@@ -81,20 +81,25 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      final dateIso = DateFormat('yyyy-MM-dd').format(event.date);
+      final insertData = <Map<String, dynamic>>[];
+      for (int i = 0; i < event.recurrenceWeeks; i++) {
+        final d = event.date.add(Duration(days: i * 7));
+        final dateIso = DateFormat('yyyy-MM-dd').format(d);
 
-      await Supabase.instance.client.from('class_sessions').insert({
-        'template_id': event.template.id,
-        'name': event.template.name,
-        'description': event.template.description,
-        'date': dateIso,
-        'start_time': event.template.startTime,
-        'end_time': event.template.endTime,
-        'capacity': event.template.capacity,
-        'status': 'scheduled',
-        'instructor_name': event.template.instructorName,
-      });
+        insertData.add({
+          'template_id': event.template.id,
+          'name': event.template.name,
+          'description': event.template.description,
+          'date': dateIso,
+          'start_time': event.template.startTime,
+          'end_time': event.template.endTime,
+          'capacity': event.template.capacity,
+          'status': 'scheduled',
+          'instructor_name': event.template.instructorName,
+        });
+      }
 
+      await Supabase.instance.client.from('class_sessions').insert(insertData);
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al crear el turno: $e'));
@@ -161,13 +166,40 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      await Supabase.instance.client.from('reservations').insert({
+      final db = Supabase.instance.client;
+      final inserts = <Map<String, dynamic>>[];
+      
+      // 1. Inscripción actual focalizada
+      inserts.add({
         'user_id': event.userId,
-        'session_id': event.sessionId,
-        'status': 'confirmed' // Assuming confirmed is the default reservation_status
+        'session_id': event.session.id,
+        'status': 'confirmed' 
       });
 
-      // Refrescar el turno seleccionado para mostrar el alumno
+      // 2. Si marcamos recurrencia, buscamos las 3 clases *futuras* con el mismo template
+      if (event.enrollInFuture && event.session.templateId != null) {
+        final startIso = DateFormat('yyyy-MM-dd').format(event.session.date.add(const Duration(days: 1))); // From tomorrow onwards
+        
+        final futureSessionsResponse = await db.from('class_sessions')
+          .select('id')
+          .eq('template_id', event.session.templateId!)
+          .gte('date', startIso)
+          .order('date', ascending: true)
+          .limit(3);
+
+        final futureSessions = futureSessionsResponse as List<dynamic>;
+        for (final row in futureSessions) {
+          // Omito validación estricta de cupo en inscripciones masivas para hacerlo atómico y resolverlo a nivel logistico si choca.
+          inserts.add({
+            'user_id': event.userId,
+            'session_id': row['id'],
+            'status': 'confirmed'
+          });
+        }
+      }
+
+      await db.from('reservations').insert(inserts);
+
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al inscribir alumno: $e'));
