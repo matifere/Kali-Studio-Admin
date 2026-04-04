@@ -96,9 +96,9 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               OutlinedButton.icon(
                 onPressed: onCreateTemplate,
-                icon: Icon(Icons.note_add_outlined, size: 20, color: KaliColors.espresso.withValues(alpha: 0.7)),
+                icon: Icon(Icons.settings_outlined, size: 20, color: KaliColors.espresso.withValues(alpha: 0.7)),
                 label: Text(
-                  'Nueva Plantilla',
+                  'Administrar Plantillas',
                   style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7), weight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(

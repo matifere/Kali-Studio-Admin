@@ -14,6 +14,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoCreated>(_onTurnoCreated);
     on<TurnoSelected>(_onTurnoSelected);
     on<TurnoDeselected>(_onTurnoDeselected);
+    on<TurnoDeleted>(_onTurnoDeleted);
+    on<TurnoEdited>(_onTurnoEdited);
   }
 
   static DateTime _getStartOfWeek(DateTime date) {
@@ -103,5 +105,42 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) {
     emit(state.copyWith(clearSelection: true));
+  }
+
+  Future<void> _onTurnoDeleted(
+    TurnoDeleted event,
+    Emitter<TurnosState> emit,
+  ) async {
+    try {
+      await Supabase.instance.client.from('class_sessions').delete().eq('id', event.sessionId);
+      emit(state.copyWith(clearSelection: true));
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al cancelar turno: $e'));
+    }
+  }
+
+  Future<void> _onTurnoEdited(
+    TurnoEdited event,
+    Emitter<TurnosState> emit,
+  ) async {
+    final t = event.turno;
+    try {
+      final dateIso = DateFormat('yyyy-MM-dd').format(t.date);
+      await Supabase.instance.client.from('class_sessions').update({
+        'name': t.name,
+        'description': t.description,
+        'date': dateIso,
+        'start_time': t.startTime.substring(0, 5),
+        'end_time': t.endTime.substring(0, 5),
+        'capacity': t.capacity,
+        'instructor_name': t.instructorName,
+      }).eq('id', t.id);
+
+      emit(state.copyWith(clearSelection: true));
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al editar turno: $e'));
+    }
   }
 }

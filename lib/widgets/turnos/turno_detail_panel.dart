@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
+import 'package:kali_studio/widgets/turnos/edit_turno_dialog.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {
@@ -37,7 +40,7 @@ class TurnoDetailPanel extends StatelessWidget {
           if (turno.description != null && turno.description!.isNotEmpty) 
             _buildDescription(),
           const Spacer(),
-          _buildActions(),
+          _buildActions(context),
           const SizedBox(height: 20),
         ],
       ),
@@ -153,21 +156,53 @@ class TurnoDetailPanel extends StatelessWidget {
   }
 
   // ── Botones de acción ──────────────────────────────────────────────────────
-  Widget _buildActions() {
+  Widget _buildActions(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
           _ActionButton(
-            icon: Icons.move_to_inbox_outlined,
-            label: 'Reprogramar Clase',
-            onTap: () {},
+            icon: Icons.edit_outlined,
+            label: 'Editar / Reprogramar',
+            onTap: () {
+              final bloc = context.read<TurnosBloc>();
+              showDialog(
+                context: context,
+                builder: (_) => BlocProvider.value(
+                  value: bloc,
+                  child: EditTurnoDialog(turno: turno),
+                ),
+              );
+              onClose(); // Cerrar panel tras abrir
+            },
           ),
           const SizedBox(height: 10),
           _ActionButton(
             icon: Icons.delete_outline,
             label: 'Cancelar Sesión',
-            onTap: () {},
+            onTap: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Cancelar sesión'),
+                  content: Text('¿Seguro que deseas cancelar la clase de ${turno.name}? Esta acción eliminará el turno completamente.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Volver')),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(true), 
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: const Text('Cancelar Sesión')
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                if (context.mounted) {
+                  context.read<TurnosBloc>().add(TurnoDeleted(turno.id));
+                }
+              }
+            },
             isDestructive: true,
           ),
         ],

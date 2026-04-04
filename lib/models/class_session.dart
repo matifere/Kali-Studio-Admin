@@ -97,24 +97,28 @@ class ClassSession {
   String get occupancyText => '$enrolled/$capacity';
   bool get isFull => enrolled >= capacity;
 
-  Color get backgroundColor {
-    switch (uiTurnoType) {
-      case TurnoType.reformerPilates:
-        return const Color(0xFFF5D9B8); // Clay/peach cálido
-      case TurnoType.matPilates:
-        return const Color(0xFFEDE6D8); // Sand suave
-      case TurnoType.privateSpecial:
-        return const Color(0xFF2C1F14); // Espresso oscuro
-    }
+  static const _palette = [
+    ColorPair(Color(0xFFF5D9B8), Color(0xFF2C1F14)), // Peach cálido -> Espresso
+    ColorPair(Color(0xFFEDE6D8), Color(0xFF2C1F14)), // Sand suave -> Espresso
+    ColorPair(Color(0xFFD4DDD3), Color(0xFF2C1F14)), // Sage light -> Espresso
+    ColorPair(Color(0xFF2C1F14), Color(0xFFFAF7F2)), // Espresso oscuro -> Blanco cálido
+    ColorPair(Color(0xFF8A9E88), Color(0xFFFAF7F2)), // Sage -> Blanco cálido
+    ColorPair(Color(0xFFA08060), Color(0xFFFAF7F2)), // Clay dark -> Blanco cálido
+    ColorPair(Color(0xFFE8E2D8), Color(0xFF2C1F14)), // Background base -> Espresso
+  ];
+
+  ColorPair get _assignedColors {
+    // Calculamos un índice dependiente únicamente del nombre de la clase
+    final hash = name.trim().toLowerCase().hashCode;
+    return _palette[hash.abs() % _palette.length];
   }
 
-  Color get foregroundColor {
-    switch (uiTurnoType) {
-      case TurnoType.reformerPilates:
-      case TurnoType.matPilates:
-        return const Color(0xFF2C1F14); // Espresso
-      case TurnoType.privateSpecial:
-        return const Color(0xFFFAF7F2); // Warm white
-    }
-  }
+  Color get backgroundColor => _assignedColors.bg;
+  Color get foregroundColor => _assignedColors.fg;
+}
+
+class ColorPair {
+  final Color bg;
+  final Color fg;
+  const ColorPair(this.bg, this.fg);
 }

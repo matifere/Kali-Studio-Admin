@@ -32,3 +32,15 @@ class TurnoSelected extends TurnosEvent {
 /// El usuario cerró el panel de detalle.
 class TurnoDeselected extends TurnosEvent {}
 
+/// El usuario cancela (elimina) un turno.
+class TurnoDeleted extends TurnosEvent {
+  final String sessionId;
+  TurnoDeleted(this.sessionId);
+}
+
+/// El usuario ha guardado la modificación de un turno.
+class TurnoEdited extends TurnosEvent {
+  final ClassSession turno;
+  TurnoEdited(this.turno);
+}
+
