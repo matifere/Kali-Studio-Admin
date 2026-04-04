@@ -16,6 +16,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoDeselected>(_onTurnoDeselected);
     on<TurnoDeleted>(_onTurnoDeleted);
     on<TurnoEdited>(_onTurnoEdited);
+    on<TurnoStudentAssigned>(_onTurnoStudentAssigned);
+    on<TurnoStudentRemoved>(_onTurnoStudentRemoved);
   }
 
   static DateTime _getStartOfWeek(DateTime date) {
@@ -37,14 +39,24 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
       final response = await Supabase.instance.client
           .from('class_sessions')
-          .select('*, reservations(id)')
+          .select('*, reservations(id, user_id, profiles:profiles!reservations_user_id_fkey(full_name, avatar_url))')
           .gte('date', startIso)
           .lte('date', endIso);
 
       final sessions = response.map<ClassSession>((data) => ClassSession.fromJson(data)).toList();
 
+      ClassSession? freshSelected;
+      if (state.selectedTurno != null) {
+        try {
+          freshSelected = sessions.firstWhere((s) => s.id == state.selectedTurno!.id);
+        } catch (_) {
+          freshSelected = state.selectedTurno;
+        }
+      }
+
       emit(state.copyWith(
         sessions: sessions,
+        selectedTurno: freshSelected,
         isLoading: false,
       ));
     } catch (e) {
@@ -141,6 +153,38 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al editar turno: $e'));
+    }
+  }
+
+  Future<void> _onTurnoStudentAssigned(
+    TurnoStudentAssigned event,
+    Emitter<TurnosState> emit,
+  ) async {
+    try {
+      await Supabase.instance.client.from('reservations').insert({
+        'user_id': event.userId,
+        'session_id': event.sessionId,
+        'status': 'confirmed' // Assuming confirmed is the default reservation_status
+      });
+
+      // Refrescar el turno seleccionado para mostrar el alumno
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al inscribir alumno: $e'));
+    }
+  }
+
+  Future<void> _onTurnoStudentRemoved(
+    TurnoStudentRemoved event,
+    Emitter<TurnosState> emit,
+  ) async {
+    try {
+      await Supabase.instance.client.from('reservations').delete().eq('id', event.reservationId);
+      
+      // Refrescar el turno seleccionado
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al desinscribir alumno: $e'));
     }
   }
 }

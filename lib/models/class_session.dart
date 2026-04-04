@@ -1,5 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/models/turno.dart';
+class TurnoReservation {
+  final String id;
+  final String userId;
+  final String studentName;
+  final String? avatarUrl;
+
+  const TurnoReservation({
+    required this.id,
+    required this.userId,
+    required this.studentName,
+    this.avatarUrl,
+  });
+
+  factory TurnoReservation.fromJson(Map<String, dynamic> json) {
+    String name = 'Sin nombre';
+    String? av;
+    if (json['profiles'] != null) {
+      name = json['profiles']['full_name'] ?? 'Sin nombre';
+      av = json['profiles']['avatar_url'];
+    }
+
+    return TurnoReservation(
+      id: json['id'],
+      userId: json['user_id'],
+      studentName: name,
+      avatarUrl: av,
+    );
+  }
+}
 
 class ClassSession {
   final String id;
@@ -14,6 +43,7 @@ class ClassSession {
   final String? cancellationReason;
   final String? instructorName;
   final int enrolled;
+  final List<TurnoReservation> enrolledStudents;
 
   const ClassSession({
     required this.id,
@@ -28,13 +58,15 @@ class ClassSession {
     this.cancellationReason,
     this.instructorName,
     required this.enrolled,
+    this.enrolledStudents = const [],
   });
 
   factory ClassSession.fromJson(Map<String, dynamic> json) {
-    // Check for reservations array to calculate `enrolled`
-    int enrolledCount = 0;
+    List<TurnoReservation> reservations = [];
     if (json['reservations'] != null && json['reservations'] is List) {
-      enrolledCount = (json['reservations'] as List).length;
+      reservations = (json['reservations'] as List)
+          .map((r) => TurnoReservation.fromJson(r))
+          .toList();
     }
 
     return ClassSession(
@@ -49,7 +81,8 @@ class ClassSession {
       status: json['status'],
       cancellationReason: json['cancellation_reason'],
       instructorName: json['instructor_name'],
-      enrolled: enrolledCount,
+      enrolled: reservations.length,
+      enrolledStudents: reservations,
     );
   }
 

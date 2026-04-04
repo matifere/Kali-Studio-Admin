@@ -44,3 +44,16 @@ class TurnoEdited extends TurnosEvent {
   TurnoEdited(this.turno);
 }
 
+/// Se inscribe a un alumno a un turno
+class TurnoStudentAssigned extends TurnosEvent {
+  final String userId;
+  final String sessionId;
+  TurnoStudentAssigned({required this.userId, required this.sessionId});
+}
+
+/// Se des-inscribe/remueve a un alumno de un turno
+class TurnoStudentRemoved extends TurnosEvent {
+  final String reservationId;
+  TurnoStudentRemoved(this.reservationId);
+}
+

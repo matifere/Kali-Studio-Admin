@@ -5,6 +5,8 @@ import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 import 'package:kali_studio/widgets/turnos/edit_turno_dialog.dart';
+import 'package:kali_studio/widgets/turnos/assign_student_dialog.dart';
+import 'package:kali_studio/widgets/common/avatar_provider.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {
@@ -20,7 +22,7 @@ class TurnoDetailPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 300,
+      width: 320,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -39,9 +41,10 @@ class TurnoDetailPanel extends StatelessWidget {
           _buildSlotInfo(),
           if (turno.description != null && turno.description!.isNotEmpty) 
             _buildDescription(),
-          const Spacer(),
+          const SizedBox(height: 16),
+          Expanded(child: _buildEnrolledStudents(context)),
           _buildActions(context),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -94,10 +97,17 @@ class TurnoDetailPanel extends StatelessWidget {
                   KaliColors.espresso.withValues(alpha: 0.5),
                 ),
               ),
-              Text(
-                turno.occupancyText,
-                style: KaliText.label(
-                  KaliColors.espresso.withValues(alpha: 0.7),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: turno.isFull ? const Color(0xFFD4685C).withValues(alpha: 0.1) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  turno.occupancyText,
+                  style: KaliText.label(
+                    turno.isFull ? const Color(0xFFD4685C) : KaliColors.espresso.withValues(alpha: 0.7),
+                  ).copyWith(fontWeight: turno.isFull ? FontWeight.bold : FontWeight.normal),
                 ),
               ),
             ],
@@ -152,6 +162,90 @@ class TurnoDetailPanel extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // ── Alumnos inscriptos ──────────────────────────────────────────────────────
+  Widget _buildEnrolledStudents(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'ALUMNOS INSCRIPTOS',
+                style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
+              ),
+              if (!turno.isFull)
+                InkWell(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<TurnosBloc>(),
+                        child: AssignStudentDialog(session: turno),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '+ Inscribir',
+                    style: KaliText.label(KaliColors.espresso).copyWith(
+                      color: KaliColors.espresso,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: turno.enrolledStudents.isEmpty
+              ? Center(
+                  child: Text(
+                    'No hay alumnos inscriptos.',
+                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: turno.enrolledStudents.length,
+                  itemBuilder: (context, index) {
+                    final student = turno.enrolledStudents[index];
+                    return ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      leading: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: KaliColors.clay,
+                        backgroundImage: AvatarProvider.fromUrl(student.avatarUrl),
+                        child: student.avatarUrl == null 
+                          ? Text(student.studentName.isNotEmpty ? student.studentName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 10))
+                          : null,
+                      ),
+                      title: Text(
+                        student.studentName,
+                        style: KaliText.body(KaliColors.espresso, weight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
+                        onPressed: () {
+                          context.read<TurnosBloc>().add(TurnoStudentRemoved(student.id));
+                        },
+                        tooltip: 'Desinscribir',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

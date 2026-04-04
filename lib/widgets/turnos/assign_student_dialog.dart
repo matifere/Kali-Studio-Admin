@@ -1,0 +1,174 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
+import 'package:kali_studio/models/class_session.dart';
+import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/widgets/common/avatar_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AssignStudentDialog extends StatefulWidget {
+  final ClassSession session;
+
+  const AssignStudentDialog({super.key, required this.session});
+
+  @override
+  State<AssignStudentDialog> createState() => _AssignStudentDialogState();
+}
+
+class _AssignStudentDialogState extends State<AssignStudentDialog> {
+  List<Map<String, dynamic>> _profiles = [];
+  List<Map<String, dynamic>> _filteredProfiles = [];
+  bool _isLoading = true;
+  String? _error;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfiles();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfiles() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .order('full_name', ascending: true);
+
+      // Filtrar los que ya están anotados
+      final enrolledIds = widget.session.enrolledStudents.map((e) => e.userId).toSet();
+
+      final available = (response as List<dynamic>)
+          .map((e) => e as Map<String, dynamic>)
+          .where((p) => !enrolledIds.contains(p['id']))
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _profiles = available;
+          _filteredProfiles = available;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error al cargar alumnos: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _filter(String query) {
+    if (query.isEmpty) {
+      setState(() => _filteredProfiles = _profiles);
+      return;
+    }
+    final q = query.toLowerCase();
+    setState(() {
+      _filteredProfiles = _profiles.where((p) {
+        final name = (p['full_name'] ?? '').toString().toLowerCase();
+        return name.contains(q);
+      }).toList();
+    });
+  }
+
+  void _assign(String userId) {
+    context.read<TurnosBloc>().add(
+      TurnoStudentAssigned(userId: userId, sessionId: widget.session.id)
+    );
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alumno inscripto correctamente')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: Colors.white,
+      child: Container(
+        width: 450,
+        height: 600,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Inscribir Alumno',
+                  style: KaliText.heading(KaliColors.espresso, size: 24),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Asignar a: ${widget.session.name}',
+              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _searchController,
+              onChanged: _filter,
+              decoration: InputDecoration(
+                hintText: 'Buscar por nombre...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                  ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+                  : _filteredProfiles.isEmpty
+                    ? Center(child: Text('No se encontraron alumnos disponibles', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
+                    : ListView.separated(
+                        itemCount: _filteredProfiles.length,
+                        separatorBuilder: (_, __) => Divider(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                        itemBuilder: (context, index) {
+                          final p = _filteredProfiles[index];
+                          final name = p['full_name'] ?? 'Sin nombre';
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: KaliColors.clay,
+                              backgroundImage: AvatarProvider.fromUrl(p['avatar_url']),
+                              child: p['avatar_url'] == null 
+                                ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 12))
+                                : null,
+                            ),
+                            title: Text(name, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+                            trailing: TextButton(
+                              onPressed: () => _assign(p['id']),
+                              child: const Text('Inscribir'),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

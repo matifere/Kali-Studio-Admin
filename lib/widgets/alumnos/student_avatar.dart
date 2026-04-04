@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:kali_studio/models/student.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/widgets/common/avatar_provider.dart';
 
 /// Avatar circular de un alumno.
 ///
@@ -20,24 +20,14 @@ class StudentAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (student.avatarImage != null && student.avatarImage!.isNotEmpty) {
-      ImageProvider provider;
-      if (student.avatarImage!.startsWith('data:image')) {
-        final commaIndex = student.avatarImage!.indexOf(',');
-        if (commaIndex != -1) {
-          final base64String = student.avatarImage!.substring(commaIndex + 1);
-          provider = MemoryImage(base64Decode(base64String));
-        } else {
-          provider = MemoryImage(base64Decode(student.avatarImage!)); // Fallback in case it's pure base64
-        }
-      } else {
-        provider = NetworkImage(student.avatarImage!);
+      final provider = AvatarProvider.fromUrl(student.avatarImage);
+      if (provider != null) {
+        return CircleAvatar(
+          radius: radius,
+          backgroundColor: student.avatarColor,
+          backgroundImage: provider,
+        );
       }
-
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: student.avatarColor,
-        backgroundImage: provider,
-      );
     }
     return CircleAvatar(
       radius: radius,
