@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:kali_studio/data/mock_turnos.dart';
-import 'package:kali_studio/models/turno.dart';
+import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/turnos/turno_card.dart';
+import 'package:intl/intl.dart';
 
 /// Grilla del calendario semanal.
 ///
 /// Usa [StaggeredGrid] del paquete `flutter_staggered_grid_view`
-/// para posicionar las tarjetas de turnos en una grilla de 5 columnas
-/// (Lun–Vie) donde cada turno ocupa un número variable de celdas
+/// para posicionar las tarjetas de turnos en una grilla de 7 columnas
+/// (Lun–Dom) donde cada turno ocupa un número variable de celdas
 /// verticales según su duración.
 class WeeklySchedule extends StatelessWidget {
-  final List<Turno> turnos;
-  final int todayIndex;
-  final Turno? selectedTurno;
-  final ValueChanged<Turno> onTurnoSelected;
+  final DateTime currentWeekStart;
+  final List<ClassSession> sessions;
+  final ClassSession? selectedTurno;
+  final ValueChanged<ClassSession> onTurnoSelected;
 
   const WeeklySchedule({
     super.key,
-    this.turnos = kMockTurnos,
-    this.todayIndex = kTodayIndex,
+    required this.currentWeekStart,
+    required this.sessions,
     this.selectedTurno,
     required this.onTurnoSelected,
   });
@@ -34,10 +34,6 @@ class WeeklySchedule extends StatelessWidget {
   static const int _totalSlots = _totalHours * _slotsPerHour;
   static const double _slotHeight = 48.0;
 
-  /// Cuántas celdas de grilla (slots de 30 min) ocupa un turno.
-  int _cellCountForTurno(Turno t) =>
-      (t.durationMinutes / 30).ceil().clamp(1, _totalSlots);
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -50,6 +46,7 @@ class WeeklySchedule extends StatelessWidget {
 
   // ── Headers de días ────────────────────────────────────────────────────────
   Widget _buildDayHeaders() {
+    final now = DateTime.now();
     return Container(
       padding: const EdgeInsets.fromLTRB(60, 16, 0, 12),
       decoration: BoxDecoration(
@@ -60,16 +57,18 @@ class WeeklySchedule extends StatelessWidget {
         ),
       ),
       child: StaggeredGrid.count(
-        crossAxisCount: 5,
-        children: List.generate(5, (i) {
-          final isToday = i == todayIndex;
+        crossAxisCount: 7,
+        children: List.generate(7, (i) {
+          final dayDate = currentWeekStart.add(Duration(days: i));
+          final isToday = dayDate.year == now.year && dayDate.month == now.month && dayDate.day == now.day;
+          final dayName = DateFormat('EEE', 'es_ES').format(dayDate).toUpperCase();
           return StaggeredGridTile.fit(
             crossAxisCellCount: 1,
             child: Center(
               child: Column(
                 children: [
                   Text(
-                    kWeekDayLabels[i],
+                    dayName,
                     style: KaliText.label(
                       isToday
                           ? KaliColors.espresso
@@ -87,7 +86,7 @@ class WeeklySchedule extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '${kWeekDayNumbers[i]}',
+                      '${dayDate.day}',
                       style: KaliText.body(
                         isToday ? KaliColors.warmWhite : KaliColors.espresso,
                         weight: isToday ? FontWeight.w700 : FontWeight.w400,
@@ -106,6 +105,7 @@ class WeeklySchedule extends StatelessWidget {
 
   // ── Cuerpo del calendario: horas + grilla staggered por día ────────────────
   Widget _buildScheduleBody() {
+    final now = DateTime.now();
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 4),
       child: SizedBox(
@@ -115,19 +115,19 @@ class WeeklySchedule extends StatelessWidget {
           children: [
             // Columna de horas
             _buildTimeLabels(),
-            // 5 columnas de días usando StaggeredGrid dentro de cada Stack
-            ...List.generate(5, (dayIdx) {
+            // 7 columnas de días
+            ...List.generate(7, (dayIdx) {
+              final dayDate = currentWeekStart.add(Duration(days: dayIdx));
+              final isToday = dayDate.year == now.year && dayDate.month == now.month && dayDate.day == now.day;
               return Expanded(
                 child: _DayColumn(
                   dayIndex: dayIdx,
-                  isToday: dayIdx == todayIndex,
-                  turnos:
-                      turnos.where((t) => t.dayIndex == dayIdx).toList(),
+                  isToday: isToday,
+                  turnos: sessions.where((t) => t.dayIndex == dayIdx).toList(),
                   selectedTurno: selectedTurno,
                   onTurnoSelected: onTurnoSelected,
                   startHour: _startHour,
                   slotHeight: _slotHeight,
-                  cellCountForTurno: _cellCountForTurno,
                 ),
               );
             }),
@@ -172,12 +172,11 @@ class WeeklySchedule extends StatelessWidget {
 class _DayColumn extends StatelessWidget {
   final int dayIndex;
   final bool isToday;
-  final List<Turno> turnos;
-  final Turno? selectedTurno;
-  final ValueChanged<Turno> onTurnoSelected;
+  final List<ClassSession> turnos;
+  final ClassSession? selectedTurno;
+  final ValueChanged<ClassSession> onTurnoSelected;
   final int startHour;
   final double slotHeight;
-  final int Function(Turno) cellCountForTurno;
 
   const _DayColumn({
     required this.dayIndex,
@@ -187,16 +186,19 @@ class _DayColumn extends StatelessWidget {
     required this.onTurnoSelected,
     required this.startHour,
     required this.slotHeight,
-    required this.cellCountForTurno,
   });
 
-  double _topForTurno(Turno t) {
-    final minutesFromStart = (t.startHour - startHour) * 60 + t.startMinute;
+  double _topForTurno(ClassSession t) {
+    final start = t.parsedStartTime;
+    final minutesFromStart = (start.hour - startHour) * 60 + start.minute;
     return (minutesFromStart / 30) * slotHeight;
   }
 
-  double _heightForTurno(Turno t) {
-    return (t.durationMinutes / 30) * slotHeight;
+  double _heightForTurno(ClassSession t) {
+    final start = t.parsedStartTime;
+    final end = t.parsedEndTime;
+    final durationMinutes = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
+    return (durationMinutes / 30) * slotHeight;
   }
 
   @override
@@ -231,7 +233,7 @@ class _DayColumn extends StatelessWidget {
           ),
           // Tarjetas de turnos posicionadas
           ...turnos.map((t) {
-            final isSelected = selectedTurno == t;
+            final isSelected = selectedTurno?.id == t.id;
             return Positioned(
               top: _topForTurno(t),
               left: 4,

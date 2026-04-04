@@ -9,11 +9,14 @@ import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
 import 'package:kali_studio/screens/dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme/kali_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(
       url: dotenv.env['URL'] ?? '', anonKey: dotenv.env['ANON'] ?? '');
   runApp(const KaliApp());
@@ -87,6 +90,14 @@ class _KaliAppView extends StatelessWidget {
       title: 'Kali Studio',
       theme: KaliTheme.theme,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'),
+      ],
       home: isLoggedIn ? const DashboardScreen() : const LoginScreen(),
     );
   }

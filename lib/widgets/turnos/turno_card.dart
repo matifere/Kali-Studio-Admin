@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/models/turno.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
@@ -7,7 +8,7 @@ import 'package:kali_studio/theme/kali_theme.dart';
 /// El alto se calcula proporcionalmente a la duración del turno.
 /// El color depende del [TurnoType].
 class TurnoCard extends StatefulWidget {
-  final Turno turno;
+  final ClassSession turno;
   final VoidCallback? onTap;
 
   const TurnoCard({super.key, required this.turno, this.onTap});
@@ -24,7 +25,7 @@ class _TurnoCardState extends State<TurnoCard> {
     final t = widget.turno;
     final bg = t.backgroundColor;
     final fg = t.foregroundColor;
-    final isPrivate = t.type == TurnoType.privateSpecial;
+    final isPrivate = t.uiTurnoType == TurnoType.privateSpecial;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -64,14 +65,14 @@ class _TurnoCardState extends State<TurnoCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    t.className,
+                    t.name,
                     style: KaliText.label(fg.withValues(alpha: 0.7)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    t.instructor,
+                    t.instructorName ?? 'Sin instructor',
                     style: KaliText.body(fg, weight: FontWeight.w600, size: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

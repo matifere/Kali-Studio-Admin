@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/turno.dart';
+import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {
-  final Turno turno;
+  final ClassSession turno;
   final VoidCallback onClose;
 
   const TurnoDetailPanel({
@@ -34,7 +34,8 @@ class TurnoDetailPanel extends StatelessWidget {
         children: [
           _buildPanelHeader(),
           _buildSlotInfo(),
-          if (turno.attendees.isNotEmpty) _buildAttendees(),
+          if (turno.description != null && turno.description!.isNotEmpty) 
+            _buildDescription(),
           const Spacer(),
           _buildActions(),
           const SizedBox(height: 20),
@@ -81,15 +82,26 @@ class TurnoDetailPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'TURNO SELECCIONADO',
-            style: KaliText.label(
-              KaliColors.espresso.withValues(alpha: 0.5),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TURNO SELECCIONADO',
+                style: KaliText.label(
+                  KaliColors.espresso.withValues(alpha: 0.5),
+                ),
+              ),
+              Text(
+                turno.occupancyText,
+                style: KaliText.label(
+                  KaliColors.espresso.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
-            turno.className,
+            turno.name,
             style: KaliText.body(
               KaliColors.espresso,
               weight: FontWeight.w700,
@@ -105,7 +117,7 @@ class TurnoDetailPanel extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            turno.instructor,
+            turno.instructorName ?? 'Sin instructor',
             style: KaliText.body(
               KaliColors.espresso.withValues(alpha: 0.5),
             ),
@@ -115,48 +127,26 @@ class TurnoDetailPanel extends StatelessWidget {
     );
   }
 
-  // ── Lista de asistentes ────────────────────────────────────────────────────
-  Widget _buildAttendees() {
+  Widget _buildDescription() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ASISTENTES (${turno.enrolled}/${turno.capacity})',
+            'DESCRIPCIÓN',
             style: KaliText.label(
               KaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
-          const SizedBox(height: 12),
-          ...turno.attendees.map((a) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: a.avatarColor,
-                      child: Text(
-                        a.initials,
-                        style: KaliText.body(
-                          KaliColors.espresso,
-                          weight: FontWeight.w700,
-                          size: 10,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      a.name,
-                      style: KaliText.body(
-                        KaliColors.espresso,
-                        weight: FontWeight.w500,
-                        size: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+          const SizedBox(height: 8),
+          Text(
+            turno.description!,
+            style: KaliText.body(
+              KaliColors.espresso.withValues(alpha: 0.7),
+              size: 14,
+            ),
+          ),
         ],
       ),
     );

@@ -1,43 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:intl/intl.dart';
 
 /// Header del calendario semanal con título, rango de fechas y filtros.
 class ScheduleHeader extends StatelessWidget {
-  final String weekRange;
+  final DateTime currentWeekStart;
+  final VoidCallback onPreviousWeek;
+  final VoidCallback onNextWeek;
+  final VoidCallback onCreateTurno;
 
   const ScheduleHeader({
     super.key,
-    this.weekRange = 'Octubre 23 — Octubre 29, 2023',
+    required this.currentWeekStart,
+    required this.onPreviousWeek,
+    required this.onNextWeek,
+    required this.onCreateTurno,
   });
+
+  String get _weekRange {
+    final endOfWeek = currentWeekStart.add(const Duration(days: 6));
+    const formatStr = "dd MMM";
+    return '${DateFormat(formatStr, 'es_ES').format(currentWeekStart)} — ${DateFormat(formatStr, 'es_ES').format(endOfWeek)}, ${endOfWeek.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            'Calendario Semanal',
-            style: KaliText.heading(KaliColors.espresso, size: 40)
-                .copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            weekRange,
-            style: KaliText.body(
-              KaliColors.espresso.withValues(alpha: 0.5),
-              size: 14,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Calendario Semanal',
+                      style: KaliText.heading(KaliColors.espresso, size: 40)
+                          .copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 24),
+                    // Navigation controls
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left_rounded, size: 24),
+                            onPressed: onPreviousWeek,
+                            color: KaliColors.espresso,
+                            tooltip: 'Semana Anterior',
+                          ),
+                          Container(width: 1, height: 24, color: KaliColors.espresso.withValues(alpha: 0.1)),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right_rounded, size: 24),
+                            onPressed: onNextWeek,
+                            color: KaliColors.espresso,
+                            tooltip: 'Próxima Semana',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _weekRange,
+                  style: KaliText.body(
+                    KaliColors.espresso.withValues(alpha: 0.5),
+                    size: 14,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Filtros
+                const Row(
+                  children: [
+                    _FilterDropdown(label: 'Todos los Instructores'),
+                    SizedBox(width: 12),
+                    _FilterDropdown(label: 'Todas las Salas'),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-          // Filtros
-          const Row(
-            children: [
-              _FilterDropdown(label: 'Todos los Instructores'),
-              SizedBox(width: 12),
-              _FilterDropdown(label: 'Todas las Salas'),
-            ],
+          ElevatedButton.icon(
+            onPressed: onCreateTurno,
+            icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+            label: Text(
+              'Nuevo Turno',
+              style: KaliText.body(Colors.white, weight: FontWeight.w600),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: KaliColors.espresso,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
           ),
         ],
       ),

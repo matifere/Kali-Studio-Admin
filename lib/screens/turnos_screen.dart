@@ -1,16 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/data/mock_turnos.dart';
 import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
 import 'package:kali_studio/widgets/turnos/schedule_header.dart';
 import 'package:kali_studio/widgets/turnos/weekly_schedule.dart';
 import 'package:kali_studio/widgets/turnos/schedule_bottom_bar.dart';
 import 'package:kali_studio/widgets/turnos/turno_detail_panel.dart';
+import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
+import 'package:kali_studio/theme/kali_theme.dart';
 
 /// Pantalla principal de Turnos (calendario semanal).
-class TurnosScreen extends StatelessWidget {
+class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});
+
+  @override
+  State<TurnosScreen> createState() => _TurnosScreenState();
+}
+
+class _TurnosScreenState extends State<TurnosScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<TurnosBloc>();
+    if (bloc.state.sessions.isEmpty && !bloc.state.isLoading) {
+      bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
+    } else if (bloc.state.isLoading == true && bloc.state.sessions.isEmpty) {
+       bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
+    }
+  }
+
+  void _showCreateDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: context.read<TurnosBloc>(),
+        child: const CreateTurnoDialog(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +56,18 @@ class TurnosScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const ScheduleHeader(),
+                          ScheduleHeader(
+                            currentWeekStart: state.currentWeekStart,
+                            onPreviousWeek: () {
+                              final prev = state.currentWeekStart.subtract(const Duration(days: 7));
+                              context.read<TurnosBloc>().add(TurnosWeekChanged(prev));
+                            },
+                            onNextWeek: () {
+                              final next = state.currentWeekStart.add(const Duration(days: 7));
+                              context.read<TurnosBloc>().add(TurnosWeekChanged(next));
+                            },
+                            onCreateTurno: _showCreateDialog,
+                          ),
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
@@ -37,30 +75,40 @@ class TurnosScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        Colors.black.withValues(alpha: 0.03),
+                                    color: Colors.black.withValues(alpha: 0.03),
                                     blurRadius: 16,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: WeeklySchedule(
-                                      selectedTurno: state.selectedTurno,
-                                      onTurnoSelected: (turno) {
-                                        context.read<TurnosBloc>().add(
-                                              TurnoSelected(turno),
-                                            );
-                                      },
-                                    ),
-                                  ),
-                                  const ScheduleBottomBar(
-                                    turnos: kMockTurnos,
-                                  ),
-                                ],
-                              ),
+                              child: state.isLoading
+                                  ? const Center(child: CircularProgressIndicator())
+                                  : state.error != null
+                                      ? Center(
+                                          child: Text(
+                                            state.error!,
+                                            style: KaliText.body(KaliColors.espresso),
+                                          ),
+                                        )
+                                      : Column(
+                                          children: [
+                                            Expanded(
+                                              child: WeeklySchedule(
+                                                currentWeekStart: state.currentWeekStart,
+                                                sessions: state.sessions,
+                                                selectedTurno: state.selectedTurno,
+                                                onTurnoSelected: (turno) {
+                                                  context.read<TurnosBloc>().add(
+                                                        TurnoSelected(turno),
+                                                      );
+                                                },
+                                              ),
+                                            ),
+                                            const ScheduleBottomBar(
+                                              turnos: [], // Deprecated for now, mock data removed
+                                            ),
+                                          ],
+                                        ),
                             ),
                           ),
                         ],
@@ -74,14 +122,11 @@ class TurnosScreen extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     child: state.hasSelection
                         ? Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(0, 16, 24, 24),
+                            padding: const EdgeInsets.fromLTRB(0, 16, 24, 24),
                             child: TurnoDetailPanel(
-                              turno: state.selectedTurno!,
+                              turno: state.selectedTurno!, // Note: detail panel will need to be updated to support ClassSession instead of Turno
                               onClose: () {
-                                context
-                                    .read<TurnosBloc>()
-                                    .add(TurnoDeselected());
+                                context.read<TurnosBloc>().add(TurnoDeselected());
                               },
                             ),
                           )
