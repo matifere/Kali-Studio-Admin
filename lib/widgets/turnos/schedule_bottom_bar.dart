@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/turno.dart';
+import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 /// Barra inferior del calendario con leyenda de tipos y estadísticas.
 class ScheduleBottomBar extends StatelessWidget {
-  final List<Turno> turnos;
+  final List<ClassSession> sessions;
 
-  const ScheduleBottomBar({super.key, required this.turnos});
+  const ScheduleBottomBar({super.key, required this.sessions});
 
-  int get _totalClasses => turnos.length;
+  int get _totalClasses => sessions.length;
   int get _totalCapacity =>
-      turnos.fold<int>(0, (sum, t) => sum + t.capacity);
+      sessions.fold<int>(0, (sum, s) => sum + s.capacity);
   int get _totalEnrolled =>
-      turnos.fold<int>(0, (sum, t) => sum + t.enrolled);
+      sessions.fold<int>(0, (sum, s) => sum + s.enrolled);
   String get _capacityPercent =>
       _totalCapacity > 0
           ? '${((_totalEnrolled / _totalCapacity) * 100).round()}%'

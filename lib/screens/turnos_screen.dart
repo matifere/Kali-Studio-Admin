@@ -113,8 +113,8 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                                 },
                                               ),
                                             ),
-                                            const ScheduleBottomBar(
-                                              turnos: [], // Deprecated for now, mock data removed
+                                            ScheduleBottomBar(
+                                              sessions: state.sessions,
                                             ),
                                           ],
                                         ),

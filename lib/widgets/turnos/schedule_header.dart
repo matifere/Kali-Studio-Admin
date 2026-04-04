@@ -50,19 +50,26 @@ class ScheduleHeader extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                        border: Border.all(
+                            color: KaliColors.espresso.withValues(alpha: 0.1)),
                       ),
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.chevron_left_rounded, size: 24),
+                            icon: const Icon(Icons.chevron_left_rounded,
+                                size: 24),
                             onPressed: onPreviousWeek,
                             color: KaliColors.espresso,
                             tooltip: 'Semana Anterior',
                           ),
-                          Container(width: 1, height: 24, color: KaliColors.espresso.withValues(alpha: 0.1)),
+                          Container(
+                              width: 1,
+                              height: 24,
+                              color:
+                                  KaliColors.espresso.withValues(alpha: 0.1)),
                           IconButton(
-                            icon: const Icon(Icons.chevron_right_rounded, size: 24),
+                            icon: const Icon(Icons.chevron_right_rounded,
+                                size: 24),
                             onPressed: onNextWeek,
                             color: KaliColors.espresso,
                             tooltip: 'Próxima Semana',
@@ -96,30 +103,38 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               OutlinedButton.icon(
                 onPressed: onCreateTemplate,
-                icon: Icon(Icons.settings_outlined, size: 20, color: KaliColors.espresso.withValues(alpha: 0.7)),
+                icon: Icon(Icons.settings_outlined,
+                    size: 20,
+                    color: KaliColors.espresso.withValues(alpha: 0.7)),
                 label: Text(
                   'Administrar Plantillas',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7), weight: FontWeight.w600),
+                  style: KaliText.body(
+                      KaliColors.espresso.withValues(alpha: 0.7),
+                      weight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
+                  side: BorderSide(
+                      color: KaliColors.espresso.withValues(alpha: 0.2)),
                 ),
               ),
               const SizedBox(width: 12),
               ElevatedButton.icon(
                 onPressed: onCreateTurno,
-                icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+                icon: const Icon(Icons.add_rounded,
+                    size: 20, color: Colors.white),
                 label: Text(
                   'Nuevo Turno',
                   style: KaliText.body(Colors.white, weight: FontWeight.w600),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: KaliColors.espresso,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
