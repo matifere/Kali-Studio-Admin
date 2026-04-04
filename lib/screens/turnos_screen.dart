@@ -7,6 +7,7 @@ import 'package:kali_studio/widgets/turnos/weekly_schedule.dart';
 import 'package:kali_studio/widgets/turnos/schedule_bottom_bar.dart';
 import 'package:kali_studio/widgets/turnos/turno_detail_panel.dart';
 import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
+import 'package:kali_studio/widgets/turnos/create_template_dialog.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 /// Pantalla principal de Turnos (calendario semanal).
@@ -39,6 +40,13 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
+  void _showCreateTemplateDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => const CreateTemplateDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TurnosBloc, TurnosState>(
@@ -67,6 +75,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                               context.read<TurnosBloc>().add(TurnosWeekChanged(next));
                             },
                             onCreateTurno: _showCreateDialog,
+                            onCreateTemplate: _showCreateTemplateDialog,
                           ),
                           Expanded(
                             child: Container(

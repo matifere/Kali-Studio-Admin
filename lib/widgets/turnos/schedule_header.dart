@@ -8,6 +8,7 @@ class ScheduleHeader extends StatelessWidget {
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
   final VoidCallback onCreateTurno;
+  final VoidCallback onCreateTemplate;
 
   const ScheduleHeader({
     super.key,
@@ -15,6 +16,7 @@ class ScheduleHeader extends StatelessWidget {
     required this.onPreviousWeek,
     required this.onNextWeek,
     required this.onCreateTurno,
+    required this.onCreateTemplate,
   });
 
   String get _weekRange {
@@ -90,21 +92,41 @@ class ScheduleHeader extends StatelessWidget {
               ],
             ),
           ),
-          ElevatedButton.icon(
-            onPressed: onCreateTurno,
-            icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
-            label: Text(
-              'Nuevo Turno',
-              style: KaliText.body(Colors.white, weight: FontWeight.w600),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: KaliColors.espresso,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: onCreateTemplate,
+                icon: Icon(Icons.note_add_outlined, size: 20, color: KaliColors.espresso.withValues(alpha: 0.7)),
+                label: Text(
+                  'Nueva Plantilla',
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7), weight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
+                ),
               ),
-              elevation: 0,
-            ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: onCreateTurno,
+                icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+                label: Text(
+                  'Nuevo Turno',
+                  style: KaliText.body(Colors.white, weight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: KaliColors.espresso,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ],
           ),
         ],
       ),

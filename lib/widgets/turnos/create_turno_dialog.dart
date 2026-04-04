@@ -36,22 +36,70 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
           .select()
           .eq('is_active', true);
 
-      setState(() {
-        _templates = response
-            .map<ScheduleTemplate>((data) => ScheduleTemplate.fromJson(data))
-            .toList();
-        _isLoadingTemplates = false;
-      });
+      if (mounted) {
+        setState(() {
+          _templates = response
+              .map<ScheduleTemplate>((data) => ScheduleTemplate.fromJson(data))
+              .toList();
+          _isLoadingTemplates = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Failed to load templates: $e';
-        _isLoadingTemplates = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load templates: $e';
+          _isLoadingTemplates = false;
+        });
+      }
     }
   }
 
   void _submit() {
     if (_formKey.currentState!.validate() && _selectedTemplate != null && _selectedDate != null) {
+      // 1. Check if past
+      final parts = _selectedTemplate!.startTime.split(':');
+      final startDateTime = DateTime(
+        _selectedDate!.year, _selectedDate!.month, _selectedDate!.day, 
+        int.parse(parts[0]), int.parse(parts[1])
+      );
+
+      if (startDateTime.isBefore(DateTime.now())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No puedes agendar un turno en el pasado.')),
+        );
+        return;
+      }
+
+      // 2. Check overlap
+      final sessions = context.read<TurnosBloc>().state.sessions;
+      final newStartMins = int.parse(parts[0]) * 60 + int.parse(parts[1]);
+      final endParts = _selectedTemplate!.endTime.split(':');
+      final newEndMins = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+
+      final hasOverlap = sessions.any((session) {
+        // Compare same day
+        if (session.date.year != _selectedDate!.year || 
+            session.date.month != _selectedDate!.month || 
+            session.date.day != _selectedDate!.day) {
+          return false;
+        }
+        
+        final existingStartParts = session.startTime.split(':');
+        final existingEndParts = session.endTime.split(':');
+        final existingStartMins = int.parse(existingStartParts[0]) * 60 + int.parse(existingStartParts[1]);
+        final existingEndMins = int.parse(existingEndParts[0]) * 60 + int.parse(existingEndParts[1]);
+        
+        // Return true if they overlap
+        return newStartMins < existingEndMins && newEndMins > existingStartMins;
+      });
+
+      if (hasOverlap) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ya existe un turno en este mismo horario.')),
+        );
+        return;
+      }
+
       // Dispatch TurnoCreated
       context.read<TurnosBloc>().add(TurnoCreated(
         template: _selectedTemplate!, 
@@ -61,24 +109,20 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecciona un template y una fecha')),
+        const SnackBar(content: Text('Por favor, selecciona un template válido')),
       );
     }
   }
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      locale: const Locale('es', 'ES'),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+  void _onTemplateSelected(ScheduleTemplate? template) {
+    if (template == null) return;
+    final currentWeekStart = context.read<TurnosBloc>().state.currentWeekStart;
+    final targetDate = currentWeekStart.add(Duration(days: template.dayIndex));
+    
+    setState(() {
+      _selectedTemplate = template;
+      _selectedDate = targetDate;
+    });
   }
 
   @override
@@ -106,7 +150,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Selecciona una clase predefinida para agendar un turno.',
+                    'Agendando para la semana en vista (${DateFormat("dd MMM", "es_ES").format(context.read<TurnosBloc>().state.currentWeekStart)}).',
                     style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                   const SizedBox(height: 24),
@@ -119,49 +163,54 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                   // Template Dropdown
                   Text('Plantilla de Clase', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
-                  DropdownButton<ScheduleTemplate>(
+                  DropdownButtonFormField<ScheduleTemplate>(
                     value: _selectedTemplate,
                     isExpanded: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
                     hint: const Text('Seleccionar plantilla'),
                     items: _templates.map((t) {
                       return DropdownMenuItem(
                         value: t,
-                        child: Text('${t.name} (${t.startTime} - ${t.endTime}) - ${t.dayNameSpanish}'),
+                        child: Text('${t.name} (${t.startTime.substring(0,5)} - ${t.endTime.substring(0,5)}) - ${t.dayNameSpanish}'),
                       );
                     }).toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedTemplate = val;
-                      });
-                    },
+                    onChanged: _onTemplateSelected,
+                    validator: (val) => val == null ? 'Requerido' : null,
                   ),
                   
                   const SizedBox(height: 20),
 
-                  // Date Picker
-                  Text('Fecha de la Sesión', style: KaliText.label(KaliColors.espresso)),
+                  // Auto-calculated Date
+                  Text('Fecha Autocalculada', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
-                  InkWell(
-                    onTap: _pickDate,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _selectedDate == null 
-                              ? 'Seleccionar fecha' 
-                              : DateFormat('dd/MM/yyyy').format(_selectedDate!),
-                            style: KaliText.body(KaliColors.espresso),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: KaliColors.sand.withValues(alpha: 0.3),
+                      border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome, size: 18, color: KaliColors.espresso.withValues(alpha: 0.6)),
+                        const SizedBox(width: 10),
+                        Text(
+                          _selectedDate == null 
+                            ? 'Esperando selección de plantilla...' 
+                            : DateFormat("EEEE dd 'de' MMMM", "es_ES").format(_selectedDate!),
+                          style: KaliText.body(
+                            KaliColors.espresso,
+                            weight: _selectedDate == null ? FontWeight.w400 : FontWeight.w600,
                           ),
-                          Icon(Icons.calendar_month_outlined, color: KaliColors.espresso.withValues(alpha: 0.5)),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
 
