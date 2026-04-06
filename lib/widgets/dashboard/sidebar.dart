@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
 
 class DashboardSidebar extends StatelessWidget {
   final String currentPage;
@@ -27,7 +30,7 @@ class DashboardSidebar extends StatelessWidget {
           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
           _buildMenuItem(Icons.payment_outlined, 'Pagos'),
           const Spacer(),
-          _buildNewAppointmentButton(),
+          _buildNewAppointmentButton(context),
           const SizedBox(height: 32),
           _buildBottomMenuItem(Icons.settings_outlined, 'AJUSTES'),
           _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
@@ -61,18 +64,24 @@ class DashboardSidebar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isActive ? Colors.black.withValues(alpha: 0.05) : Colors.transparent,
+        color: isActive
+            ? Colors.black.withValues(alpha: 0.05)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
         leading: Icon(
           icon,
-          color: isActive ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.6),
+          color: isActive
+              ? KaliColors.espresso
+              : KaliColors.espresso.withValues(alpha: 0.6),
         ),
         title: Text(
           title,
           style: KaliText.body(
-            isActive ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.6),
+            isActive
+                ? KaliColors.espresso
+                : KaliColors.espresso.withValues(alpha: 0.6),
             weight: isActive ? FontWeight.bold : FontWeight.w500,
           ),
         ),
@@ -82,7 +91,7 @@ class DashboardSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildNewAppointmentButton() {
+  Widget _buildNewAppointmentButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -90,10 +99,20 @@ class DashboardSidebar extends StatelessWidget {
           backgroundColor: KaliColors.espresso,
           foregroundColor: KaliColors.warmWhite,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 0,
         ),
-        onPressed: () {},
+        onPressed: () {
+          //TODO agregar misma logica que turnos
+          showDialog(
+            context: context,
+            builder: (_) => BlocProvider.value(
+              value: context.read<TurnosBloc>(),
+              child: const CreateTurnoDialog(),
+            ),
+          );
+        },
         child: Text(
           'Nuevo Turno',
           style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w500),
@@ -109,7 +128,8 @@ class DashboardSidebar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         child: Row(
           children: [
-            Icon(icon, color: KaliColors.espresso.withValues(alpha: 0.5), size: 18),
+            Icon(icon,
+                color: KaliColors.espresso.withValues(alpha: 0.5), size: 18),
             const SizedBox(width: 12),
             Text(
               title,

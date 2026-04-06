@@ -9,14 +9,11 @@ class ScheduleBottomBar extends StatelessWidget {
   const ScheduleBottomBar({super.key, required this.sessions});
 
   int get _totalClasses => sessions.length;
-  int get _totalCapacity =>
-      sessions.fold<int>(0, (sum, s) => sum + s.capacity);
-  int get _totalEnrolled =>
-      sessions.fold<int>(0, (sum, s) => sum + s.enrolled);
-  String get _capacityPercent =>
-      _totalCapacity > 0
-          ? '${((_totalEnrolled / _totalCapacity) * 100).round()}%'
-          : '0%';
+  int get _totalCapacity => sessions.fold<int>(0, (sum, s) => sum + s.capacity);
+  int get _totalEnrolled => sessions.fold<int>(0, (sum, s) => sum + s.enrolled);
+  String get _capacityPercent => _totalCapacity > 0
+      ? '${((_totalEnrolled / _totalCapacity) * 100).round()}%'
+      : '0%';
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +32,6 @@ class ScheduleBottomBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Leyenda
-          const _LegendDot(
-            color: Color(0xFFF5D9B8),
-            label: 'Reformer Pilates',
-          ),
-          const SizedBox(width: 20),
-          const _LegendDot(
-            color: Color(0xFFEDE6D8),
-            label: 'Mat Pilates',
-          ),
-          const SizedBox(width: 20),
-          const _LegendDot(
-            color: Color(0xFF2C1F14),
-            label: 'Privada/Especial',
-          ),
           const Spacer(),
 
           // Stats
@@ -63,7 +45,7 @@ class ScheduleBottomBar extends StatelessWidget {
 }
 
 // ─── Dot de leyenda ───────────────────────────────────────────────────────────
-class _LegendDot extends StatelessWidget {
+/*class _LegendDot extends StatelessWidget {
   final Color color;
   final String label;
 
@@ -83,7 +65,7 @@ class _LegendDot extends StatelessWidget {
       ],
     );
   }
-}
+}*/
 
 // ─── Chip de estadística ──────────────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
