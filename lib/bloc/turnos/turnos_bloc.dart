@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/activity/activity_bloc.dart';
 import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/models/schedule_template.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,7 +9,11 @@ part 'turnos_event.dart';
 part 'turnos_state.dart';
 
 class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
-  TurnosBloc() : super(TurnosState(currentWeekStart: _getStartOfWeek(DateTime.now()))) {
+  final ActivityBloc? _activityBloc;
+
+  TurnosBloc({ActivityBloc? activityBloc})
+      : _activityBloc = activityBloc,
+        super(TurnosState(currentWeekStart: _getStartOfWeek(DateTime.now()))) {
     on<TurnosLoadRequested>(_onLoadRequested);
     on<TurnosWeekChanged>(_onWeekChanged);
     on<TurnoCreated>(_onTurnoCreated);
@@ -100,6 +105,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       }
 
       await Supabase.instance.client.from('class_sessions').insert(insertData);
+      _activityBloc?.add(ActivityLogged(ActivityEntry(
+        title: 'Turno creado',
+        subtitle: '${event.template.name} — ${DateFormat('dd/MM', 'es_ES').format(event.date)}${event.recurrenceWeeks > 1 ? ' (+${event.recurrenceWeeks - 1} recurrencias)' : ''}.',
+        category: ActivityCategory.turno,
+        timestamp: DateTime.now(),
+      )));
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al crear el turno: $e'));
@@ -130,6 +141,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     try {
       await Supabase.instance.client.from('class_sessions').delete().eq('id', event.sessionId);
+      _activityBloc?.add(ActivityLogged(ActivityEntry(
+        title: 'Turno cancelado',
+        subtitle: 'Se eliminó la sesión del cronograma.',
+        category: ActivityCategory.turno,
+        timestamp: DateTime.now(),
+      )));
       emit(state.copyWith(clearSelection: true));
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
@@ -156,6 +173,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
       emit(state.copyWith(clearSelection: true));
       add(TurnosLoadRequested(state.currentWeekStart));
+      _activityBloc?.add(ActivityLogged(ActivityEntry(
+        title: 'Turno modificado',
+        subtitle: '${t.name} actualizado para el ${DateFormat('dd/MM', 'es_ES').format(t.date)}.',
+        category: ActivityCategory.turno,
+        timestamp: DateTime.now(),
+      )));
     } catch (e) {
       emit(state.copyWith(error: 'Error al editar turno: $e'));
     }
@@ -199,7 +222,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       }
 
       await db.from('reservations').insert(inserts);
-
+      _activityBloc?.add(ActivityLogged(ActivityEntry(
+        title: 'Alumno inscripto a turno',
+        subtitle: 'Inscripción confirmada en ${event.session.name}${event.enrollInFuture ? ' (recurrente)' : ''}.',
+        category: ActivityCategory.alumno,
+        timestamp: DateTime.now(),
+      )));
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al inscribir alumno: $e'));
@@ -212,7 +240,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     try {
       await Supabase.instance.client.from('reservations').delete().eq('id', event.reservationId);
-      
+      _activityBloc?.add(ActivityLogged(ActivityEntry(
+        title: 'Alumno removido de turno',
+        subtitle: 'Reserva cancelada y cupo liberado.',
+        category: ActivityCategory.turno,
+        timestamp: DateTime.now(),
+      )));
       // Refrescar el turno seleccionado
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {

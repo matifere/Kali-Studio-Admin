@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kali_studio/bloc/activity/activity_bloc.dart';
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
 import 'package:kali_studio/bloc/navigation/navigation_bloc.dart';
@@ -38,6 +39,7 @@ class _KaliAppState extends State<KaliApp> {
   // Esto garantiza que hot reload NO los destruya ni duplique eventos.
   late final AuthBloc _authBloc;
   late final NavigationBloc _navigationBloc;
+  late final ActivityBloc _activityBloc;
   late final AlumnosBloc _alumnosBloc;
   late final TurnosBloc _turnosBloc;
   late final PagosBloc _pagosBloc;
@@ -47,8 +49,9 @@ class _KaliAppState extends State<KaliApp> {
     super.initState();
     _authBloc = AuthBloc();
     _navigationBloc = NavigationBloc();
-    _alumnosBloc = AlumnosBloc(); // Carga lazy: AlumnosScreen dispara AlumnosLoadRequested en su initState
-    _turnosBloc = TurnosBloc();
+    _activityBloc = ActivityBloc();
+    _alumnosBloc = AlumnosBloc(activityBloc: _activityBloc);
+    _turnosBloc = TurnosBloc(activityBloc: _activityBloc);
     _pagosBloc = PagosBloc()..add(PagosLoadRequested());
   }
 
@@ -56,6 +59,7 @@ class _KaliAppState extends State<KaliApp> {
   void dispose() {
     _authBloc.close();
     _navigationBloc.close();
+    _activityBloc.close();
     _alumnosBloc.close();
     _turnosBloc.close();
     _pagosBloc.close();
@@ -68,6 +72,7 @@ class _KaliAppState extends State<KaliApp> {
       providers: [
         BlocProvider.value(value: _authBloc),
         BlocProvider.value(value: _navigationBloc),
+        BlocProvider.value(value: _activityBloc),
         BlocProvider.value(value: _alumnosBloc),
         BlocProvider.value(value: _turnosBloc),
         BlocProvider.value(value: _pagosBloc),
