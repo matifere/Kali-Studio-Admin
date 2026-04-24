@@ -26,6 +26,12 @@ class AuthRegisterRequested extends AuthEvent {
 /// El usuario cerraró sesión.
 class AuthLogoutRequested extends AuthEvent {}
 
+/// El usuario guardó cambios en su perfil (nombre completo).
+class AuthProfileUpdateRequested extends AuthEvent {
+  final String fullName;
+  AuthProfileUpdateRequested({required this.fullName});
+}
+
 /// Reinicia el BLoC a [AuthInitial]. Se dispara después de navegar
 /// con éxito, para que rebuilds / hot reloads no re-disparen el listener.
 class AuthReset extends AuthEvent {}

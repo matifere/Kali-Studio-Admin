@@ -11,6 +11,9 @@ class AuthLoading extends AuthState {}
 /// Autenticación exitosa.
 class AuthSuccess extends AuthState {}
 
+/// El perfil del usuario fue actualizado con éxito.
+class AuthProfileUpdated extends AuthState {}
+
 /// Error de autenticación, con el mensaje a mostrar.
 class AuthFailure extends AuthState {
   final String message;

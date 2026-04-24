@@ -14,6 +14,9 @@ class AlumnosStatCards extends StatelessWidget {
         String percentGrowthStr = '0%';
         bool isPositive = true;
 
+        // ── Contar por plan en O(n) ────────────────────────────────────────
+        final Map<String, int> countByPlan = {};
+
         if (state is AlumnosLoaded) {
           activeCount = state.students.length.toString();
 
@@ -23,6 +26,9 @@ class AlumnosStatCards extends StatelessWidget {
             if (s.createdAt.year == now.year && s.createdAt.month == now.month) {
               thisMonthCount++;
             }
+            // Aprovechar el mismo bucle para contar por plan
+            final plan = s.plan.isNotEmpty ? s.plan : 'Sin plan';
+            countByPlan[plan] = (countByPlan[plan] ?? 0) + 1;
           }
 
           int previousTotal = state.students.length - thisMonthCount;
@@ -36,7 +42,8 @@ class AlumnosStatCards extends StatelessWidget {
             }
           } else {
             double percent = (thisMonthCount / previousTotal) * 100;
-            percentGrowthStr = '${percent.toStringAsFixed(1).replaceAll('.0', '')}%';
+            percentGrowthStr =
+                '${percent.toStringAsFixed(1).replaceAll('.0', '')}%';
             isPositive = percent >= 0;
           }
         } else if (state is AlumnosError) {
@@ -44,8 +51,9 @@ class AlumnosStatCards extends StatelessWidget {
         }
 
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Total Alumnos Activos (white card, wider)
+            // ── Total Alumnos Activos (blanco, más ancho) ──────────────────
             Expanded(
               flex: 5,
               child: _buildWhiteCard(
@@ -54,19 +62,21 @@ class AlumnosStatCards extends StatelessWidget {
                 badge: Row(
                   children: [
                     Icon(
-                        isPositive ? Icons.trending_up : Icons.trending_down,
-                        size: 14,
-                        color: isPositive
-                            ? const Color(0xFF5C9E6C)
-                            : const Color(0xFFD4685C)),
+                      isPositive ? Icons.trending_up : Icons.trending_down,
+                      size: 14,
+                      color: isPositive
+                          ? const Color(0xFF5C9E6C)
+                          : const Color(0xFFD4685C),
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${isPositive ? '+' : ''}$percentGrowthStr este mes',
                       style: KaliText.body(
-                          isPositive
-                              ? const Color(0xFF5C9E6C)
-                              : const Color(0xFFD4685C),
-                          weight: FontWeight.w600),
+                        isPositive
+                            ? const Color(0xFF5C9E6C)
+                            : const Color(0xFFD4685C),
+                        weight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -74,22 +84,19 @@ class AlumnosStatCards extends StatelessWidget {
             ),
             const SizedBox(width: 20),
 
-            // Membresía Premium (clay warm card)
+            // ── Distribución por Plan (carrusel deslizable) ────────────────
             Expanded(
               flex: 4,
-              child: _buildClayCard(
-                title: 'MEMBRESÍA PREMIUM',
-                value: '48', // FIXME: Add logic to calculate premium members
-              ),
+              child: _PlanCarousel(countByPlan: countByPlan, isLoading: state is AlumnosLoading),
             ),
             const SizedBox(width: 20),
 
-            // Próximos Vencimientos (white card)
+            // ── Próximos Vencimientos (blanco) ─────────────────────────────
             Expanded(
               flex: 4,
               child: _buildWhiteCard(
                 title: 'PRÓXIMOS VENCIMIENTOS',
-                value: '12', // FIXME: Add logic to calculate expiring members
+                value: '12', // FIXME
                 badge: Text(
                   'En los próximos 7 días',
                   style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
@@ -124,8 +131,7 @@ class AlumnosStatCards extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style:
-                  KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
+              style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
           value != null
               ? Text(
@@ -143,11 +149,132 @@ class AlumnosStatCards extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildClayCard({
-    required String title,
-    required String value,
-  }) {
+// ── Carrusel de Planes ─────────────────────────────────────────────────────────
+//
+// Muestra un card por cada plan encontrado (datos reales del BLoC).
+// Si hay más de un plan, aparecen indicadores de página y flechas de navegación.
+class _PlanCarousel extends StatefulWidget {
+  final Map<String, int> countByPlan;
+  final bool isLoading;
+
+  const _PlanCarousel({required this.countByPlan, required this.isLoading});
+
+  @override
+  State<_PlanCarousel> createState() => _PlanCarouselState();
+}
+
+class _PlanCarouselState extends State<_PlanCarousel> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goTo(int page) {
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Mientras carga, mostrar skeleton
+    if (widget.isLoading) {
+      return _ClayPlanCard(planName: '...', count: null);
+    }
+
+    final entries = widget.countByPlan.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value)); // Mayor primero
+
+    if (entries.isEmpty) {
+      return _ClayPlanCard(planName: 'Sin datos', count: 0);
+    }
+
+    if (entries.length == 1) {
+      return _ClayPlanCard(
+        planName: entries[0].key,
+        count: entries[0].value,
+      );
+    }
+
+    // Múltiples planes → carrusel con indicadores y flechas
+    return Stack(
+      children: [
+        SizedBox(
+          height: 185, // altura fija para no depender del contenido variable
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: entries.length,
+            onPageChanged: (page) => setState(() => _currentPage = page),
+            itemBuilder: (context, index) {
+              return _ClayPlanCard(
+                planName: entries[index].key,
+                count: entries[index].value,
+                showPager: true,
+                currentPage: _currentPage,
+                totalPages: entries.length,
+              );
+            },
+          ),
+        ),
+
+        // Flecha izquierda
+        if (_currentPage > 0)
+          Positioned(
+            left: 8,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: _NavArrow(
+                icon: Icons.chevron_left_rounded,
+                onTap: () => _goTo(_currentPage - 1),
+              ),
+            ),
+          ),
+
+        // Flecha derecha
+        if (_currentPage < entries.length - 1)
+          Positioned(
+            right: 8,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: _NavArrow(
+                icon: Icons.chevron_right_rounded,
+                onTap: () => _goTo(_currentPage + 1),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Card individual de plan ────────────────────────────────────────────────────
+class _ClayPlanCard extends StatelessWidget {
+  final String planName;
+  final int? count; // null = cargando
+  final bool showPager;
+  final int currentPage;
+  final int totalPages;
+
+  const _ClayPlanCard({
+    required this.planName,
+    required this.count,
+    this.showPager = false,
+    this.currentPage = 0,
+    this.totalPages = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -157,24 +284,100 @@ class AlumnosStatCards extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  KaliText.label(KaliColors.espresso.withValues(alpha: 0.7))),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: KaliText.display(KaliColors.espresso).copyWith(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.normal,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  planName.toUpperCase(),
+                  style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.7)),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Indicadores de página (dots)
+              if (showPager)
+                Row(
+                  children: List.generate(
+                    totalPages,
+                    (i) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.only(left: 4),
+                      width: i == currentPage ? 16 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: i == currentPage
+                            ? KaliColors.espresso
+                            : KaliColors.espresso.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
+          const SizedBox(height: 16),
+          count != null
+              ? Text(
+                  count.toString(),
+                  style: KaliText.display(KaliColors.espresso).copyWith(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                  ),
+                )
+              : const SizedBox(
+                  width: 80,
+                  child: LinearProgressIndicator(),
+                ),
           const SizedBox(height: 12),
           Text(
-            'alumnos con plan premium',
+            count == 1 ? 'alumno con este plan' : 'alumnos con este plan',
             style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Botón de navegación del carrusel ──────────────────────────────────────────
+class _NavArrow extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _NavArrow({required this.icon, required this.onTap});
+
+  @override
+  State<_NavArrow> createState() => _NavArrowState();
+}
+
+class _NavArrowState extends State<_NavArrow> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: _hovered
+                ? KaliColors.espresso.withValues(alpha: 0.15)
+                : KaliColors.espresso.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            widget.icon,
+            size: 18,
+            color: KaliColors.espresso.withValues(alpha: 0.7),
+          ),
+        ),
       ),
     );
   }
