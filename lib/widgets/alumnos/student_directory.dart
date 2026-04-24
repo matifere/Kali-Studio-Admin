@@ -6,6 +6,7 @@ import 'package:kali_studio/widgets/alumnos/student_row.dart';
 import 'package:kali_studio/widgets/common/kali_empty_state.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 import 'package:kali_studio/widgets/common/kali_pagination.dart';
+import 'package:kali_studio/widgets/alumnos/alumnos_filter_dialog.dart';
 
 /// Directorio paginado de alumnos.
 ///
@@ -52,13 +53,19 @@ class StudentDirectory extends StatelessWidget {
             AlumnosLoaded() => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
+                  _buildHeader(context, state),
                   if (state.students.isEmpty)
                     const KaliEmptyState(
                       icon: Icons.people_outline_rounded,
                       title: 'Aún no hay alumnos registrados',
                       subtitle:
                           'Añadí tu primer alumno para comenzar a gestionar tu comunidad.',
+                    )
+                  else if (state.filteredStudents.isEmpty)
+                    const KaliEmptyState(
+                      icon: Icons.search_off_rounded,
+                      title: 'No se encontraron alumnos',
+                      subtitle: 'Intenta ajustando los filtros de búsqueda.',
                     )
                   else ...[
                     _buildColumnHeaders(),
@@ -67,7 +74,7 @@ class StudentDirectory extends StatelessWidget {
                       currentPage: state.currentPage,
                       totalPages: state.totalPages,
                       showingCount: state.pageStudents.length,
-                      totalCount: state.students.length,
+                      totalCount: state.filteredStudents.length,
                       onPageChanged: (page) {
                         context
                             .read<AlumnosBloc>()
@@ -87,7 +94,12 @@ class StudentDirectory extends StatelessWidget {
   }
 
   // ── Header ─────────────────────────────────────────────────────────────────
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, AlumnosLoaded state) {
+    // Si hay filtros activos, podemos mostrar un pequeño indicador (opcional)
+    final hasFilters = state.searchQuery.isNotEmpty || 
+                       state.planFilter != null || 
+                       state.isActiveFilter != null;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 20, 0),
       child: Row(
@@ -97,11 +109,21 @@ class StudentDirectory extends StatelessWidget {
             'Directorio de Alumnos',
             style: KaliText.headingItalic(KaliColors.espresso, size: 22),
           ),
-          const Row(
+          Row(
             children: [
-              KaliIconButton(Icons.tune_rounded, tooltip: 'Filtrar'),
-              SizedBox(width: 8),
-              KaliIconButton(Icons.download_rounded, tooltip: 'Exportar'),
+              KaliIconButton(
+                Icons.tune_rounded, 
+                tooltip: 'Filtrar',
+                color: hasFilters ? KaliColors.clayDark : null,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlumnosFilterDialog(state: state),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              const KaliIconButton(Icons.download_rounded, tooltip: 'Exportar'),
             ],
           ),
         ],

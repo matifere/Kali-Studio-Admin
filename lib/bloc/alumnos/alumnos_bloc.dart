@@ -13,6 +13,7 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
   AlumnosBloc() : super(AlumnosInitial()) {
     on<AlumnosLoadRequested>(_onLoadRequested);
     on<AlumnosPageChanged>(_onPageChanged);
+    on<AlumnosFilterChanged>(_onFilterChanged);
   }
 
   // ── Carga inicial ──────────────────────────────────────────────────────────
@@ -50,4 +51,23 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
       emit(current.copyWithPage(event.page));
     }
   }
+
+  // ── Cambio de filtros ──────────────────────────────────────────────────────
+  void _onFilterChanged(
+    AlumnosFilterChanged event,
+    Emitter<AlumnosState> emit,
+  ) {
+    final current = state;
+    if (current is AlumnosLoaded) {
+      // Re-invoca el factory para computar los nuevos filtros y resetea a página 1
+      emit(AlumnosLoaded(
+        students: current.students,
+        currentPage: 1,
+        searchQuery: event.searchQuery,
+        planFilter: event.planFilter,
+        isActiveFilter: event.isActiveFilter,
+      ));
+    }
+  }
 }
+
