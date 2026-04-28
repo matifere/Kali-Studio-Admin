@@ -19,6 +19,8 @@ class TurnosScreen extends StatefulWidget {
 }
 
 class _TurnosScreenState extends State<TurnosScreen> {
+  bool _isCompactMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +68,8 @@ class _TurnosScreenState extends State<TurnosScreen> {
                         children: [
                           ScheduleHeader(
                             currentWeekStart: state.currentWeekStart,
+                            isCompactMode: _isCompactMode,
+                            onCompactModeChanged: (val) => setState(() => _isCompactMode = val),
                             onPreviousWeek: () {
                               final prev = state.currentWeekStart.subtract(const Duration(days: 7));
                               context.read<TurnosBloc>().add(TurnosWeekChanged(prev));
@@ -101,12 +105,13 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                         )
                                       : Column(
                                           children: [
-                                            Expanded(
-                                              child: WeeklySchedule(
-                                                currentWeekStart: state.currentWeekStart,
-                                                sessions: state.sessions,
-                                                selectedTurno: state.selectedTurno,
-                                                onTurnoSelected: (turno) {
+                                              Expanded(
+                                                child: WeeklySchedule(
+                                                  currentWeekStart: state.currentWeekStart,
+                                                  sessions: state.sessions,
+                                                  selectedTurno: state.selectedTurno,
+                                                  isCompactMode: _isCompactMode,
+                                                  onTurnoSelected: (turno) {
                                                   context.read<TurnosBloc>().add(
                                                         TurnoSelected(turno),
                                                       );

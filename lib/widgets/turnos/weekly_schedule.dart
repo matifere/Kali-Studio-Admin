@@ -16,6 +16,7 @@ class WeeklySchedule extends StatelessWidget {
   final List<ClassSession> sessions;
   final ClassSession? selectedTurno;
   final ValueChanged<ClassSession> onTurnoSelected;
+  final bool isCompactMode;
 
   const WeeklySchedule({
     super.key,
@@ -23,16 +24,45 @@ class WeeklySchedule extends StatelessWidget {
     required this.sessions,
     this.selectedTurno,
     required this.onTurnoSelected,
+    required this.isCompactMode,
   });
 
   // Rango horario visible en la grilla.
-  static const int _startHour = 7;
-  static const int _endHour = 22;
-  static const int _totalHours = _endHour - _startHour;
+  int get _startHour {
+    if (!isCompactMode || sessions.isEmpty) return 7;
+    int minHour = 24;
+    for (var s in sessions) {
+      if (s.parsedStartTime.hour < minHour) {
+        minHour = s.parsedStartTime.hour;
+      }
+    }
+    return minHour;
+  }
+
+  int get _endHour {
+    if (!isCompactMode || sessions.isEmpty) return 22;
+    int maxHour = 0;
+    for (var s in sessions) {
+      int endH = s.parsedEndTime.hour;
+      if (s.parsedEndTime.minute > 0) endH += 1;
+      if (endH > maxHour) {
+        maxHour = endH;
+      }
+    }
+    return maxHour;
+  }
+
+  int get _totalHours {
+    final start = _startHour;
+    final end = _endHour;
+    return end > start ? end - start : 1;
+  }
+
   // Cada hora = 2 celdas de 30 min.
   static const int _slotsPerHour = 2;
-  static const int _totalSlots = _totalHours * _slotsPerHour;
-  static const double _slotHeight = 48.0;
+  int get _totalSlots => _totalHours * _slotsPerHour;
+  
+  double get _slotHeight => isCompactMode ? 24.0 : 48.0;
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +158,8 @@ class WeeklySchedule extends StatelessWidget {
                   onTurnoSelected: onTurnoSelected,
                   startHour: _startHour,
                   slotHeight: _slotHeight,
+                  isCompactMode: isCompactMode,
+                  totalSlots: _totalSlots,
                 ),
               );
             }),
@@ -156,7 +188,7 @@ class WeeklySchedule extends StatelessWidget {
                         '${hour.toString().padLeft(2, '0')}:00',
                         style: KaliText.label(
                           KaliColors.espresso.withValues(alpha: 0.3),
-                        ),
+                        ).copyWith(fontSize: isCompactMode ? 10 : null),
                       ),
                     ),
                   )
@@ -177,6 +209,8 @@ class _DayColumn extends StatelessWidget {
   final ValueChanged<ClassSession> onTurnoSelected;
   final int startHour;
   final double slotHeight;
+  final bool isCompactMode;
+  final int totalSlots;
 
   const _DayColumn({
     required this.dayIndex,
@@ -186,6 +220,8 @@ class _DayColumn extends StatelessWidget {
     required this.onTurnoSelected,
     required this.startHour,
     required this.slotHeight,
+    required this.isCompactMode,
+    required this.totalSlots,
   });
 
   double _topForTurno(ClassSession t) {
@@ -218,7 +254,7 @@ class _DayColumn extends StatelessWidget {
         children: [
           // Líneas horizontales de grilla
           ...List.generate(
-            WeeklySchedule._totalSlots,
+            totalSlots,
             (i) => Positioned(
               top: i * slotHeight,
               left: 0,
@@ -256,6 +292,7 @@ class _DayColumn extends StatelessWidget {
                     : null,
                 child: TurnoCard(
                   turno: t,
+                  isCompactMode: isCompactMode,
                   onTap: () => onTurnoSelected(t),
                 ),
               ),

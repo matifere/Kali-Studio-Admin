@@ -10,8 +10,9 @@ import 'package:kali_studio/theme/kali_theme.dart';
 class TurnoCard extends StatefulWidget {
   final ClassSession turno;
   final VoidCallback? onTap;
+  final bool isCompactMode;
 
-  const TurnoCard({super.key, required this.turno, this.onTap});
+  const TurnoCard({super.key, required this.turno, this.onTap, this.isCompactMode = false});
 
   @override
   State<TurnoCard> createState() => _TurnoCardState();
@@ -34,7 +35,7 @@ class _TurnoCardState extends State<TurnoCard> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(widget.isCompactMode ? 6 : 10),
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(10),
@@ -58,7 +59,7 @@ class _TurnoCardState extends State<TurnoCard> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: widget.isCompactMode ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
             children: [
               // Parte superior: nombre + instructor
               Column(
@@ -66,38 +67,44 @@ class _TurnoCardState extends State<TurnoCard> {
                 children: [
                   Text(
                     t.name,
-                    style: KaliText.label(fg.withValues(alpha: 0.7)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    t.instructorName ?? 'Sin instructor',
-                    style: KaliText.body(fg, weight: FontWeight.w600, size: 13),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-
-              // Parte inferior: ocupación
-              Row(
-                children: [
-                  Text(
-                    t.occupancyText,
-                    style: KaliText.label(
-                      fg.withValues(alpha: t.isFull ? 0.9 : 0.55),
+                    style: KaliText.label(fg.withValues(alpha: widget.isCompactMode ? 0.9 : 0.7)).copyWith(
+                      fontSize: widget.isCompactMode ? 12 : null,
+                      fontWeight: widget.isCompactMode ? FontWeight.bold : null,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (t.isFull) ...[
-                    const SizedBox(width: 4),
+                  if (!widget.isCompactMode) ...[
+                    const SizedBox(height: 3),
                     Text(
-                      'full',
-                      style: KaliText.label(fg.withValues(alpha: 0.55)),
+                      t.instructorName ?? 'Sin instructor',
+                      style: KaliText.body(fg, weight: FontWeight.w600, size: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
               ),
+
+              // Parte inferior: ocupación
+              if (!widget.isCompactMode)
+                Row(
+                  children: [
+                    Text(
+                      t.occupancyText,
+                      style: KaliText.label(
+                        fg.withValues(alpha: t.isFull ? 0.9 : 0.55),
+                      ),
+                    ),
+                    if (t.isFull) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        'full',
+                        style: KaliText.label(fg.withValues(alpha: 0.55)),
+                      ),
+                    ],
+                  ],
+                ),
             ],
           ),
         ),

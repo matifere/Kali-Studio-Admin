@@ -9,6 +9,8 @@ class ScheduleHeader extends StatelessWidget {
   final VoidCallback onNextWeek;
   final VoidCallback onCreateTurno;
   final VoidCallback onCreateTemplate;
+  final bool isCompactMode;
+  final ValueChanged<bool> onCompactModeChanged;
 
   const ScheduleHeader({
     super.key,
@@ -17,6 +19,8 @@ class ScheduleHeader extends StatelessWidget {
     required this.onNextWeek,
     required this.onCreateTurno,
     required this.onCreateTemplate,
+    required this.isCompactMode,
+    required this.onCompactModeChanged,
   });
 
   String get _weekRange {
@@ -89,11 +93,22 @@ class ScheduleHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 // Filtros
-                const Row(
+                Row(
                   children: [
-                    _FilterDropdown(label: 'Todos los Instructores'),
-                    SizedBox(width: 12),
-                    _FilterDropdown(label: 'Todas las Salas'),
+                    const _FilterDropdown(label: 'Todos los Instructores'),
+                    const SizedBox(width: 12),
+                    const _FilterDropdown(label: 'Todas las Salas'),
+                    const SizedBox(width: 24),
+                    Text('Modo Compacto', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+                    const SizedBox(width: 8),
+                    Switch(
+                      value: isCompactMode,
+                      onChanged: onCompactModeChanged,
+                      activeColor: KaliColors.warmWhite,
+                      activeTrackColor: KaliColors.espresso,
+                      inactiveThumbColor: KaliColors.espresso.withValues(alpha: 0.4),
+                      inactiveTrackColor: KaliColors.sand,
+                    ),
                   ],
                 ),
               ],
