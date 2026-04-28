@@ -8,7 +8,6 @@ import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
 import 'package:kali_studio/widgets/dashboard/stat_cards.dart';
 import 'package:kali_studio/widgets/dashboard/schedule_list.dart';
 import 'package:kali_studio/widgets/dashboard/recent_activity.dart';
-import 'package:kali_studio/widgets/dashboard/bottom_promos.dart';
 import 'package:kali_studio/screens/alumnos_screen.dart';
 import 'package:kali_studio/screens/turnos_screen.dart';
 import 'package:kali_studio/screens/pagos_screen.dart';
@@ -96,8 +95,6 @@ class _DashboardHome extends StatelessWidget {
                     Expanded(flex: 4, child: DashboardRecentActivity()),
                   ],
                 ),
-                const SizedBox(height: 32),
-                const DashboardBottomPromos(),
                 const SizedBox(height: 40),
               ],
             ),

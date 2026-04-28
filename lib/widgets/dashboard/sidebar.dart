@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
 
 class DashboardSidebar extends StatelessWidget {
   final String currentPage;
@@ -30,9 +27,6 @@ class DashboardSidebar extends StatelessWidget {
           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
           _buildMenuItem(Icons.payment_outlined, 'Pagos'),
           const Spacer(),
-          _buildNewAppointmentButton(context),
-          const SizedBox(height: 32),
-          _buildBottomMenuItem(Icons.settings_outlined, 'AJUSTES'),
           _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
         ],
       ),
@@ -91,35 +85,7 @@ class DashboardSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildNewAppointmentButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: KaliColors.espresso,
-          foregroundColor: KaliColors.warmWhite,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          elevation: 0,
-        ),
-        onPressed: () {
-          //TODO agregar misma logica que turnos
-          showDialog(
-            context: context,
-            builder: (_) => BlocProvider.value(
-              value: context.read<TurnosBloc>(),
-              child: const CreateTurnoDialog(),
-            ),
-          );
-        },
-        child: Text(
-          'Nuevo Turno',
-          style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w500),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildBottomMenuItem(IconData icon, String title) {
     return InkWell(

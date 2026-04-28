@@ -38,11 +38,13 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
-      // Solo reaccionar a estados que nos importan en esta barra
-      listenWhen: (_, current) =>
-          current is AuthSuccess ||
+      // Solo reaccionar a transiciones reales — ignorar el estado
+      // que ya existía cuando este widget se monta en otra pantalla.
+      listenWhen: (previous, current) =>
+          previous is! AuthInitial &&
+          (current is AuthSuccess ||
           current is AuthProfileUpdated ||
-          current is AuthFailure,
+          current is AuthFailure),
       listener: (ctx, state) {
         if (state is AuthSuccess) {
           // Logout exitoso → volver al login limpiando el stack
@@ -89,39 +91,10 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
         final initial = fullName.isNotEmpty ? fullName[0].toUpperCase() : '?';
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+          padding: const EdgeInsets.fromLTRB(40, 32, 40, 0),
           child: Row(
             children: [
-              // ── Search Bar ─────────────────────────────────────────────────
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: KaliColors.sand,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search,
-                          color: KaliColors.espresso.withValues(alpha: 0.4)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          style: KaliText.body(KaliColors.espresso),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Buscar alumnos, pagos...',
-                            hintStyle: KaliText.body(
-                                KaliColors.espresso.withValues(alpha: 0.4)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 24),
+              const Spacer(),
 
               // ── Iconos ─────────────────────────────────────────────────────
               IconButton(
