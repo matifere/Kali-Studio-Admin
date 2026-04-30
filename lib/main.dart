@@ -7,6 +7,7 @@ import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
 import 'package:kali_studio/bloc/navigation/navigation_bloc.dart';
 import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
+import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
 import 'package:kali_studio/screens/dashboard_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -43,6 +44,7 @@ class _KaliAppState extends State<KaliApp> {
   late final AlumnosBloc _alumnosBloc;
   late final TurnosBloc _turnosBloc;
   late final PagosBloc _pagosBloc;
+  late final DashboardBloc _dashboardBloc;
 
   @override
   void initState() {
@@ -53,6 +55,7 @@ class _KaliAppState extends State<KaliApp> {
     _alumnosBloc = AlumnosBloc(activityBloc: _activityBloc);
     _turnosBloc = TurnosBloc(activityBloc: _activityBloc);
     _pagosBloc = PagosBloc()..add(PagosLoadRequested());
+    _dashboardBloc = DashboardBloc()..add(DashboardLoadRequested());
   }
 
   @override
@@ -63,6 +66,7 @@ class _KaliAppState extends State<KaliApp> {
     _alumnosBloc.close();
     _turnosBloc.close();
     _pagosBloc.close();
+    _dashboardBloc.close();
     super.dispose();
   }
 
@@ -76,6 +80,7 @@ class _KaliAppState extends State<KaliApp> {
         BlocProvider.value(value: _alumnosBloc),
         BlocProvider.value(value: _turnosBloc),
         BlocProvider.value(value: _pagosBloc),
+        BlocProvider.value(value: _dashboardBloc),
       ],
       child: const _KaliAppView(),
     );

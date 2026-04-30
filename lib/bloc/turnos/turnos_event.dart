@@ -69,3 +69,14 @@ class TurnoStudentRemoved extends TurnosEvent {
   TurnoStudentRemoved(this.reservationId);
 }
 
+/// Marca la asistencia de un alumno (cambia status a 'attended' o 'confirmed')
+class TurnoStudentAttendanceToggled extends TurnosEvent {
+  final String reservationId;
+  final String currentStatus;
+
+  TurnoStudentAttendanceToggled({
+    required this.reservationId,
+    required this.currentStatus,
+  });
+}
+

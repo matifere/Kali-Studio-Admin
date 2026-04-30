@@ -23,6 +23,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoEdited>(_onTurnoEdited);
     on<TurnoStudentAssigned>(_onTurnoStudentAssigned);
     on<TurnoStudentRemoved>(_onTurnoStudentRemoved);
+    on<TurnoStudentAttendanceToggled>(_onTurnoStudentAttendanceToggled);
   }
 
   static DateTime _getStartOfWeek(DateTime date) {
@@ -44,7 +45,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
       final response = await Supabase.instance.client
           .from('class_sessions')
-          .select('*, reservations(id, user_id, profiles:profiles!reservations_user_id_fkey(full_name, avatar_url))')
+          .select('*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))')
           .gte('date', startIso)
           .lte('date', endIso);
 
@@ -250,6 +251,24 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
       emit(state.copyWith(error: 'Error al desinscribir alumno: $e'));
+    }
+  }
+
+  Future<void> _onTurnoStudentAttendanceToggled(
+    TurnoStudentAttendanceToggled event,
+    Emitter<TurnosState> emit,
+  ) async {
+    try {
+      final nextStatus = event.currentStatus == 'attended' ? 'confirmed' : 'attended';
+      await Supabase.instance.client
+          .from('reservations')
+          .update({'status': nextStatus})
+          .eq('id', event.reservationId);
+      
+      // Refrescar para ver el cambio
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al marcar asistencia: $e'));
     }
   }
 }

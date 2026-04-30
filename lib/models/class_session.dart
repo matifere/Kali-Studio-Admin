@@ -4,28 +4,26 @@ class TurnoReservation {
   final String id;
   final String userId;
   final String studentName;
-  final String? avatarUrl;
+  final String status;
 
   const TurnoReservation({
     required this.id,
     required this.userId,
     required this.studentName,
-    this.avatarUrl,
+    required this.status,
   });
 
   factory TurnoReservation.fromJson(Map<String, dynamic> json) {
     String name = 'Sin nombre';
-    String? av;
     if (json['profiles'] != null) {
       name = json['profiles']['full_name'] ?? 'Sin nombre';
-      av = json['profiles']['avatar_url'];
     }
 
     return TurnoReservation(
       id: json['id'],
       userId: json['user_id'],
       studentName: name,
-      avatarUrl: av,
+      status: json['status'] ?? 'confirmed',
     );
   }
 }

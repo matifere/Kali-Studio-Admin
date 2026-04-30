@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 class DashboardStatCards extends StatelessWidget {
@@ -6,49 +9,55 @@ class DashboardStatCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            title: 'INGRESOS TOTALES',
-            value: '\$12,480',
-            icon: Icons.payments_outlined,
-            bottomWidget: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: KaliColors.clay.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '+12% vs mes anterior',
-                style: KaliText.label(KaliColors.espresso),
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final percentage = (state.capacidadPorcentaje * 100).toInt();
+
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: 'INGRESOS TOTALES',
+                value: '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
+                icon: Icons.payments_outlined,
+                bottomWidget: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: KaliColors.clay.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '+12% vs mes anterior',
+                    style: KaliText.label(KaliColors.espresso),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildStatCard(
-            title: 'TURNOS ACTIVOS HOY',
-            value: '24',
-            icon: Icons.event_available_outlined,
-            bottomWidget: Text(
-              '8 sesiones completadas',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+            const SizedBox(width: 24),
+            Expanded(
+              child: _buildStatCard(
+                title: 'TURNOS ACTIVOS HOY',
+                value: state.turnosActivosHoy.toString(),
+                icon: Icons.event_available_outlined,
+                bottomWidget: Text(
+                  '${state.turnosActivosHoy > 0 ? "Sesiones programadas para hoy" : "No hay sesiones hoy"}',
+                  style: KaliText.body(KaliColors.espresso.withOpacity(0.6)),
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildDarkStatCard(
-            title: 'ALUMNOS PRESENTES',
-            value: '142',
-            icon: Icons.person_add_alt_1_outlined,
-            capacityText: '75% de capacidad diaria alcanzada',
-            progress: 0.75,
-          ),
-        ),
-      ],
+            const SizedBox(width: 24),
+            Expanded(
+              child: _buildDarkStatCard(
+                title: 'ALUMNOS PRESENTES',
+                value: state.alumnosPresentesHoy.toString(),
+                icon: Icons.person_add_alt_1_outlined,
+                capacityText: '$percentage% de capacidad diaria alcanzada',
+                progress: state.capacidadPorcentaje,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -65,7 +74,7 @@ class DashboardStatCards extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -77,7 +86,7 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
+              Text(title, style: KaliText.label(KaliColors.espresso.withOpacity(0.5))),
               Icon(icon, color: KaliColors.espresso, size: 20),
             ],
           ),
@@ -109,7 +118,7 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.warmWhite.withValues(alpha: 0.6))),
+              Text(title, style: KaliText.label(KaliColors.warmWhite.withOpacity(0.6))),
               Icon(icon, color: KaliColors.warmWhite, size: 20),
             ],
           ),
@@ -120,13 +129,13 @@ class DashboardStatCards extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              backgroundColor: Colors.white.withOpacity(0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(KaliColors.sand),
               minHeight: 4,
             ),
           ),
           const SizedBox(height: 8),
-          Text(capacityText, style: KaliText.body(KaliColors.warmWhite.withValues(alpha: 0.6))),
+          Text(capacityText, style: KaliText.body(KaliColors.warmWhite.withOpacity(0.6))),
         ],
       ),
     );

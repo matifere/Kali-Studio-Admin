@@ -6,7 +6,6 @@ import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 import 'package:kali_studio/widgets/turnos/edit_turno_dialog.dart';
 import 'package:kali_studio/widgets/turnos/assign_student_dialog.dart';
-import 'package:kali_studio/widgets/common/avatar_provider.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {
@@ -221,10 +220,10 @@ class TurnoDetailPanel extends StatelessWidget {
                       leading: CircleAvatar(
                         radius: 14,
                         backgroundColor: KaliColors.clay,
-                        backgroundImage: AvatarProvider.fromUrl(student.avatarUrl),
-                        child: student.avatarUrl == null 
-                          ? Text(student.studentName.isNotEmpty ? student.studentName[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 10))
-                          : null,
+                        child: Text(
+                          student.studentName.isNotEmpty ? student.studentName[0].toUpperCase() : '?', 
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
+                        ),
                       ),
                       title: Text(
                         student.studentName,
@@ -232,14 +231,35 @@ class TurnoDetailPanel extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
-                        onPressed: () {
-                          context.read<TurnosBloc>().add(TurnoStudentRemoved(student.id));
-                        },
-                        tooltip: 'Desinscribir',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Tooltip(
+                            message: student.status == 'attended' ? 'Presente' : 'Marcar presente',
+                            child: Checkbox(
+                              value: student.status == 'attended',
+                              activeColor: KaliColors.clay,
+                              onChanged: (_) {
+                                context.read<TurnosBloc>().add(TurnoStudentAttendanceToggled(
+                                  reservationId: student.id,
+                                  currentStatus: student.status,
+                                ));
+                              },
+                              visualDensity: VisualDensity.compact,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withOpacity(0.5)),
+                            onPressed: () {
+                              context.read<TurnosBloc>().add(TurnoStudentRemoved(student.id));
+                            },
+                            tooltip: 'Desinscribir',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
                       ),
                     );
                   },

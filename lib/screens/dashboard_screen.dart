@@ -11,6 +11,7 @@ import 'package:kali_studio/widgets/dashboard/recent_activity.dart';
 import 'package:kali_studio/screens/alumnos_screen.dart';
 import 'package:kali_studio/screens/turnos_screen.dart';
 import 'package:kali_studio/screens/pagos_screen.dart';
+import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -54,8 +55,19 @@ class DashboardScreen extends StatelessWidget {
 }
 
 // ─── Dashboard home content ───────────────────────────────────────────────────
-class _DashboardHome extends StatelessWidget {
+class _DashboardHome extends StatefulWidget {
   const _DashboardHome();
+
+  @override
+  State<_DashboardHome> createState() => _DashboardHomeState();
+}
+
+class _DashboardHomeState extends State<_DashboardHome> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<DashboardBloc>().add(DashboardLoadRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +92,7 @@ class _DashboardHome extends StatelessWidget {
                 Text(
                   'Esto es lo que está pasando en Kali Studio hoy.',
                   style: KaliText.body(
-                    KaliColors.espresso.withValues(alpha: 0.6),
+                    KaliColors.espresso.withOpacity(0.6),
                     size: 16,
                   ),
                 ),
