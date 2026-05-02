@@ -6,6 +6,7 @@ import 'package:kali_studio/widgets/pagos/pagos_stat_cards.dart';
 import 'package:kali_studio/widgets/pagos/pagos_filters.dart';
 import 'package:kali_studio/widgets/pagos/pagos_table.dart';
 import 'package:kali_studio/widgets/pagos/pagos_bottom_panels.dart';
+import 'package:kali_studio/widgets/pagos/plans_table.dart';
 
 /// Pantalla principal de Pagos.
 class PagosScreen extends StatelessWidget {
@@ -53,6 +54,10 @@ class PagosScreen extends StatelessWidget {
                 const PagosTable(),
                 const SizedBox(height: 32),
 
+                // Tabla de planes disponibles
+                const PlansTable(),
+                const SizedBox(height: 32),
+
                 // Paneles inferiores
                 const PagosBottomPanels(),
                 const SizedBox(height: 40),
@@ -64,3 +69,4 @@ class PagosScreen extends StatelessWidget {
     );
   }
 }
+
