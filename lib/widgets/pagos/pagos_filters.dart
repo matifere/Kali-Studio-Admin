@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
 
 /// Barra de filtros y acciones de la sección de pagos.
 class PagosFilters extends StatelessWidget {
@@ -43,6 +44,17 @@ class PagosFilters extends StatelessWidget {
         const _OutlinedActionBtn(
           icon: Icons.download_rounded,
           label: 'Exportar Reporte',
+        ),
+        const SizedBox(width: 12),
+        _FilledActionBtn(
+          icon: Icons.add_card_rounded,
+          label: 'Crear Plan',
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => const CreatePlanDialog(),
+            );
+          },
         ),
         const SizedBox(width: 12),
         const _FilledActionBtn(
@@ -207,8 +219,9 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
 class _FilledActionBtn extends StatefulWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _FilledActionBtn({required this.icon, required this.label});
+  const _FilledActionBtn({required this.icon, required this.label, this.onTap});
 
   @override
   State<_FilledActionBtn> createState() => _FilledActionBtnState();
@@ -223,7 +236,7 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () {},
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
