@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
+import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
 
 /// Barra de filtros y acciones de la sección de pagos.
 class PagosFilters extends StatelessWidget {
@@ -53,6 +54,17 @@ class PagosFilters extends StatelessWidget {
             showDialog(
               context: context,
               builder: (context) => const CreatePlanDialog(),
+            );
+          },
+        ),
+        const SizedBox(width: 12),
+        _FilledActionBtn(
+          icon: Icons.person_add_alt_1_rounded,
+          label: 'Asignar Plan',
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => const AssignPlanDialog(),
             );
           },
         ),
