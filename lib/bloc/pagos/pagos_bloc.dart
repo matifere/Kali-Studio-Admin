@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/data/mock_payments.dart';
-import 'package:kali_studio/models/payment.dart';
+import 'package:kali_studio/models/subscription.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'pagos_event.dart';
 part 'pagos_state.dart';
@@ -20,8 +21,24 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     PagosLoadRequested event,
     Emitter<PagosState> emit,
   ) async {
-    // TODO: reemplazar con llamada a Supabase cuando la tabla esté lista.
-    emit(PagosLoaded(payments: kMockPayments));
+    emit(PagosLoading());
+    try {
+      final response = await Supabase.instance.client
+          .from('subscriptions')
+          .select('*, profiles!subscriptions_user_id_fkey(*), plans(*)')
+          .order('created_at', ascending: false);
+
+      final subscriptions = response
+          .map<Subscription>((data) => Subscription.fromJson(data))
+          .toList();
+
+      emit(PagosLoaded(payments: subscriptions));
+    } catch (e) {
+      debugPrint('Error fetching subscriptions: $e');
+      // Si hay error en Supabase o parseo, emitimos estado con error (se podría crear PagosError si hace falta)
+      // Por el momento, si falla podemos dejar la lista vacía o manejarlo si existiese PagosError.
+      emit(PagosLoaded(payments: []));
+    }
   }
 
   // ── Cambio de página ───────────────────────────────────────────────────────

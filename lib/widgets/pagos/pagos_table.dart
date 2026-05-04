@@ -4,7 +4,7 @@ import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_empty_state.dart';
 import 'package:kali_studio/widgets/common/kali_pagination.dart';
-import 'package:kali_studio/widgets/pagos/payment_row.dart';
+import 'package:kali_studio/widgets/pagos/subscription_row.dart';
 
 /// Tabla paginada de transacciones.
 ///
@@ -36,20 +36,20 @@ class PagosTable extends StatelessWidget {
                 children: [
                   if (state.payments.isEmpty)
                     const KaliEmptyState(
-                      icon: Icons.receipt_long_outlined,
-                      title: 'No hay transacciones registradas',
+                      icon: Icons.card_membership_rounded,
+                      title: 'No hay suscripciones registradas',
                       subtitle:
-                          'Las transacciones aparecerán aquí cuando registres pagos.',
+                          'Las suscripciones a planes aparecerán aquí.',
                     )
                   else ...[
                     _buildColumnHeaders(),
-                    ...state.pagePayments.map((p) => PaymentRow(payment: p)),
+                    ...state.pagePayments.map((p) => SubscriptionRow(subscription: p)),
                     KaliPagination(
                       currentPage: state.currentPage,
                       totalPages: state.totalPages,
                       showingCount: state.pagePayments.length,
                       totalCount: state.payments.length,
-                      itemLabel: 'TRANSACCIONES',
+                      itemLabel: 'SUSCRIPCIONES',
                       onPageChanged: (page) {
                         context
                             .read<PagosBloc>()
@@ -77,13 +77,12 @@ class PagosTable extends StatelessWidget {
       child: Row(
         children: [
           Expanded(flex: 4, child: Text('ALUMNO', style: style)),
-          Expanded(flex: 3, child: Text('REFERENCIA', style: style)),
-          Expanded(flex: 2, child: Text('FECHA', style: style)),
-          Expanded(flex: 3, child: Text('MÉTODO', style: style)),
+          Expanded(flex: 3, child: Text('PLAN', style: style)),
+          Expanded(flex: 3, child: Text('FECHAS', style: style)),
           Expanded(flex: 2, child: Text('ESTADO', style: style)),
           Expanded(
             flex: 2,
-            child: Text('MONTO', style: style, textAlign: TextAlign.right),
+            child: Text('PRECIO', style: style, textAlign: TextAlign.right),
           ),
         ],
       ),

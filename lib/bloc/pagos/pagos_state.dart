@@ -5,9 +5,11 @@ abstract class PagosState {}
 /// Estado inicial antes de solicitar la carga.
 class PagosInitial extends PagosState {}
 
+class PagosLoading extends PagosState {}
+
 /// Datos cargados y listos para mostrar.
 class PagosLoaded extends PagosState {
-  final List<Payment> payments;
+  final List<Subscription> payments;
   final int currentPage;
   static const int perPage = 5;
 
@@ -16,7 +18,7 @@ class PagosLoaded extends PagosState {
   int get totalPages =>
       (payments.length / perPage).ceil().clamp(1, 999);
 
-  List<Payment> get pagePayments {
+  List<Subscription> get pagePayments {
     if (payments.isEmpty) return [];
     final start = (currentPage - 1) * perPage;
     final end = (start + perPage).clamp(0, payments.length);

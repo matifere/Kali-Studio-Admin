@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
 import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
@@ -61,11 +63,14 @@ class PagosFilters extends StatelessWidget {
         _FilledActionBtn(
           icon: Icons.person_add_alt_1_rounded,
           label: 'Asignar Plan',
-          onTap: () {
-            showDialog(
+          onTap: () async {
+            final result = await showDialog<bool>(
               context: context,
               builder: (context) => const AssignPlanDialog(),
             );
+            if (result == true && context.mounted) {
+              context.read<PagosBloc>().add(PagosLoadRequested());
+            }
           },
         ),
         const SizedBox(width: 12),
