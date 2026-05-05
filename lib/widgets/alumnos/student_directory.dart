@@ -163,6 +163,56 @@ class StudentDirectory extends StatelessWidget {
           ),
           Row(
             children: [
+              SizedBox(
+                width: 250,
+                height: 40,
+                child: TextField(
+                  onChanged: (value) {
+                    context.read<AlumnosBloc>().add(
+                          AlumnosFilterChanged(
+                            searchQuery: value,
+                            planFilter: state.planFilter,
+                            isActiveFilter: state.isActiveFilter,
+                          ),
+                        );
+                  },
+                  style: KaliText.body(KaliColors.espresso, size: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar alumno...',
+                    hintStyle: KaliText.body(
+                      KaliColors.espresso.withValues(alpha: 0.4),
+                      size: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 18,
+                      color: KaliColors.espresso.withValues(alpha: 0.4),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: KaliColors.espresso.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: KaliColors.espresso.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: KaliColors.espresso,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               KaliIconButton(
                 Icons.tune_rounded, 
                 tooltip: 'Filtrar',
