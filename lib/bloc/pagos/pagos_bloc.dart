@@ -16,6 +16,7 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     on<PagosPageChanged>(_onPageChanged);
     on<PagosSubscriptionStatusChanged>(_onSubscriptionStatusChanged);
     on<PagosFiltersChanged>(_onFiltersChanged);
+    on<PagosSearchChanged>(_onSearchChanged);
   }
 
   // ── Carga inicial (mock — listo para Supabase) ─────────────────────────────
@@ -128,6 +129,20 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
       emit(current.copyWith(
         selectedStatuses: event.selectedStatuses,
         currentPage: 1, // Reset page on filter change
+      ));
+    }
+  }
+
+  // ── Búsqueda por nombre ────────────────────────────────────────────────────
+  void _onSearchChanged(
+    PagosSearchChanged event,
+    Emitter<PagosState> emit,
+  ) {
+    final current = state;
+    if (current is PagosLoaded) {
+      emit(current.copyWith(
+        searchQuery: event.query,
+        currentPage: 1, // Reset page on search change
       ));
     }
   }

@@ -29,3 +29,10 @@ class PagosFiltersChanged extends PagosEvent {
 
   PagosFiltersChanged(this.selectedStatuses);
 }
+
+/// El usuario cambió el término de búsqueda.
+class PagosSearchChanged extends PagosEvent {
+  final String query;
+
+  PagosSearchChanged(this.query);
+}

@@ -30,6 +30,65 @@ class PagosFilters extends StatelessWidget {
 
         return Row(
           children: [
+            // Búsqueda
+            SizedBox(
+              width: 280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BUSCAR USUARIO',
+                    style: KaliText.label(
+                      KaliColors.espresso.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 40,
+                    child: TextField(
+                      onChanged: (value) {
+                        context.read<PagosBloc>().add(PagosSearchChanged(value));
+                      },
+                      style: KaliText.body(KaliColors.espresso, size: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Ej. Juan Pérez',
+                        hintStyle: KaliText.body(
+                          KaliColors.espresso.withValues(alpha: 0.4),
+                          size: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          size: 18,
+                          color: KaliColors.espresso.withValues(alpha: 0.4),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: KaliColors.espresso.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: KaliColors.espresso.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: KaliColors.espresso,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
             // Estado
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

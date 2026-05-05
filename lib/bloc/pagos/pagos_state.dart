@@ -12,19 +12,29 @@ class PagosLoaded extends PagosState {
   final List<Subscription> payments;
   final int currentPage;
   final Set<String> selectedStatuses;
+  final String searchQuery;
   static const int perPage = 5;
 
   PagosLoaded({
     required this.payments,
     this.currentPage = 1,
     this.selectedStatuses = const {},
+    this.searchQuery = '',
   });
 
   List<Subscription> get filteredPayments {
-    if (selectedStatuses.isEmpty) return payments;
-    return payments
-        .where((p) => selectedStatuses.contains(p.status))
-        .toList();
+    var filtered = payments;
+    
+    if (selectedStatuses.isNotEmpty) {
+      filtered = filtered.where((p) => selectedStatuses.contains(p.status)).toList();
+    }
+    
+    if (searchQuery.trim().isNotEmpty) {
+      final q = searchQuery.trim().toLowerCase();
+      filtered = filtered.where((p) => p.studentName.toLowerCase().contains(q)).toList();
+    }
+    
+    return filtered;
   }
 
   int get totalPages =>
@@ -70,11 +80,13 @@ class PagosLoaded extends PagosState {
     List<Subscription>? payments,
     int? currentPage,
     Set<String>? selectedStatuses,
+    String? searchQuery,
   }) {
     return PagosLoaded(
       payments: payments ?? this.payments,
       currentPage: currentPage ?? this.currentPage,
       selectedStatuses: selectedStatuses ?? this.selectedStatuses,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 
