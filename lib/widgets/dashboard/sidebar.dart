@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 class DashboardSidebar extends StatelessWidget {
   final String currentPage;
   final void Function(String page) onNavigate;
@@ -85,11 +87,16 @@ class DashboardSidebar extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildBottomMenuItem(IconData icon, String title) {
     return InkWell(
-      onTap: () {},
+      onTap: () async {
+        final url = Uri.parse('https://middleouttech.netlify.app/');
+        try {
+          await launchUrl(url);
+        } catch (e) {
+          debugPrint('No se pudo abrir el enlace: $e');
+        }
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         child: Row(

@@ -1,6 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:csv/csv.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
+import 'package:kali_studio/models/subscription.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
 import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
@@ -145,9 +149,14 @@ class PagosFilters extends StatelessWidget {
             ),
             const Spacer(),
             // Botones de acción
-            const _OutlinedActionBtn(
+            _OutlinedActionBtn(
               icon: Icons.download_rounded,
               label: 'Exportar Reporte',
+              onTap: () {
+                if (state is PagosLoaded) {
+                  _exportReport(context, state.filteredPayments);
+                }
+              },
             ),
             const SizedBox(width: 12),
             _FilledActionBtn(
@@ -178,6 +187,49 @@ class PagosFilters extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _exportReport(BuildContext context, List<Subscription> payments) async {
+    try {
+      List<List<dynamic>> rows = [
+        ['ID', 'Alumno', 'Plan', 'Monto', 'Moneda', 'Fecha Inicio', 'Fecha Fin', 'Estado']
+      ];
+
+      for (var p in payments) {
+        rows.add([
+          p.id,
+          p.studentName,
+          p.planName,
+          p.price,
+          p.currency,
+          p.startDateFormatted,
+          p.endDateFormatted,
+          p.statusLabel,
+        ]);
+      }
+
+      String csv = const ListToCsvConverter().convert(rows);
+      Uint8List bytes = Uint8List.fromList(csv.codeUnits);
+
+      await FileSaver.instance.saveFile(
+        name: 'reporte_pagos_${DateTime.now().millisecondsSinceEpoch}',
+        bytes: bytes,
+        ext: 'csv',
+        mimeType: MimeType.csv,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reporte exportado correctamente')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al exportar: $e')),
+        );
+      }
+    }
   }
 }
 
@@ -224,8 +276,9 @@ class _StatusChip extends StatelessWidget {
 class _OutlinedActionBtn extends StatefulWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _OutlinedActionBtn({required this.icon, required this.label});
+  const _OutlinedActionBtn({required this.icon, required this.label, this.onTap});
 
   @override
   State<_OutlinedActionBtn> createState() => _OutlinedActionBtnState();
@@ -240,7 +293,7 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () {},
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
