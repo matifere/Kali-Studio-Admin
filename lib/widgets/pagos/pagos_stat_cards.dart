@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 /// Tarjetas de estadísticas de la sección de pagos.
@@ -7,36 +9,77 @@ class PagosStatCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        // Ingresos Mensuales
-        Expanded(
-          flex: 5,
-          child: _RevenueCard(),
-        ),
-        SizedBox(width: 20),
-        // Pendiente
-        Expanded(
-          flex: 4,
-          child: _OutstandingCard(),
-        ),
-        SizedBox(width: 20),
-        // Sesiones Pagadas
-        Expanded(
-          flex: 3,
-          child: _PaidSessionsCard(),
-        ),
-      ],
+    return BlocBuilder<PagosBloc, PagosState>(
+      builder: (context, state) {
+        double revenue = 0.0;
+        double outstandingAmount = 0.0;
+        int outstandingCount = 0;
+        double paidPercentage = 0.0;
+
+        if (state is PagosLoaded) {
+          revenue = state.monthlyRevenue;
+          outstandingAmount = state.outstandingAmount;
+          outstandingCount = state.outstandingCount;
+          paidPercentage = state.paidSessionsPercentage;
+        }
+
+        return Row(
+          children: [
+            // Ingresos Mensuales
+            Expanded(
+              flex: 5,
+              child: _RevenueCard(revenue: revenue),
+            ),
+            const SizedBox(width: 20),
+            // Pendiente
+            Expanded(
+              flex: 4,
+              child: _OutstandingCard(
+                amount: outstandingAmount,
+                count: outstandingCount,
+              ),
+            ),
+            const SizedBox(width: 20),
+            // Sesiones Pagadas
+            Expanded(
+              flex: 3,
+              child: _PaidSessionsCard(percentage: paidPercentage),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
+String _getMonthName(int month) {
+  const months = [
+    '',
+    'ENERO',
+    'FEBRERO',
+    'MARZO',
+    'ABRIL',
+    'MAYO',
+    'JUNIO',
+    'JULIO',
+    'AGOSTO',
+    'SEPTIEMBRE',
+    'OCTUBRE',
+    'NOVIEMBRE',
+    'DICIEMBRE'
+  ];
+  return month >= 1 && month <= 12 ? months[month] : '';
+}
+
 // ─── Ingresos Mensuales ───────────────────────────────────────────────────────
 class _RevenueCard extends StatelessWidget {
-  const _RevenueCard();
+  final double revenue;
+  
+  const _RevenueCard({required this.revenue});
 
   @override
   Widget build(BuildContext context) {
+    final currentMonthName = _getMonthName(DateTime.now().month);
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -54,14 +97,14 @@ class _RevenueCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'INGRESOS MENSUALES (MARZO)',
+            'INGRESOS MENSUALES ($currentMonthName)',
             style: KaliText.label(
               KaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            '\$12,450.00',
+            '\$${revenue.toStringAsFixed(2)}',
             style: KaliText.display(KaliColors.espresso).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
@@ -74,7 +117,7 @@ class _RevenueCard extends StatelessWidget {
               const Icon(Icons.trending_up, size: 14, color: Color(0xFF5C9E6C)),
               const SizedBox(width: 4),
               Text(
-                '+12.4% vs mes anterior',
+                'Datos en tiempo real',
                 style: KaliText.body(
                   const Color(0xFF5C9E6C),
                   weight: FontWeight.w600,
@@ -90,7 +133,10 @@ class _RevenueCard extends StatelessWidget {
 
 // ─── Pendiente ────────────────────────────────────────────────────────────────
 class _OutstandingCard extends StatelessWidget {
-  const _OutstandingCard();
+  final double amount;
+  final int count;
+
+  const _OutstandingCard({required this.amount, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +164,7 @@ class _OutstandingCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '\$2,140.00',
+            '\$${amount.toStringAsFixed(2)}',
             style: KaliText.display(KaliColors.espresso).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
@@ -127,7 +173,7 @@ class _OutstandingCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '8 facturas pendientes',
+            '$count facturas pendientes',
             style: KaliText.body(
               KaliColors.espresso.withValues(alpha: 0.5),
             ),
@@ -140,7 +186,9 @@ class _OutstandingCard extends StatelessWidget {
 
 // ─── Sesiones Pagadas ─────────────────────────────────────────────────────────
 class _PaidSessionsCard extends StatelessWidget {
-  const _PaidSessionsCard();
+  final double percentage;
+
+  const _PaidSessionsCard({required this.percentage});
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +209,7 @@ class _PaidSessionsCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '94%',
+            '${(percentage * 100).toStringAsFixed(0)}%',
             style: KaliText.display(KaliColors.warmWhite).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
@@ -172,7 +220,7 @@ class _PaidSessionsCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
-              value: 0.94,
+              value: percentage,
               backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor:
                   const AlwaysStoppedAnimation<Color>(KaliColors.sand),

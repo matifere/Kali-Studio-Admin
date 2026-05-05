@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/models/subscription.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
@@ -136,16 +138,48 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: subscription.statusBgColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          subscription.statusLabel,
-          style: KaliText.label(subscription.statusColor)
-              .copyWith(fontSize: 8, letterSpacing: 1.0),
+      child: PopupMenuButton<String>(
+        tooltip: 'Cambiar estado',
+        offset: const Offset(0, 30),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onSelected: (newStatus) {
+          if (newStatus != subscription.status) {
+            context.read<PagosBloc>().add(
+                  PagosSubscriptionStatusChanged(
+                    subscriptionId: subscription.id,
+                    newStatus: newStatus,
+                  ),
+                );
+          }
+        },
+        itemBuilder: (context) => const [
+          PopupMenuItem(value: 'active', child: Text('Activo')),
+          PopupMenuItem(value: 'pending', child: Text('Pendiente')),
+          PopupMenuItem(value: 'expired', child: Text('Vencido')),
+          PopupMenuItem(value: 'cancelled', child: Text('Cancelado')),
+        ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: subscription.statusBgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                subscription.statusLabel,
+                style: KaliText.label(subscription.statusColor)
+                    .copyWith(fontSize: 8, letterSpacing: 1.0),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_drop_down_rounded,
+                size: 14,
+                color: subscription.statusColor,
+              ),
+            ],
+          ),
         ),
       ),
     );

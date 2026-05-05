@@ -23,6 +23,30 @@ class Subscription {
     required this.status,
   });
 
+  Subscription copyWith({
+    String? id,
+    String? studentName,
+    String? avatarUrl,
+    String? planName,
+    double? price,
+    String? currency,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? status,
+  }) {
+    return Subscription(
+      id: id ?? this.id,
+      studentName: studentName ?? this.studentName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      planName: planName ?? this.planName,
+      price: price ?? this.price,
+      currency: currency ?? this.currency,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      status: status ?? this.status,
+    );
+  }
+
   factory Subscription.fromJson(Map<String, dynamic> json) {
     final profile = json['profiles'] ?? {};
     final plan = json['plans'] ?? {};
@@ -64,9 +88,9 @@ class Subscription {
         return 'ACTIVO';
       case 'pending':
         return 'PENDIENTE';
-      case 'overdue':
+      case 'expired':
         return 'VENCIDO';
-      case 'canceled':
+      case 'cancelled':
         return 'CANCELADO';
       default:
         return status.toUpperCase();
@@ -79,8 +103,8 @@ class Subscription {
         return const Color(0xFF5C9E6C);
       case 'pending':
         return const Color(0xFFD4A836);
-      case 'overdue':
-      case 'canceled':
+      case 'expired':
+      case 'cancelled':
         return const Color(0xFFD4685C);
       default:
         return Colors.grey;
@@ -93,8 +117,8 @@ class Subscription {
         return const Color(0xFFE8F5E9);
       case 'pending':
         return const Color(0xFFFFF8E1);
-      case 'overdue':
-      case 'canceled':
+      case 'expired':
+      case 'cancelled':
         return const Color(0xFFFDECEA);
       default:
         return Colors.grey.withValues(alpha: 0.2);
