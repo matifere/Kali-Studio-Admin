@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/models/subscription.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/widgets/common/avatar_provider.dart';
 
 /// Fila de la tabla de suscripciones.
 class SubscriptionRow extends StatefulWidget {
@@ -36,21 +37,25 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               flex: 4,
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: s.avatarColor,
-                    backgroundImage: s.avatarUrl != null ? NetworkImage(s.avatarUrl!) : null,
-                    child: s.avatarUrl == null
-                        ? Text(
-                            s.studentInitials,
-                            style: KaliText.body(
-                              KaliColors.espresso,
-                              weight: FontWeight.w700,
-                              size: 11,
-                            ),
-                          )
-                        : null,
-                  ),
+                  if (s.avatarUrl != null && s.avatarUrl!.isNotEmpty && AvatarProvider.fromUrl(s.avatarUrl) != null)
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: s.avatarColor,
+                      backgroundImage: AvatarProvider.fromUrl(s.avatarUrl),
+                    )
+                  else
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: s.avatarColor,
+                      child: Text(
+                        s.studentInitials,
+                        style: KaliText.body(
+                          KaliColors.espresso,
+                          weight: FontWeight.w700,
+                          size: 11,
+                        ),
+                      ),
+                    ),
                   const SizedBox(width: 12),
                   Text(
                     s.studentName,
