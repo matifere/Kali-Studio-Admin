@@ -4,6 +4,8 @@ import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/alumnos/student_avatar.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 import 'package:kali_studio/widgets/common/kali_plan_badge.dart';
+import 'package:kali_studio/widgets/alumnos/student_profile_dialog.dart';
+import 'package:kali_studio/widgets/alumnos/edit_student_dialog.dart';
 
 /// Fila de la tabla que representa a un alumno.
 class StudentRow extends StatefulWidget {
@@ -85,23 +87,55 @@ class _StudentRowState extends State<StudentRow> {
             ),
 
             // Acciones
-            const Expanded(
+            Expanded(
               flex: 2,
               child: Row(
                 children: [
                   KaliIconButton.action(
                     Icons.visibility_outlined,
                     tooltip: 'Ver perfil',
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => StudentProfileDialog(student: s),
+                      );
+                    },
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   KaliIconButton.action(
                     Icons.edit_outlined,
                     tooltip: 'Editar',
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => EditStudentDialog(student: s),
+                      );
+                    },
                   ),
-                  SizedBox(width: 4),
-                  KaliIconButton.action(
-                    Icons.more_horiz,
+                  const SizedBox(width: 4),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_horiz, color: KaliColors.espresso),
                     tooltip: 'Más opciones',
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Eliminar alumno próximamente')),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delete_outline, color: Color(0xFFD4685C), size: 20),
+                            const SizedBox(width: 8),
+                            Text('Eliminar', style: KaliText.body(const Color(0xFFD4685C))),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Modelo de datos de un alumno.
 class Student {
+  final String id;
   final String? avatarImage;
   final String name;
   final String email;
@@ -11,8 +12,10 @@ class Student {
   final String shiftClass;
   final bool reactivate;
   final DateTime createdAt;
+  final List<String> patologias;
 
   const Student({
+    required this.id,
     this.avatarImage,
     required this.name,
     required this.email,
@@ -21,6 +24,7 @@ class Student {
     required this.nextShift,
     required this.shiftClass,
     required this.createdAt,
+    required this.patologias,
     this.reactivate = false,
   });
   String get initials {
@@ -80,6 +84,7 @@ class Student {
 
     // 3. Retorno de la instancia
     return Student(
+      id: json['id'] ?? '',
       avatarImage: json['avatar_url'],
       name: json['full_name'] ?? 'Sin nombre',
       // NOTA: Como vimos en el diagrama, email no está en profiles.
@@ -90,6 +95,7 @@ class Student {
       nextShift: nextShiftDate,
       shiftClass: shiftClassName,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now() : DateTime.now(),
+      patologias: json['patologias'] != null ? List<String>.from(json['patologias']) : [],
       reactivate:
           false, // Asumo que esto es puramente para la UI y no viene de la DB
     );

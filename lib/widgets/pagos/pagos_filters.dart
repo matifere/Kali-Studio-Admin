@@ -32,156 +32,169 @@ class PagosFilters extends StatelessWidget {
           selectedStatuses = state.selectedStatuses;
         }
 
-        return Row(
+        return Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          crossAxisAlignment: WrapCrossAlignment.end,
+          alignment: WrapAlignment.spaceBetween,
           children: [
-            // Búsqueda
-            SizedBox(
-              width: 280,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'BUSCAR USUARIO',
-                    style: KaliText.label(
-                      KaliColors.espresso.withValues(alpha: 0.45),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 40,
-                    child: TextField(
-                      onChanged: (value) {
-                        context.read<PagosBloc>().add(PagosSearchChanged(value));
-                      },
-                      style: KaliText.body(KaliColors.espresso, size: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Ej. Juan Pérez',
-                        hintStyle: KaliText.body(
-                          KaliColors.espresso.withValues(alpha: 0.4),
-                          size: 14,
+            Wrap(
+              spacing: 24,
+              runSpacing: 16,
+              crossAxisAlignment: WrapCrossAlignment.start,
+              children: [
+                // Búsqueda
+                SizedBox(
+                  width: 280,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BUSCAR USUARIO',
+                        style: KaliText.label(
+                          KaliColors.espresso.withValues(alpha: 0.45),
                         ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: 18,
-                          color: KaliColors.espresso.withValues(alpha: 0.4),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                            color: KaliColors.espresso.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                            color: KaliColors.espresso.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: KaliColors.espresso,
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 40,
+                        child: TextField(
+                          onChanged: (value) {
+                            context.read<PagosBloc>().add(PagosSearchChanged(value));
+                          },
+                          style: KaliText.body(KaliColors.espresso, size: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Ej. Juan Pérez',
+                            hintStyle: KaliText.body(
+                              KaliColors.espresso.withValues(alpha: 0.4),
+                              size: 14,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 18,
+                              color: KaliColors.espresso.withValues(alpha: 0.4),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: KaliColors.espresso.withValues(alpha: 0.1),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(
+                                color: KaliColors.espresso.withValues(alpha: 0.1),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: KaliColors.espresso,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 24),
-            // Estado
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ESTADO',
-                  style: KaliText.label(
-                    KaliColors.espresso.withValues(alpha: 0.45),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                // Estado
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _StatusChip(
-                      label: 'Activo',
-                      isSelected: selectedStatuses.contains('active'),
-                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'active', selected),
-                    ),
-                    _StatusChip(
-                      label: 'Pendiente',
-                      isSelected: selectedStatuses.contains('pending'),
-                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'pending', selected),
-                    ),
-                    _StatusChip(
-                      label: 'Vencido',
-                      isSelected: selectedStatuses.contains('expired'),
-                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'expired', selected),
-                    ),
-                    _StatusChip(
-                      label: 'Cancelado',
-                      isSelected: selectedStatuses.contains('cancelled'),
-                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'cancelled', selected),
-                    ),
-                    if (selectedStatuses.isNotEmpty)
-                      TextButton.icon(
-                        onPressed: () {
-                          context.read<PagosBloc>().add(PagosFiltersChanged(const {}));
-                        },
-                        icon: Icon(Icons.clear, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
-                        label: Text(
-                          'Limpiar',
-                          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          minimumSize: const Size(0, 36),
-                        ),
+                    Text(
+                      'ESTADO',
+                      style: KaliText.label(
+                        KaliColors.espresso.withValues(alpha: 0.45),
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _StatusChip(
+                          label: 'Activo',
+                          isSelected: selectedStatuses.contains('active'),
+                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'active', selected),
+                        ),
+                        _StatusChip(
+                          label: 'Pendiente',
+                          isSelected: selectedStatuses.contains('pending'),
+                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'pending', selected),
+                        ),
+                        _StatusChip(
+                          label: 'Vencido',
+                          isSelected: selectedStatuses.contains('expired'),
+                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'expired', selected),
+                        ),
+                        _StatusChip(
+                          label: 'Cancelado',
+                          isSelected: selectedStatuses.contains('cancelled'),
+                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'cancelled', selected),
+                        ),
+                        if (selectedStatuses.isNotEmpty)
+                          TextButton.icon(
+                            onPressed: () {
+                              context.read<PagosBloc>().add(PagosFiltersChanged(const {}));
+                            },
+                            icon: Icon(Icons.clear, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
+                            label: Text(
+                              'Limpiar',
+                              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              minimumSize: const Size(0, 36),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ],
             ),
-            const Spacer(),
             // Botones de acción
-            _OutlinedActionBtn(
-              icon: Icons.download_rounded,
-              label: 'Exportar Reporte',
-              onTap: () {
-                if (state is PagosLoaded) {
-                  _exportReport(context, state.filteredPayments);
-                }
-              },
-            ),
-            const SizedBox(width: 12),
-            _FilledActionBtn(
-              icon: Icons.add_card_rounded,
-              label: 'Crear Plan',
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const CreatePlanDialog(),
-                );
-              },
-            ),
-            const SizedBox(width: 12),
-            _FilledActionBtn(
-              icon: Icons.person_add_alt_1_rounded,
-              label: 'Asignar Plan',
-              onTap: () async {
-                final result = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => const AssignPlanDialog(),
-                );
-                if (result == true && context.mounted) {
-                  context.read<PagosBloc>().add(PagosLoadRequested());
-                }
-              },
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _OutlinedActionBtn(
+                  icon: Icons.download_rounded,
+                  label: 'Exportar Reporte',
+                  onTap: () {
+                    if (state is PagosLoaded) {
+                      _exportReport(context, state.filteredPayments);
+                    }
+                  },
+                ),
+                _FilledActionBtn(
+                  icon: Icons.add_card_rounded,
+                  label: 'Crear Plan',
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const CreatePlanDialog(),
+                    );
+                  },
+                ),
+                _FilledActionBtn(
+                  icon: Icons.person_add_alt_1_rounded,
+                  label: 'Asignar Plan',
+                  onTap: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => const AssignPlanDialog(),
+                    );
+                    if (result == true && context.mounted) {
+                      context.read<PagosBloc>().add(PagosLoadRequested());
+                    }
+                  },
+                ),
+              ],
             ),
           ],
         );
