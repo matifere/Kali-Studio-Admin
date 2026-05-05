@@ -9,173 +9,154 @@ import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
 class PagosFilters extends StatelessWidget {
   const PagosFilters({super.key});
 
+  void _toggleStatus(BuildContext context, Set<String> current, String status, bool add) {
+    final newSet = Set<String>.from(current);
+    if (add) {
+      newSet.add(status);
+    } else {
+      newSet.remove(status);
+    }
+    context.read<PagosBloc>().add(PagosFiltersChanged(newSet));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Rango de fechas
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return BlocBuilder<PagosBloc, PagosState>(
+      builder: (context, state) {
+        Set<String> selectedStatuses = {};
+        if (state is PagosLoaded) {
+          selectedStatuses = state.selectedStatuses;
+        }
+
+        return Row(
           children: [
-            Text(
-              'RANGO DE FECHAS',
-              style: KaliText.label(
-                KaliColors.espresso.withValues(alpha: 0.45),
-              ),
+            // Estado
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ESTADO',
+                  style: KaliText.label(
+                    KaliColors.espresso.withValues(alpha: 0.45),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _StatusChip(
+                      label: 'Activo',
+                      isSelected: selectedStatuses.contains('active'),
+                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'active', selected),
+                    ),
+                    _StatusChip(
+                      label: 'Pendiente',
+                      isSelected: selectedStatuses.contains('pending'),
+                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'pending', selected),
+                    ),
+                    _StatusChip(
+                      label: 'Vencido',
+                      isSelected: selectedStatuses.contains('expired'),
+                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'expired', selected),
+                    ),
+                    _StatusChip(
+                      label: 'Cancelado',
+                      isSelected: selectedStatuses.contains('cancelled'),
+                      onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'cancelled', selected),
+                    ),
+                    if (selectedStatuses.isNotEmpty)
+                      TextButton.icon(
+                        onPressed: () {
+                          context.read<PagosBloc>().add(PagosFiltersChanged(const {}));
+                        },
+                        icon: Icon(Icons.clear, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
+                        label: Text(
+                          'Limpiar',
+                          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          minimumSize: const Size(0, 36),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            const _DateRangeChip(),
-          ],
-        ),
-        const SizedBox(width: 24),
-        // Estado
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'ESTADO',
-              style: KaliText.label(
-                KaliColors.espresso.withValues(alpha: 0.45),
-              ),
+            const Spacer(),
+            // Botones de acción
+            const _OutlinedActionBtn(
+              icon: Icons.download_rounded,
+              label: 'Exportar Reporte',
             ),
-            const SizedBox(height: 8),
-            const _StatusDropdown(),
+            const SizedBox(width: 12),
+            _FilledActionBtn(
+              icon: Icons.add_card_rounded,
+              label: 'Crear Plan',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const CreatePlanDialog(),
+                );
+              },
+            ),
+            const SizedBox(width: 12),
+            _FilledActionBtn(
+              icon: Icons.person_add_alt_1_rounded,
+              label: 'Asignar Plan',
+              onTap: () async {
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => const AssignPlanDialog(),
+                );
+                if (result == true && context.mounted) {
+                  context.read<PagosBloc>().add(PagosLoadRequested());
+                }
+              },
+            ),
           ],
-        ),
-        const Spacer(),
-        // Botones de acción
-        const _OutlinedActionBtn(
-          icon: Icons.download_rounded,
-          label: 'Exportar Reporte',
-        ),
-        const SizedBox(width: 12),
-        _FilledActionBtn(
-          icon: Icons.add_card_rounded,
-          label: 'Crear Plan',
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (context) => const CreatePlanDialog(),
-            );
-          },
-        ),
-        const SizedBox(width: 12),
-        _FilledActionBtn(
-          icon: Icons.person_add_alt_1_rounded,
-          label: 'Asignar Plan',
-          onTap: () async {
-            final result = await showDialog<bool>(
-              context: context,
-              builder: (context) => const AssignPlanDialog(),
-            );
-            if (result == true && context.mounted) {
-              context.read<PagosBloc>().add(PagosLoadRequested());
-            }
-          },
-        ),
-        const SizedBox(width: 12),
-        const _FilledActionBtn(
-          icon: Icons.add,
-          label: 'Registrar Pago',
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-// ─── Chip de rango de fechas ──────────────────────────────────────────────────
-class _DateRangeChip extends StatefulWidget {
-  const _DateRangeChip();
+// ─── Chip de estado ───────────────────────────────────────────────────────────
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final Function(bool) onToggle;
 
-  @override
-  State<_DateRangeChip> createState() => _DateRangeChipState();
-}
-
-class _DateRangeChipState extends State<_DateRangeChip> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: _hovered ? KaliColors.sand : KaliColors.espresso,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Mar 01 - Mar 31, 2024',
-              style: KaliText.body(
-                _hovered ? KaliColors.espresso : KaliColors.warmWhite,
-                weight: FontWeight.w500,
-                size: 13,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.calendar_today_rounded,
-              size: 14,
-              color: _hovered ? KaliColors.espresso : KaliColors.warmWhite,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Dropdown de estado ───────────────────────────────────────────────────────
-class _StatusDropdown extends StatefulWidget {
-  const _StatusDropdown();
-
-  @override
-  State<_StatusDropdown> createState() => _StatusDropdownState();
-}
-
-class _StatusDropdownState extends State<_StatusDropdown> {
-  bool _hovered = false;
+  const _StatusChip({
+    required this.label,
+    required this.isSelected,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: _hovered ? KaliColors.sand : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: KaliColors.espresso.withValues(alpha: 0.1),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Todos los Estados',
-              style: KaliText.body(
-                KaliColors.espresso,
-                weight: FontWeight.w500,
-                size: 13,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: KaliColors.espresso.withValues(alpha: 0.5),
-            ),
-          ],
+    return FilterChip(
+      label: Text(
+        label,
+        style: KaliText.body(
+          isSelected ? Colors.white : KaliColors.espresso,
+          weight: FontWeight.w500,
+          size: 13,
         ),
       ),
+      selected: isSelected,
+      onSelected: onToggle,
+      selectedColor: KaliColors.espresso,
+      backgroundColor: Colors.white,
+      checkmarkColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: isSelected ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.1),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     );
   }
 }

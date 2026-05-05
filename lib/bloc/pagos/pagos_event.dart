@@ -22,3 +22,10 @@ class PagosSubscriptionStatusChanged extends PagosEvent {
     required this.newStatus,
   });
 }
+
+/// El usuario cambió los filtros de estado.
+class PagosFiltersChanged extends PagosEvent {
+  final Set<String> selectedStatuses;
+
+  PagosFiltersChanged(this.selectedStatuses);
+}

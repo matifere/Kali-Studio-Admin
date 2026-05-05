@@ -15,6 +15,7 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     on<PagosLoadRequested>(_onLoadRequested);
     on<PagosPageChanged>(_onPageChanged);
     on<PagosSubscriptionStatusChanged>(_onSubscriptionStatusChanged);
+    on<PagosFiltersChanged>(_onFiltersChanged);
   }
 
   // ── Carga inicial (mock — listo para Supabase) ─────────────────────────────
@@ -114,6 +115,20 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
         debugPrint('Error updating subscription status: $e');
         // Opcional: mostrar un error o revertir optimísticamente
       }
+    }
+  }
+
+  // ── Cambio de filtros ──────────────────────────────────────────────────────
+  void _onFiltersChanged(
+    PagosFiltersChanged event,
+    Emitter<PagosState> emit,
+  ) {
+    final current = state;
+    if (current is PagosLoaded) {
+      emit(current.copyWith(
+        selectedStatuses: event.selectedStatuses,
+        currentPage: 1, // Reset page on filter change
+      ));
     }
   }
 }

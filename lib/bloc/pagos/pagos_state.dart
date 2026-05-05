@@ -11,18 +11,31 @@ class PagosLoading extends PagosState {}
 class PagosLoaded extends PagosState {
   final List<Subscription> payments;
   final int currentPage;
+  final Set<String> selectedStatuses;
   static const int perPage = 5;
 
-  PagosLoaded({required this.payments, this.currentPage = 1});
+  PagosLoaded({
+    required this.payments,
+    this.currentPage = 1,
+    this.selectedStatuses = const {},
+  });
+
+  List<Subscription> get filteredPayments {
+    if (selectedStatuses.isEmpty) return payments;
+    return payments
+        .where((p) => selectedStatuses.contains(p.status))
+        .toList();
+  }
 
   int get totalPages =>
-      (payments.length / perPage).ceil().clamp(1, 999);
+      (filteredPayments.length / perPage).ceil().clamp(1, 999);
 
   List<Subscription> get pagePayments {
-    if (payments.isEmpty) return [];
+    final filtered = filteredPayments;
+    if (filtered.isEmpty) return [];
     final start = (currentPage - 1) * perPage;
-    final end = (start + perPage).clamp(0, payments.length);
-    return payments.sublist(start, end);
+    final end = (start + perPage).clamp(0, filtered.length);
+    return filtered.sublist(start, end);
   }
 
   /// Ingresos mensuales (suma de precios de suscripciones activas)
@@ -53,7 +66,19 @@ class PagosLoaded extends PagosState {
     return activeCount / payments.length;
   }
 
+  PagosLoaded copyWith({
+    List<Subscription>? payments,
+    int? currentPage,
+    Set<String>? selectedStatuses,
+  }) {
+    return PagosLoaded(
+      payments: payments ?? this.payments,
+      currentPage: currentPage ?? this.currentPage,
+      selectedStatuses: selectedStatuses ?? this.selectedStatuses,
+    );
+  }
+
   /// Crea una copia con la página actualizada (sin recargar datos).
   PagosLoaded copyWithPage(int page) =>
-      PagosLoaded(payments: payments, currentPage: page);
+      copyWith(currentPage: page);
 }
