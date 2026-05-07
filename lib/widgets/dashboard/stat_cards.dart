@@ -13,17 +13,21 @@ class DashboardStatCards extends StatelessWidget {
       builder: (context, state) {
         final percentage = (state.capacidadPorcentaje * 100).toInt();
 
-        return Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bool isNarrow = constraints.maxWidth < 700;
+
+            final widgets = [
+              _buildStatCard(
                 title: 'INGRESOS TOTALES',
-                value: '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
+                value:
+                    '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
                 icon: Icons.payments_outlined,
                 bottomWidget: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: KaliColors.clay.withOpacity(0.4),
+                    color: KaliColors.clay.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -32,30 +36,49 @@ class DashboardStatCards extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: _buildStatCard(
+              _buildStatCard(
                 title: 'TURNOS ACTIVOS HOY',
                 value: state.turnosActivosHoy.toString(),
                 icon: Icons.event_available_outlined,
                 bottomWidget: Text(
-                  '${state.turnosActivosHoy > 0 ? "Sesiones programadas para hoy" : "No hay sesiones hoy"}',
-                  style: KaliText.body(KaliColors.espresso.withOpacity(0.6)),
+                  state.turnosActivosHoy > 0
+                      ? "Sesiones programadas para hoy"
+                      : "No hay sesiones hoy",
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                 ),
               ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: _buildDarkStatCard(
+              _buildDarkStatCard(
                 title: 'ALUMNOS PRESENTES',
                 value: state.alumnosPresentesHoy.toString(),
                 icon: Icons.person_add_alt_1_outlined,
                 capacityText: '$percentage% de capacidad diaria alcanzada',
                 progress: state.capacidadPorcentaje,
               ),
-            ),
-          ],
+            ];
+
+            if (isNarrow) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widgets[0],
+                  const SizedBox(height: 24),
+                  widgets[1],
+                  const SizedBox(height: 24),
+                  widgets[2],
+                ],
+              );
+            } else {
+              return Row(
+                children: [
+                  Expanded(child: widgets[0]),
+                  const SizedBox(width: 24),
+                  Expanded(child: widgets[1]),
+                  const SizedBox(width: 24),
+                  Expanded(child: widgets[2]),
+                ],
+              );
+            }
+          },
         );
       },
     );
@@ -74,7 +97,7 @@ class DashboardStatCards extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -86,12 +109,17 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.espresso.withOpacity(0.5))),
+              Text(title,
+                  style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
               Icon(icon, color: KaliColors.espresso, size: 20),
             ],
           ),
           const SizedBox(height: 16),
-          Text(value, style: KaliText.display(KaliColors.espresso).copyWith(fontWeight: FontWeight.bold, fontSize: 40, fontStyle: FontStyle.normal)),
+          Text(value,
+              style: KaliText.display(KaliColors.espresso).copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 40,
+                  fontStyle: FontStyle.normal)),
           const SizedBox(height: 16),
           bottomWidget,
         ],
@@ -118,24 +146,30 @@ class DashboardStatCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: KaliText.label(KaliColors.warmWhite.withOpacity(0.6))),
+              Text(title,
+                  style: KaliText.label(KaliColors.warmWhite.withValues(alpha: 0.6))),
               Icon(icon, color: KaliColors.warmWhite, size: 20),
             ],
           ),
           const SizedBox(height: 16),
-          Text(value, style: KaliText.display(KaliColors.warmWhite).copyWith(fontWeight: FontWeight.bold, fontSize: 40, fontStyle: FontStyle.normal)),
+          Text(value,
+              style: KaliText.display(KaliColors.warmWhite).copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 40,
+                  fontStyle: FontStyle.normal)),
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(KaliColors.sand),
               minHeight: 4,
             ),
           ),
           const SizedBox(height: 8),
-          Text(capacityText, style: KaliText.body(KaliColors.warmWhite.withOpacity(0.6))),
+          Text(capacityText,
+              style: KaliText.body(KaliColors.warmWhite.withValues(alpha: 0.6))),
         ],
       ),
     );

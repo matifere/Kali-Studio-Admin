@@ -50,13 +50,12 @@ class AlumnosStatCards extends StatelessWidget {
           activeCount = '0';
         }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Total Alumnos Activos (blanco, más ancho) ──────────────────
-            Expanded(
-              flex: 5,
-              child: _buildWhiteCard(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bool isNarrow = constraints.maxWidth < 900;
+
+            final children = [
+              _buildWhiteCard(
                 title: 'TOTAL ALUMNOS ACTIVOS',
                 value: activeCount,
                 badge: Row(
@@ -81,29 +80,44 @@ class AlumnosStatCards extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(width: 20),
-
-            // ── Distribución por Plan (carrusel deslizable) ────────────────
-            Expanded(
-              flex: 4,
-              child: _PlanCarousel(countByPlan: countByPlan, isLoading: state is AlumnosLoading),
-            ),
-            const SizedBox(width: 20),
-
-            // ── Próximos Vencimientos (blanco) ─────────────────────────────
-            Expanded(
-              flex: 4,
-              child: _buildWhiteCard(
+              _PlanCarousel(
+                countByPlan: countByPlan,
+                isLoading: state is AlumnosLoading,
+              ),
+              _buildWhiteCard(
                 title: 'PRÓXIMOS VENCIMIENTOS',
                 value: '12', // FIXME
                 badge: Text(
                   'En los próximos 7 días',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                  style: KaliText.body(
+                      KaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ),
-            ),
-          ],
+            ];
+
+            if (isNarrow) {
+              return Column(
+                children: [
+                  children[0],
+                  const SizedBox(height: 20),
+                  children[1],
+                  const SizedBox(height: 20),
+                  children[2],
+                ],
+              );
+            } else {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 5, child: children[0]),
+                  const SizedBox(width: 20),
+                  Expanded(flex: 4, child: children[1]),
+                  const SizedBox(width: 20),
+                  Expanded(flex: 4, child: children[2]),
+                ],
+              );
+            }
+          },
         );
       },
     );

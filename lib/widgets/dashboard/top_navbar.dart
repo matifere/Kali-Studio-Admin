@@ -89,11 +89,21 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
             : rawRole.toUpperCase();
         final avatarUrl = metadata['avatar_url'] as String?;
         final initial = fullName.isNotEmpty ? fullName[0].toUpperCase() : '?';
+        final bool isMobile = MediaQuery.of(ctx).size.width < 1100;
+        final bool isUltraMobile = MediaQuery.of(ctx).size.width < 500;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(40, 32, 40, 0),
+          padding: EdgeInsets.fromLTRB(
+              isUltraMobile ? 20 : 40, 32, isUltraMobile ? 20 : 40, 0),
           child: Row(
             children: [
+              if (isMobile)
+                IconButton(
+                  icon: const Icon(Icons.menu, color: KaliColors.espresso),
+                  onPressed: () {
+                    Scaffold.of(ctx).openDrawer();
+                  },
+                ),
               const Spacer(),
 
               // ── Iconos ─────────────────────────────────────────────────────
@@ -167,23 +177,25 @@ class _UserProfileButtonState extends State<_UserProfileButton> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.fullName,
-                    style: KaliText.body(KaliColors.espresso,
-                        weight: FontWeight.bold),
-                  ),
-                  Text(
-                    widget.displayRole,
-                    style: KaliText.label(
-                        KaliColors.espresso.withValues(alpha: 0.5)),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 12),
+              if (MediaQuery.of(context).size.width > 600)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.fullName,
+                      style: KaliText.body(KaliColors.espresso,
+                          weight: FontWeight.bold),
+                    ),
+                    Text(
+                      widget.displayRole,
+                      style: KaliText.label(
+                          KaliColors.espresso.withValues(alpha: 0.5)),
+                    ),
+                  ],
+                ),
+              if (MediaQuery.of(context).size.width > 600)
+                const SizedBox(width: 12),
               Stack(
                 alignment: Alignment.center,
                 children: [

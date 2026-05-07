@@ -23,29 +23,41 @@ class PagosStatCards extends StatelessWidget {
           paidPercentage = state.paidSessionsPercentage;
         }
 
-        return Row(
-          children: [
-            // Ingresos Mensuales
-            Expanded(
-              flex: 5,
-              child: _RevenueCard(revenue: revenue),
-            ),
-            const SizedBox(width: 20),
-            // Pendiente
-            Expanded(
-              flex: 4,
-              child: _OutstandingCard(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bool isNarrow = constraints.maxWidth < 900;
+
+            final children = [
+              _RevenueCard(revenue: revenue),
+              _OutstandingCard(
                 amount: outstandingAmount,
                 count: outstandingCount,
               ),
-            ),
-            const SizedBox(width: 20),
-            // Sesiones Pagadas
-            Expanded(
-              flex: 3,
-              child: _PaidSessionsCard(percentage: paidPercentage),
-            ),
-          ],
+              _PaidSessionsCard(percentage: paidPercentage),
+            ];
+
+            if (isNarrow) {
+              return Column(
+                children: [
+                  children[0],
+                  const SizedBox(height: 20),
+                  children[1],
+                  const SizedBox(height: 20),
+                  children[2],
+                ],
+              );
+            } else {
+              return Row(
+                children: [
+                  Expanded(flex: 5, child: children[0]),
+                  const SizedBox(width: 20),
+                  Expanded(flex: 4, child: children[1]),
+                  const SizedBox(width: 20),
+                  Expanded(flex: 3, child: children[2]),
+                ],
+              );
+            }
+          },
         );
       },
     );
