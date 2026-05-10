@@ -14,13 +14,15 @@ class AlumnosStatCards extends StatelessWidget {
         String percentGrowthStr = '0%';
         bool isPositive = true;
 
-        // ── Contar por plan en O(n) ────────────────────────────────────────
+        // ── Contar por plan en O(n) y Vencimientos ─────────────────────────
         final Map<String, int> countByPlan = {};
+        int expiringCount = 0;
 
         if (state is AlumnosLoaded) {
           activeCount = state.students.length.toString();
 
           final now = DateTime.now();
+          final nextWeek = now.add(const Duration(days: 7));
           int thisMonthCount = 0;
           for (var s in state.students) {
             if (s.createdAt.year == now.year && s.createdAt.month == now.month) {
@@ -29,6 +31,16 @@ class AlumnosStatCards extends StatelessWidget {
             // Aprovechar el mismo bucle para contar por plan
             final plan = s.plan.isNotEmpty ? s.plan : 'Sin plan';
             countByPlan[plan] = (countByPlan[plan] ?? 0) + 1;
+
+            // Contar vencimientos próximos
+            if (s.planEndDate != null) {
+              // Si vence entre hoy (o antes pero sigue activo) y los próximos 7 días
+              // o simplemente si el vencimiento cae en los próximos 7 días a partir de hoy.
+              // Para ser seguros, si ya venció (y por alguna razón sigue en esta lista) o vence en la próxima semana:
+              if (s.planEndDate!.isBefore(nextWeek) && s.planEndDate!.isAfter(now.subtract(const Duration(days: 1)))) {
+                expiringCount++;
+              }
+            }
           }
 
           int previousTotal = state.students.length - thisMonthCount;
@@ -86,7 +98,7 @@ class AlumnosStatCards extends StatelessWidget {
               ),
               _buildWhiteCard(
                 title: 'PRÓXIMOS VENCIMIENTOS',
-                value: '12', // FIXME
+                value: state is AlumnosLoading ? null : expiringCount.toString(),
                 badge: Text(
                   'En los próximos 7 días',
                   style: KaliText.body(

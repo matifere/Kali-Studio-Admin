@@ -13,6 +13,7 @@ class Student {
   final bool reactivate;
   final DateTime createdAt;
   final List<String> patologias;
+  final DateTime? planEndDate;
 
   const Student({
     required this.id,
@@ -25,6 +26,7 @@ class Student {
     required this.shiftClass,
     required this.createdAt,
     required this.patologias,
+    this.planEndDate,
     this.reactivate = false,
   });
   String get initials {
@@ -48,12 +50,16 @@ class Student {
     // 1. Extracción segura del Plan
     // Supabase devuelve los joins como Listas (arrays) de Mapas.
     String currentPlan = 'Sin plan';
+    DateTime? endDate;
     if (json['subscriptions'] != null &&
         (json['subscriptions'] as List).isNotEmpty) {
       // Tomamos la primera suscripción (idealmente la query la trae filtrada/ordenada por activa)
       final firstSub = json['subscriptions'][0];
       if (firstSub['plans'] != null) {
         currentPlan = firstSub['plans']['name'] ?? 'Sin plan';
+      }
+      if (firstSub['end_date'] != null) {
+        endDate = DateTime.tryParse(firstSub['end_date']);
       }
     }
 
@@ -96,6 +102,7 @@ class Student {
       shiftClass: shiftClassName,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now() : DateTime.now(),
       patologias: json['patologias'] != null ? List<String>.from(json['patologias']) : [],
+      planEndDate: endDate,
       reactivate:
           false, // Asumo que esto es puramente para la UI y no viene de la DB
     );
