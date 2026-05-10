@@ -34,6 +34,8 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmall = MediaQuery.of(context).size.width < 600;
+
     return Column(
       children: [
         // Top Navigation Bar
@@ -42,39 +44,59 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
         // Content
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmall ? 20 : 40,
+              vertical: 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Alumnos',
-                          style: GoogleFonts.cormorantGaramond(
-                            fontSize: 46,
-                            fontWeight: FontWeight.w600,
-                            color: KaliColors.espresso,
-                          ),
+                if (isSmall)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Alumnos',
+                        style: GoogleFonts.cormorantGaramond(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w600,
+                          color: KaliColors.espresso,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Gestiona tu comunidad de Kali Studio.',
-                          style: KaliText.body(
-                            KaliColors.espresso.withValues(alpha: 0.6),
-                            size: 14,
+                      ),
+                      const SizedBox(height: 16),
+                      const _AddStudentButton(),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Alumnos',
+                            style: GoogleFonts.cormorantGaramond(
+                              fontSize: 46,
+                              fontWeight: FontWeight.w600,
+                              color: KaliColors.espresso,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const _AddStudentButton(),
-                  ],
-                ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Gestiona tu comunidad de Kali Studio.',
+                            style: KaliText.body(
+                              KaliColors.espresso.withValues(alpha: 0.6),
+                              size: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const _AddStudentButton(),
+                    ],
+                  ),
                 const SizedBox(height: 32),
 
                 // Stat Cards

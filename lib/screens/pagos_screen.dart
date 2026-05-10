@@ -13,12 +13,17 @@ class PagosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmall = MediaQuery.of(context).size.width < 600;
+
     return Column(
       children: [
         const DashboardTopNavBar(),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmall ? 20 : 40,
+              vertical: 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -26,7 +31,7 @@ class PagosScreen extends StatelessWidget {
                 Text(
                   'Pagos',
                   style: GoogleFonts.cormorantGaramond(
-                    fontSize: 46,
+                    fontSize: isSmall ? 36 : 46,
                     fontWeight: FontWeight.w600,
                     color: KaliColors.espresso,
                   ),

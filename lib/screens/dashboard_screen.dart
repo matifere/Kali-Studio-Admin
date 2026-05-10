@@ -31,20 +31,36 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 1100;
+
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, navState) {
         return Scaffold(
           backgroundColor: KaliColors.warmWhite,
+          drawer: isMobile
+              ? Drawer(
+                  child: DashboardSidebar(
+                    currentPage: navState.currentPage,
+                    onNavigate: (page) {
+                      context.read<NavigationBloc>().add(
+                            NavigationPageChanged(page),
+                          );
+                      Navigator.of(context).pop(); // Cerrar drawer al navegar
+                    },
+                  ),
+                )
+              : null,
           body: Row(
             children: [
-              DashboardSidebar(
-                currentPage: navState.currentPage,
-                onNavigate: (page) {
-                  context.read<NavigationBloc>().add(
-                        NavigationPageChanged(page),
-                      );
-                },
-              ),
+              if (!isMobile)
+                DashboardSidebar(
+                  currentPage: navState.currentPage,
+                  onNavigate: (page) {
+                    context.read<NavigationBloc>().add(
+                          NavigationPageChanged(page),
+                        );
+                  },
+                ),
               Expanded(child: _buildCurrentPage(navState.currentPage)),
             ],
           ),
@@ -71,19 +87,24 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmall = MediaQuery.of(context).size.width < 600;
+
     return Column(
       children: [
         const DashboardTopNavBar(),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmall ? 20 : 40,
+              vertical: 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Buenos días,',
                   style: GoogleFonts.cormorantGaramond(
-                    fontSize: 40,
+                    fontSize: isSmall ? 32 : 40,
                     fontWeight: FontWeight.w600,
                     color: KaliColors.espresso,
                   ),
@@ -92,20 +113,34 @@ class _DashboardHomeState extends State<_DashboardHome> {
                 Text(
                   'Esto es lo que está pasando en Kali Studio hoy.',
                   style: KaliText.body(
-                    KaliColors.espresso.withOpacity(0.6),
+                    KaliColors.espresso.withValues(alpha: 0.6),
                     size: 16,
                   ),
                 ),
                 const SizedBox(height: 40),
                 const DashboardStatCards(),
                 const SizedBox(height: 32),
-                const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 5, child: DashboardScheduleList()),
-                    SizedBox(width: 24),
-                    Expanded(flex: 4, child: DashboardRecentActivity()),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth < 900) {
+                      return const Column(
+                        children: [
+                          DashboardScheduleList(),
+                          SizedBox(height: 24),
+                          DashboardRecentActivity(),
+                        ],
+                      );
+                    } else {
+                      return const Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 5, child: DashboardScheduleList()),
+                          SizedBox(width: 24),
+                          Expanded(flex: 4, child: DashboardRecentActivity()),
+                        ],
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 40),
               ],
