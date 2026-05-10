@@ -43,67 +43,76 @@ class ScheduleHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+          // ── Título y Controles de Navegación ──
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 24,
+            runSpacing: 12,
+            children: [
+              Text(
+                'Calendario Semanal',
+                style: KaliText.heading(KaliColors.espresso, size: 40)
+                    .copyWith(fontWeight: FontWeight.w600),
+              ),
+              // Navigation controls
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: KaliColors.espresso.withValues(alpha: 0.1)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Calendario Semanal',
-                      style: KaliText.heading(KaliColors.espresso, size: 40)
-                          .copyWith(fontWeight: FontWeight.w600),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left_rounded, size: 24),
+                      onPressed: onPreviousWeek,
+                      color: KaliColors.espresso,
+                      tooltip: 'Semana Anterior',
                     ),
-                    const SizedBox(width: 24),
-                    // Navigation controls
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: KaliColors.espresso.withValues(alpha: 0.1)),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left_rounded,
-                                size: 24),
-                            onPressed: onPreviousWeek,
-                            color: KaliColors.espresso,
-                            tooltip: 'Semana Anterior',
-                          ),
-                          Container(
-                              width: 1,
-                              height: 24,
-                              color:
-                                  KaliColors.espresso.withValues(alpha: 0.1)),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right_rounded,
-                                size: 24),
-                            onPressed: onNextWeek,
-                            color: KaliColors.espresso,
-                            tooltip: 'Próxima Semana',
-                          ),
-                        ],
-                      ),
+                        width: 1,
+                        height: 24,
+                        color: KaliColors.espresso.withValues(alpha: 0.1)),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right_rounded, size: 24),
+                      onPressed: onNextWeek,
+                      color: KaliColors.espresso,
+                      tooltip: 'Próxima Semana',
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  _weekRange,
-                  style: KaliText.body(
-                    KaliColors.espresso.withValues(alpha: 0.5),
-                    size: 14,
-                  ),
-                ),
-                const SizedBox(height: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _weekRange,
+            style: KaliText.body(
+              KaliColors.espresso.withValues(alpha: 0.5),
+              size: 14,
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // ── Filtros y Botones de Acción ──
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 16,
+              runSpacing: 16,
+              children: [
                 // Filtros
-                Row(
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     _FilterDropdown(
                       label: selectedInstructor ?? 'Todos los Instructores',
@@ -116,7 +125,6 @@ class ScheduleHeader extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(width: 12),
                     _FilterDropdown(
                       label: selectedRoom ?? 'Todas las Salas',
                       options: ['Todas las Salas', ...availableRooms],
@@ -128,65 +136,76 @@ class ScheduleHeader extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(width: 24),
-                    Text('Modo Compacto', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
-                    const SizedBox(width: 8),
-                    Switch(
-                      value: isCompactMode,
-                      onChanged: onCompactModeChanged,
-                      activeColor: KaliColors.warmWhite,
-                      activeTrackColor: KaliColors.espresso,
-                      inactiveThumbColor: KaliColors.espresso.withValues(alpha: 0.4),
-                      inactiveTrackColor: KaliColors.sand,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(width: 8),
+                        Text('Modo Compacto',
+                            style: KaliText.body(
+                                KaliColors.espresso.withValues(alpha: 0.6))),
+                        const SizedBox(width: 8),
+                        Switch(
+                          value: isCompactMode,
+                          onChanged: onCompactModeChanged,
+                          activeColor: KaliColors.warmWhite,
+                          activeTrackColor: KaliColors.espresso,
+                          inactiveThumbColor:
+                              KaliColors.espresso.withValues(alpha: 0.4),
+                          inactiveTrackColor: KaliColors.sand,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Botones de Acción
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: onCreateTemplate,
+                      icon: Icon(Icons.settings_outlined,
+                          size: 20,
+                          color: KaliColors.espresso.withValues(alpha: 0.7)),
+                      label: Text(
+                        'Administrar Plantillas',
+                        style: KaliText.body(
+                            KaliColors.espresso.withValues(alpha: 0.7),
+                            weight: FontWeight.w600),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(
+                            color: KaliColors.espresso.withValues(alpha: 0.2)),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: onCreateTurno,
+                      icon: const Icon(Icons.add_rounded,
+                          size: 20, color: Colors.white),
+                      label: Text(
+                        'Nuevo Turno',
+                        style: KaliText.body(Colors.white,
+                            weight: FontWeight.w600),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: KaliColors.espresso,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              OutlinedButton.icon(
-                onPressed: onCreateTemplate,
-                icon: Icon(Icons.settings_outlined,
-                    size: 20,
-                    color: KaliColors.espresso.withValues(alpha: 0.7)),
-                label: Text(
-                  'Administrar Plantillas',
-                  style: KaliText.body(
-                      KaliColors.espresso.withValues(alpha: 0.7),
-                      weight: FontWeight.w600),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  side: BorderSide(
-                      color: KaliColors.espresso.withValues(alpha: 0.2)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: onCreateTurno,
-                icon: const Icon(Icons.add_rounded,
-                    size: 20, color: Colors.white),
-                label: Text(
-                  'Nuevo Turno',
-                  style: KaliText.body(Colors.white, weight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: KaliColors.espresso,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-              ),
-            ],
           ),
         ],
       ),
