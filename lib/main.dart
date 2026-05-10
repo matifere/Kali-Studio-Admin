@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:window_manager/window_manager.dart';
 import 'package:kali_studio/bloc/activity/activity_bloc.dart';
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
@@ -17,6 +20,21 @@ import 'theme/kali_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = const WindowOptions(
+      minimumSize: Size(1280, 720),
+      size: Size(1280, 720),
+      center: true,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(
