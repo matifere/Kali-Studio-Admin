@@ -80,3 +80,14 @@ class TurnoStudentAttendanceToggled extends TurnosEvent {
   });
 }
 
+/// El usuario cambió los filtros de instructores o salas
+class TurnosFilterChanged extends TurnosEvent {
+  final String? instructor;
+  final String? room;
+
+  TurnosFilterChanged({
+    this.instructor,
+    this.room,
+  });
+}
+

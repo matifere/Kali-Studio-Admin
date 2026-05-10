@@ -24,6 +24,14 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoStudentAssigned>(_onTurnoStudentAssigned);
     on<TurnoStudentRemoved>(_onTurnoStudentRemoved);
     on<TurnoStudentAttendanceToggled>(_onTurnoStudentAttendanceToggled);
+    on<TurnosFilterChanged>(_onFilterChanged);
+  }
+
+  void _onFilterChanged(TurnosFilterChanged event, Emitter<TurnosState> emit) {
+    emit(state.copyWith(
+      selectedInstructor: () => event.instructor,
+      selectedRoom: () => event.room,
+    ));
   }
 
   static DateTime _getStartOfWeek(DateTime date) {

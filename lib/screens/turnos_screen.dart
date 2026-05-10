@@ -70,6 +70,18 @@ class _TurnosScreenState extends State<TurnosScreen> {
                             currentWeekStart: state.currentWeekStart,
                             isCompactMode: _isCompactMode,
                             onCompactModeChanged: (val) => setState(() => _isCompactMode = val),
+                            selectedInstructor: state.selectedInstructor,
+                            selectedRoom: state.selectedRoom,
+                            availableInstructors: state.availableInstructors,
+                            availableRooms: state.availableRooms,
+                            onFilterChanged: (instructor, room) {
+                              context.read<TurnosBloc>().add(
+                                    TurnosFilterChanged(
+                                      instructor: instructor,
+                                      room: room,
+                                    ),
+                                  );
+                            },
                             onPreviousWeek: () {
                               final prev = state.currentWeekStart.subtract(const Duration(days: 7));
                               context.read<TurnosBloc>().add(TurnosWeekChanged(prev));
@@ -108,7 +120,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                               Expanded(
                                                 child: WeeklySchedule(
                                                   currentWeekStart: state.currentWeekStart,
-                                                  sessions: state.sessions,
+                                                  sessions: state.filteredSessions,
                                                   selectedTurno: state.selectedTurno,
                                                   isCompactMode: _isCompactMode,
                                                   onTurnoSelected: (turno) {
@@ -119,7 +131,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                               ),
                                             ),
                                             ScheduleBottomBar(
-                                              sessions: state.sessions,
+                                              sessions: state.filteredSessions,
                                             ),
                                           ],
                                         ),
