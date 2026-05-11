@@ -4,7 +4,7 @@ import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/screens/register_screen.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
-import 'package:kali_studio/screens/dashboard_screen.dart';
+import 'package:kali_studio/widgets/auth_wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // posterior (hot reload, etc.) el listener no se re-dispare.
           context.read<AuthBloc>().add(AuthReset());
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            MaterialPageRoute(builder: (_) => const AuthWrapper()),
           );
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -13,6 +13,7 @@ import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
 import 'package:kali_studio/screens/dashboard_screen.dart';
+import 'package:kali_studio/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -126,7 +127,7 @@ class _KaliAppView extends StatelessWidget {
       supportedLocales: const [
         Locale('es', 'ES'),
       ],
-      home: isLoggedIn ? const DashboardScreen() : const LoginScreen(),
+      home: isLoggedIn ? const AuthWrapper() : const LoginScreen(),
     );
   }
 }

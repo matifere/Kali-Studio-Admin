@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
+import 'package:kali_studio/widgets/auth_wrapper.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -62,7 +63,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registro exitoso')),
           );
-          Navigator.of(context).pop();
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const AuthWrapper()),
+            (route) => false,
+          );
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
@@ -105,22 +109,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 color: KaliColors.espresso,
                                 padding: const EdgeInsets.all(48.0),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Spacer(),
                                     Text(
                                       "Crear Perfil\nAdministrativo",
-                                      style: KaliText.display(
-                                              KaliColors.warmWhite)
-                                          .copyWith(
+                                      style:
+                                          KaliText.display(KaliColors.warmWhite)
+                                              .copyWith(
                                         fontSize: 48,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
                                     const SizedBox(height: 24),
                                     Text(
-                                      "Comienza a gestionar el estudio\nhoy con herramientas diseñadas\npara la administración profesional.",
+                                      "Comienza a gestionar tu institución\nhoy con herramientas diseñadas\npara la administración profesional.",
                                       style: KaliText.body(
                                         KaliColors.clay,
                                         size: 16,
@@ -196,10 +199,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                               obscureText:
                                                   _isPassConfirmObscured,
                                               controller: passConfirmControl,
-                                              suffixIcon:
-                                                  _isPassConfirmObscured
-                                                      ? Icons.visibility_off
-                                                      : Icons.visibility,
+                                              suffixIcon: _isPassConfirmObscured
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
                                               onSuffixTap: () => setState(
                                                 () => _isPassConfirmObscured =
                                                     !_isPassConfirmObscured,
@@ -215,8 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         child: ElevatedButton(
                                           onPressed: isLoading
                                               ? null
-                                              : () =>
-                                                  _handleRegister(context),
+                                              : () => _handleRegister(context),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:
                                                 KaliColors.espresso,
@@ -234,8 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                   height: 24,
                                                   child:
                                                       CircularProgressIndicator(
-                                                    color:
-                                                        KaliColors.warmWhite,
+                                                    color: KaliColors.warmWhite,
                                                     strokeWidth: 2,
                                                   ),
                                                 )
@@ -270,8 +270,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                   text: "Iniciar Sesión",
                                                   style: TextStyle(
                                                     color: KaliColors.espresso,
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ],
