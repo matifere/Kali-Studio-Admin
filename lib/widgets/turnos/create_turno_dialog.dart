@@ -59,17 +59,23 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
     if (_formKey.currentState!.validate() && _selectedTemplate != null && _selectedDate != null) {
       // 1. Check if past
       final parts = _selectedTemplate!.startTime.split(':');
-      final startDateTime = DateTime(
-        _selectedDate!.year, _selectedDate!.month, _selectedDate!.day, 
+      var targetDate = _selectedDate!;
+      var startDateTime = DateTime(
+        targetDate.year, targetDate.month, targetDate.day, 
         int.parse(parts[0]), int.parse(parts[1])
       );
 
       if (startDateTime.isBefore(DateTime.now())) {
+        // Movemos a la próxima semana automáticamente
+        targetDate = targetDate.add(const Duration(days: 7));
+        startDateTime = startDateTime.add(const Duration(days: 7));
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No puedes agendar un turno en el pasado.')),
+          const SnackBar(content: Text('El horario ya pasó. Se ha agendado para la próxima semana automáticamente.')),
         );
-        return;
       }
+      
+      _selectedDate = targetDate;
 
       // 2. Check basic overlapping logic locally (only checks first week conceptually since subsequent occur next weeks)
       final sessions = context.read<TurnosBloc>().state.sessions;

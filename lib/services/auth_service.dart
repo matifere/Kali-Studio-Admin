@@ -7,6 +7,18 @@ class SupaAuthClass {
   Future<String> registrarAlumno(
       String email, String password, String fullName) async {
     try {
+      // Obtenemos el institution_id del admin actual
+      final adminId = Supabase.instance.client.auth.currentUser?.id;
+      if (adminId == null) return 'Error: Sin sesión de administrador';
+      
+      final adminProfile = await Supabase.instance.client
+          .from('profiles')
+          .select('institution_id')
+          .eq('id', adminId)
+          .maybeSingle();
+          
+      final instId = adminProfile?['institution_id'];
+
       // Creamos un cliente temporal sin persistencia para no sobreescribir la sesión del admin
       final tempClient = SupabaseClient(
         dotenv.env['URL']!,
@@ -20,18 +32,21 @@ class SupaAuthClass {
       final AuthResponse respuesta = await tempClient.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'client'},
+        data: {'full_name': fullName, 'role': 'client', 'institution_id': instId},
       );
 
       if (respuesta.user != null) {
         try {
-          // Usamos el cliente principal autorizado (admin) para actualizar el perfil
-          await Supabase.instance.client.from('profiles').update({
+          // Usamos el cliente temporal (el alumno) para actualizar SU PROPIO perfil,
+          // esto es permitido por la política RLS (id = auth.uid())
+          await tempClient.from('profiles').update({
             'full_name': fullName,
             'role': 'client',
+            'institution_id': instId,
           }).eq('id', respuesta.user!.id);
         } catch (e) {
           // Error profile
+          print('Error actualizando el perfil del alumno: $e');
         }
         await tempClient.auth.signOut();
         tempClient.dispose();

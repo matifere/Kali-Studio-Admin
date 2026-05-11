@@ -95,6 +95,10 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
     });
 
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final profile = await Supabase.instance.client.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+      final instId = profile?['institution_id'];
+
       if (isEditing) {
         await Supabase.instance.client.from('schedule_templates').update({
           'name': _name,
@@ -103,7 +107,6 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
           'end_time': _formatTime(_endTime),
           'capacity': _capacity,
           'instructor_name': _instructor,
-          // We don't update day_of_week to keep it simple, or we can update it if they changed it
         }).eq('id', widget.templateToEdit!.id);
       } else {
         final payload = _selectedDays.map((day) => {
@@ -115,6 +118,7 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
           'capacity': _capacity,
           'instructor_name': _instructor,
           'is_active': true,
+          if (instId != null) 'institution_id': instId,
         }).toList();
 
         await Supabase.instance.client.from('schedule_templates').insert(payload);

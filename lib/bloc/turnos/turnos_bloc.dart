@@ -95,6 +95,10 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final profile = await Supabase.instance.client.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+      final instId = profile?['institution_id'];
+
       final insertData = <Map<String, dynamic>>[];
       for (int i = 0; i < event.recurrenceWeeks; i++) {
         final d = event.date.add(Duration(days: i * 7));
@@ -110,6 +114,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           'capacity': event.template.capacity,
           'status': 'scheduled',
           'instructor_name': event.template.instructorName,
+          if (instId != null) 'institution_id': instId,
         });
       }
 
