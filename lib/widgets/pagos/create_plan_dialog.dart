@@ -35,6 +35,11 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
     });
 
     try {
+      final db = Supabase.instance.client;
+      final user = db.auth.currentUser;
+      final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+      final instId = profile?['institution_id'];
+
       final payload = {
         'name': _name,
         'description': _description,
@@ -42,9 +47,10 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
         'currency': _currency,
         'max_reservations_per_week': _maxReservationsPerWeek,
         'is_active': _isActive,
+        if (instId != null) 'institution_id': instId,
       };
 
-      await Supabase.instance.client.from('plans').insert(payload);
+      await db.from('plans').insert(payload);
 
       if (mounted) {
         Navigator.of(context).pop();

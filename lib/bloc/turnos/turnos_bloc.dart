@@ -221,13 +221,18 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     try {
       final db = Supabase.instance.client;
+      final user = db.auth.currentUser;
+      final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+      final instId = profile?['institution_id'];
+
       final inserts = <Map<String, dynamic>>[];
       
       // 1. Inscripción actual focalizada
       inserts.add({
         'user_id': event.userId,
         'session_id': event.session.id,
-        'status': 'confirmed' 
+        'status': 'confirmed',
+        if (instId != null) 'institution_id': instId,
       });
 
       // 2. Si marcamos recurrencia, buscamos las 3 clases *futuras* con el mismo template
@@ -247,7 +252,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           inserts.add({
             'user_id': event.userId,
             'session_id': row['id'],
-            'status': 'confirmed'
+            'status': 'confirmed',
+            if (instId != null) 'institution_id': instId,
           });
         }
       }

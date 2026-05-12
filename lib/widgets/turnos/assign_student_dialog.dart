@@ -40,6 +40,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
       final response = await Supabase.instance.client
           .from('profiles')
           .select('id, full_name, avatar_url')
+          .eq('role', 'client')
           .order('full_name', ascending: true);
 
       // Filtrar los que ya están anotados

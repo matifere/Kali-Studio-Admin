@@ -84,15 +84,21 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
       final startDate = DateTime.now();
       final endDate = startDate.add(const Duration(days: 30));
 
+      final db = Supabase.instance.client;
+      final user = db.auth.currentUser;
+      final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+      final instId = profile?['institution_id'];
+
       final payload = {
         'user_id': _selectedStudentId,
         'plan_id': _selectedPlanId,
         'status': 'pending', // El estado inicial siempre debe ser pendiente
         'start_date': startDate.toIso8601String().split('T')[0], // Fecha actual
         'end_date': endDate.toIso8601String().split('T')[0], // Se agrega fecha de fin (30 días por defecto)
+        if (instId != null) 'institution_id': instId,
       };
 
-      await Supabase.instance.client.from('subscriptions').insert(payload);
+      await db.from('subscriptions').insert(payload);
 
       if (mounted) {
         Navigator.of(context).pop(true);
