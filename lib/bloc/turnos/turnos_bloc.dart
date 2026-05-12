@@ -239,22 +239,61 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       if (event.enrollInFuture && event.session.templateId != null) {
         final startIso = DateFormat('yyyy-MM-dd').format(event.session.date.add(const Duration(days: 1))); // From tomorrow onwards
         
-        final futureSessionsResponse = await db.from('class_sessions')
-          .select('id')
-          .eq('template_id', event.session.templateId!)
-          .gte('date', startIso)
-          .order('date', ascending: true)
-          .limit(3);
+        // Fetch max reservations limit for the user
+        final subRes = await db.from('subscriptions')
+            .select('plans(max_reservations_per_week)')
+            .eq('user_id', event.userId)
+            .inFilter('status', ['active', 'pending'])
+            .maybeSingle();
 
-        final futureSessions = futureSessionsResponse as List<dynamic>;
-        for (final row in futureSessions) {
-          // Omito validación estricta de cupo en inscripciones masivas para hacerlo atómico y resolverlo a nivel logistico si choca.
-          inserts.add({
-            'user_id': event.userId,
-            'session_id': row['id'],
-            'status': 'confirmed',
-            if (instId != null) 'institution_id': instId,
-          });
+        int maxRes = 0;
+        if (subRes != null && subRes['plans'] != null && subRes['plans']['max_reservations_per_week'] != null) {
+          maxRes = subRes['plans']['max_reservations_per_week'] as int;
+        }
+
+        // Only project if maxRes > 0
+        if (maxRes > 0) {
+          final futureSessionsResponse = await db.from('class_sessions')
+            .select('id, date')
+            .eq('template_id', event.session.templateId!)
+            .gte('date', startIso)
+            .order('date', ascending: true)
+            .limit(3);
+
+          final futureSessions = futureSessionsResponse as List<dynamic>;
+
+          if (futureSessions.isNotEmpty) {
+            // Fetch user's existing future reservations to count per week
+            final futureRes = await db.from('reservations')
+                .select('class_sessions!inner(date)')
+                .eq('user_id', event.userId)
+                .gte('class_sessions.date', startIso);
+
+            DateTime startOfWeek(DateTime d) => DateTime(d.year, d.month, d.day).subtract(Duration(days: d.weekday - 1));
+
+            final Map<DateTime, int> resCount = {};
+            for (var r in futureRes as List<dynamic>) {
+              final d = DateTime.parse(r['class_sessions']['date']);
+              final sow = startOfWeek(d);
+              resCount[sow] = (resCount[sow] ?? 0) + 1;
+            }
+
+            for (final row in futureSessions) {
+              final sessionDate = DateTime.parse(row['date']);
+              final sow = startOfWeek(sessionDate);
+              final currCount = resCount[sow] ?? 0;
+
+              if (currCount < maxRes) {
+                inserts.add({
+                  'user_id': event.userId,
+                  'session_id': row['id'],
+                  'status': 'confirmed',
+                  if (instId != null) 'institution_id': instId,
+                });
+                resCount[sow] = currCount + 1;
+              }
+            }
+          }
         }
       }
 

@@ -37,18 +37,78 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
 
   Future<void> _loadProfiles() async {
     try {
-      final response = await Supabase.instance.client
+      final client = Supabase.instance.client;
+      final sessionDate = widget.session.date;
+      final weekStart = sessionDate.subtract(Duration(days: sessionDate.weekday - 1));
+      final weekEnd = weekStart.add(const Duration(days: 6));
+      final startIso = weekStart.toIso8601String().split('T')[0];
+      final endIso = weekEnd.toIso8601String().split('T')[0];
+
+      // 1. Fetch profiles
+      final profilesRes = await client
           .from('profiles')
           .select('id, full_name, avatar_url')
           .eq('role', 'client')
           .order('full_name', ascending: true);
 
-      // Filtrar los que ya están anotados
+      // 2. Fetch active/pending subscriptions
+      final subsRes = await client
+          .from('subscriptions')
+          .select('user_id, status, plans(max_reservations_per_week)')
+          .inFilter('status', ['active', 'pending']);
+
+      // Map subscriptions by user_id
+      final Map<String, dynamic> userSubs = {};
+      for (var sub in (subsRes as List<dynamic>)) {
+        userSubs[sub['user_id']] = sub;
+      }
+
+      // 3. Fetch reservations for the week
+      final resRes = await client
+          .from('reservations')
+          .select('user_id, class_sessions!inner(date)')
+          .gte('class_sessions.date', startIso)
+          .lte('class_sessions.date', endIso);
+
+      // Count reservations per user
+      final Map<String, int> userReservations = {};
+      for (var r in (resRes as List<dynamic>)) {
+        final uid = r['user_id'] as String;
+        userReservations[uid] = (userReservations[uid] ?? 0) + 1;
+      }
+
+      // 4. Filtrar los que ya están anotados en esta sesión
       final enrolledIds = widget.session.enrolledStudents.map((e) => e.userId).toSet();
 
-      final available = (response as List<dynamic>)
-          .map((e) => e as Map<String, dynamic>)
+      final available = (profilesRes as List<dynamic>)
+          .map((e) => Map<String, dynamic>.from(e as Map<String, dynamic>))
           .where((p) => !enrolledIds.contains(p['id']))
+          .map((p) {
+            final uid = p['id'] as String;
+            final sub = userSubs[uid];
+            String? disabledReason;
+            int maxRes = 0;
+            int currRes = userReservations[uid] ?? 0;
+
+            if (sub == null) {
+              disabledReason = 'Sin plan activo';
+            } else {
+              final plansData = sub['plans'];
+              // plansData can be null if not populated or no plan linked
+              maxRes = (plansData != null && plansData['max_reservations_per_week'] != null) 
+                  ? plansData['max_reservations_per_week'] as int 
+                  : 0;
+
+              if (currRes >= maxRes) {
+                disabledReason = 'Límite semanal alcanzado';
+              }
+            }
+
+            p['disabledReason'] = disabledReason;
+            p['currRes'] = currRes;
+            p['maxRes'] = maxRes;
+            return p;
+          })
           .toList();
 
       if (mounted) {
@@ -166,6 +226,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                         itemBuilder: (context, index) {
                           final p = _filteredProfiles[index];
                           final name = p['full_name'] ?? 'Sin nombre';
+                          final disabledReason = p['disabledReason'] as String?;
+                          final currRes = p['currRes'] as int?;
+                          final maxRes = p['maxRes'] as int?;
+
                           return ListTile(
                             leading: CircleAvatar(
                               backgroundColor: KaliColors.clay,
@@ -174,10 +238,16 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                                 ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 12))
                                 : null,
                             ),
-                            title: Text(name, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+                            title: Text(name, style: KaliText.body(
+                              KaliColors.espresso.withValues(alpha: disabledReason != null ? 0.5 : 1.0), 
+                              weight: FontWeight.w600
+                            )),
+                            subtitle: disabledReason != null
+                                ? Text(disabledReason, style: TextStyle(color: Colors.red[700], fontSize: 12))
+                                : Text('Disponible ($currRes/$maxRes reservas)', style: const TextStyle(color: KaliColors.clay, fontSize: 12)),
                             trailing: TextButton(
-                              onPressed: () => _assign(p['id']),
-                              child: const Text('Inscribir'),
+                              onPressed: disabledReason != null ? null : () => _assign(p['id']),
+                              child: Text(disabledReason != null ? 'No elegible' : 'Inscribir'),
                             ),
                           );
                         },
