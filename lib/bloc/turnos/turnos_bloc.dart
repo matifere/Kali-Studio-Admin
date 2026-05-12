@@ -100,28 +100,45 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final instId = profile?['institution_id'];
 
       final insertData = <Map<String, dynamic>>[];
-      for (int i = 0; i < event.recurrenceWeeks; i++) {
-        final d = event.date.add(Duration(days: i * 7));
-        final dateIso = DateFormat('yyyy-MM-dd').format(d);
 
-        insertData.add({
-          'template_id': event.template.id,
-          'name': event.template.name,
-          'description': event.template.description,
-          'date': dateIso,
-          'start_time': event.template.startTime,
-          'end_time': event.template.endTime,
-          'capacity': event.template.capacity,
-          'status': 'scheduled',
-          'instructor_name': event.template.instructorName,
-          if (instId != null) 'institution_id': instId,
-        });
+      for (final template in event.templates) {
+        var baseDate = state.currentWeekStart.add(Duration(days: template.dayIndex));
+        final parts = template.startTime.split(':');
+        var startDateTime = DateTime(
+          baseDate.year, baseDate.month, baseDate.day, 
+          int.parse(parts[0]), int.parse(parts[1])
+        );
+
+        // Si la hora en la semana actual ya pasó, agendar desde la próxima semana
+        if (startDateTime.isBefore(DateTime.now())) {
+          baseDate = baseDate.add(const Duration(days: 7));
+        }
+
+        for (int i = 0; i < event.recurrenceWeeks; i++) {
+          final d = baseDate.add(Duration(days: i * 7));
+          final dateIso = DateFormat('yyyy-MM-dd').format(d);
+
+          insertData.add({
+            'template_id': template.id,
+            'name': template.name,
+            'description': template.description,
+            'date': dateIso,
+            'start_time': template.startTime,
+            'end_time': template.endTime,
+            'capacity': template.capacity,
+            'status': 'scheduled',
+            'instructor_name': template.instructorName,
+            if (instId != null) 'institution_id': instId,
+          });
+        }
       }
 
       await Supabase.instance.client.from('class_sessions').insert(insertData);
+      
+      final firstTemp = event.templates.first;
       _activityBloc?.add(ActivityLogged(ActivityEntry(
-        title: 'Turno creado',
-        subtitle: '${event.template.name} — ${DateFormat('dd/MM', 'es_ES').format(event.date)}${event.recurrenceWeeks > 1 ? ' (+${event.recurrenceWeeks - 1} recurrencias)' : ''}.',
+        title: 'Turnos creados en lote',
+        subtitle: '${firstTemp.name} agendado en ${event.templates.length} días para ${event.recurrenceWeeks} semanas.',
         category: ActivityCategory.turno,
         timestamp: DateTime.now(),
       )));

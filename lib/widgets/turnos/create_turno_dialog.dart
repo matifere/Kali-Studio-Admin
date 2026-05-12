@@ -16,12 +16,11 @@ class CreateTurnoDialog extends StatefulWidget {
 class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
   final _formKey = GlobalKey<FormState>();
   
-  List<ScheduleTemplate> _templates = [];
+  List<List<ScheduleTemplate>> _templateGroups = [];
   bool _isLoadingTemplates = true;
   String? _error;
 
-  ScheduleTemplate? _selectedTemplate;
-  DateTime? _selectedDate;
+  List<ScheduleTemplate>? _selectedTemplates;
   int _recurrenceWeeks = 1;
 
   @override
@@ -38,10 +37,19 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
           .eq('is_active', true);
 
       if (mounted) {
+        final allTemplates = response
+            .map<ScheduleTemplate>((data) => ScheduleTemplate.fromJson(data))
+            .toList();
+
+        // Agrupar plantillas idénticas (mismo nombre, hora inicio, hora fin e instructor)
+        final groupsMap = <String, List<ScheduleTemplate>>{};
+        for (var t in allTemplates) {
+          final key = '${t.name}_${t.startTime}_${t.endTime}_${t.instructorName ?? ""}';
+          groupsMap.putIfAbsent(key, () => []).add(t);
+        }
+
         setState(() {
-          _templates = response
-              .map<ScheduleTemplate>((data) => ScheduleTemplate.fromJson(data))
-              .toList();
+          _templateGroups = groupsMap.values.toList();
           _isLoadingTemplates = false;
         });
       }
@@ -56,78 +64,26 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
   }
 
   void _submit() {
-    if (_formKey.currentState!.validate() && _selectedTemplate != null && _selectedDate != null) {
-      // 1. Check if past
-      final parts = _selectedTemplate!.startTime.split(':');
-      var targetDate = _selectedDate!;
-      var startDateTime = DateTime(
-        targetDate.year, targetDate.month, targetDate.day, 
-        int.parse(parts[0]), int.parse(parts[1])
-      );
-
-      if (startDateTime.isBefore(DateTime.now())) {
-        // Movemos a la próxima semana automáticamente
-        targetDate = targetDate.add(const Duration(days: 7));
-        startDateTime = startDateTime.add(const Duration(days: 7));
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('El horario ya pasó. Se ha agendado para la próxima semana automáticamente.')),
-        );
-      }
-      
-      _selectedDate = targetDate;
-
-      // 2. Check basic overlapping logic locally (only checks first week conceptually since subsequent occur next weeks)
-      final sessions = context.read<TurnosBloc>().state.sessions;
-      final newStartMins = int.parse(parts[0]) * 60 + int.parse(parts[1]);
-      final endParts = _selectedTemplate!.endTime.split(':');
-      final newEndMins = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
-
-      final hasOverlap = sessions.any((session) {
-        if (session.date.year != _selectedDate!.year || 
-            session.date.month != _selectedDate!.month || 
-            session.date.day != _selectedDate!.day) {
-          return false;
-        }
-        
-        final existingStartParts = session.startTime.split(':');
-        final existingEndParts = session.endTime.split(':');
-        final existingStartMins = int.parse(existingStartParts[0]) * 60 + int.parse(existingStartParts[1]);
-        final existingEndMins = int.parse(existingEndParts[0]) * 60 + int.parse(existingEndParts[1]);
-        
-        return newStartMins < existingEndMins && newEndMins > existingStartMins;
-      });
-
-      if (hasOverlap) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ya existe un turno en este mismo horario esta semana. Revísalo antes de crear múltiples.')),
-        );
-        return;
-      }
-
-      // Dispatch TurnoCreated
+    if (_formKey.currentState!.validate() && _selectedTemplates != null && _selectedTemplates!.isNotEmpty) {
+      // Dispatch TurnoCreated con la lista de plantillas agrupadas
       context.read<TurnosBloc>().add(TurnoCreated(
-        template: _selectedTemplate!, 
-        date: _selectedDate!,
+        templates: _selectedTemplates!, 
         recurrenceWeeks: _recurrenceWeeks,
       ));
       
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecciona un template válido')),
+        const SnackBar(content: Text('Por favor, selecciona una plantilla válida')),
       );
     }
   }
 
-  void _onTemplateSelected(ScheduleTemplate? template) {
-    if (template == null) return;
-    final currentWeekStart = context.read<TurnosBloc>().state.currentWeekStart;
-    final targetDate = currentWeekStart.add(Duration(days: template.dayIndex));
+  void _onTemplateGroupSelected(List<ScheduleTemplate>? templates) {
+    if (templates == null || templates.isEmpty) return;
     
     setState(() {
-      _selectedTemplate = template;
-      _selectedDate = targetDate;
+      _selectedTemplates = templates;
     });
   }
 
@@ -167,10 +123,10 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                     ),
                   
                   // Template Dropdown
-                  Text('Plantilla de Clase', style: KaliText.label(KaliColors.espresso)),
+                  Text('Plantilla de Clase (Días)', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<ScheduleTemplate>(
-                    value: _selectedTemplate,
+                  DropdownButtonFormField<List<ScheduleTemplate>>(
+                    value: _selectedTemplates,
                     isExpanded: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -180,20 +136,22 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     hint: const Text('Seleccionar plantilla'),
-                    items: _templates.map((t) {
+                    items: _templateGroups.map((group) {
+                      final first = group.first;
+                      final daysStr = group.map((t) => t.dayNameSpanish.substring(0, 2)).join(', ');
                       return DropdownMenuItem(
-                        value: t,
-                        child: Text('${t.name} (${t.startTime.substring(0,5)} - ${t.endTime.substring(0,5)}) - ${t.dayNameSpanish}'),
+                        value: group,
+                        child: Text('${first.name} (${first.startTime.substring(0,5)} - ${first.endTime.substring(0,5)}) - [$daysStr]'),
                       );
                     }).toList(),
-                    onChanged: _onTemplateSelected,
-                    validator: (val) => val == null ? 'Requerido' : null,
+                    onChanged: _onTemplateGroupSelected,
+                    validator: (val) => val == null || val.isEmpty ? 'Requerido' : null,
                   ),
                   
                   const SizedBox(height: 20),
 
-                  // Auto-calculated Date
-                  Text('Fecha Autocalculada', style: KaliText.label(KaliColors.espresso)),
+                  // Auto-calculated Date info
+                  Text('Días Seleccionados', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
@@ -207,13 +165,15 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                       children: [
                         Icon(Icons.auto_awesome, size: 18, color: KaliColors.espresso.withValues(alpha: 0.6)),
                         const SizedBox(width: 10),
-                        Text(
-                          _selectedDate == null 
-                            ? 'Esperando selección de plantilla...' 
-                            : DateFormat("EEEE dd 'de' MMMM", "es_ES").format(_selectedDate!),
-                          style: KaliText.body(
-                            KaliColors.espresso,
-                            weight: _selectedDate == null ? FontWeight.w400 : FontWeight.w600,
+                        Expanded(
+                          child: Text(
+                            _selectedTemplates == null 
+                              ? 'Esperando selección de plantilla...' 
+                              : 'Se agendarán clases los días: ${_selectedTemplates!.map((t) => t.dayNameSpanish).join(', ')}.',
+                            style: KaliText.body(
+                              KaliColors.espresso,
+                              weight: _selectedTemplates == null ? FontWeight.w400 : FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -235,9 +195,9 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 1, child: Text('Solo esta semana (1 clase)')),
-                      DropdownMenuItem(value: 4, child: Text('Mismo día / Todo el mes (4 clases)')),
-                      DropdownMenuItem(value: 8, child: Text('Mismo día / Dos meses (8 clases)')),
+                      DropdownMenuItem(value: 1, child: Text('Solo esta semana (1 repetición)')),
+                      DropdownMenuItem(value: 4, child: Text('Todo el mes (4 repeticiones)')),
+                      DropdownMenuItem(value: 8, child: Text('Dos meses (8 repeticiones)')),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _recurrenceWeeks = val);
@@ -262,7 +222,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text('Crear Turno', style: KaliText.body(Colors.white, weight: FontWeight.w600)),
+                        child: Text('Crear Turnos', style: KaliText.body(Colors.white, weight: FontWeight.w600)),
                       ),
                     ],
                   ),

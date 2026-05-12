@@ -14,15 +14,13 @@ class TurnosWeekChanged extends TurnosEvent {
   TurnosWeekChanged(this.newWeekStart);
 }
 
-/// El usuario creó un nuevo turno.
+/// El usuario creó nuevos turnos a partir de plantillas agrupadas.
 class TurnoCreated extends TurnosEvent {
-  final ScheduleTemplate template;
-  final DateTime date;
+  final List<ScheduleTemplate> templates;
   final int recurrenceWeeks;
 
   TurnoCreated({
-    required this.template, 
-    required this.date,
+    required this.templates, 
     this.recurrenceWeeks = 1,
   });
 }
