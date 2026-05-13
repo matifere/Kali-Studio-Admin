@@ -16,6 +16,17 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
   bool _isLoading = true;
   String? _error;
 
+  String _searchQuery = '';
+  String? _selectedDay;
+
+  List<ScheduleTemplate> get _filteredTemplates {
+    return _templates.where((t) {
+      final matchesSearch = t.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesDay = _selectedDay == null || t.dayOfWeek.toLowerCase() == _selectedDay;
+      return matchesSearch && matchesDay;
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -99,7 +110,7 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 600,
+        width: 700,
         height: 600,
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -125,16 +136,57 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
             ),
             const SizedBox(height: 24),
             
-            // Botón de crear nueva
-            ElevatedButton.icon(
-              onPressed: () => _openCreateOrEdit(),
-              icon: const Icon(Icons.add, size: 20, color: Colors.white),
-              label: Text('Nueva Plantilla', style: KaliText.body(Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: KaliColors.espresso,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+            // Botón de crear nueva y filtros
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _openCreateOrEdit(),
+                  icon: const Icon(Icons.add, size: 20, color: Colors.white),
+                  label: Text('Nueva Plantilla', style: KaliText.body(Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: KaliColors.espresso,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar plantilla...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      isDense: true,
+                    ),
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButton<String?>(
+                    value: _selectedDay,
+                    hint: const Text('Día'),
+                    underline: const SizedBox(),
+                    onChanged: (val) => setState(() => _selectedDay = val),
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text('Todos los días')),
+                      DropdownMenuItem(value: 'monday', child: Text('Lunes')),
+                      DropdownMenuItem(value: 'tuesday', child: Text('Martes')),
+                      DropdownMenuItem(value: 'wednesday', child: Text('Miércoles')),
+                      DropdownMenuItem(value: 'thursday', child: Text('Jueves')),
+                      DropdownMenuItem(value: 'friday', child: Text('Viernes')),
+                      DropdownMenuItem(value: 'saturday', child: Text('Sábado')),
+                      DropdownMenuItem(value: 'sunday', child: Text('Domingo')),
+                    ],
+                  ),
+                ),
+              ],
             ),
             
             const SizedBox(height: 24),
@@ -144,13 +196,13 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
                   ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
-                  : _templates.isEmpty
-                    ? Center(child: Text('No hay plantillas activas.', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
+                  : _filteredTemplates.isEmpty
+                    ? Center(child: Text('No hay plantillas que coincidan con la búsqueda.', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
                     : ListView.separated(
-                        itemCount: _templates.length,
+                        itemCount: _filteredTemplates.length,
                         separatorBuilder: (_, __) => Divider(color: KaliColors.espresso.withValues(alpha: 0.1)),
                         itemBuilder: (context, index) {
-                          final t = _templates[index];
+                          final t = _filteredTemplates[index];
                           return ListTile(
                             title: Text(t.name, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
                             subtitle: Text('${t.dayNameSpanish} • ${t.startTime.substring(0,5)} - ${t.endTime.substring(0,5)} • Cap: ${t.capacity}'),

@@ -12,7 +12,6 @@ import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
-import 'package:kali_studio/screens/dashboard_screen.dart';
 import 'package:kali_studio/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -112,8 +111,7 @@ class _KaliAppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn =
-        Supabase.instance.client.auth.currentSession != null;
+    final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
 
     return MaterialApp(
       title: 'Kali Studio',
