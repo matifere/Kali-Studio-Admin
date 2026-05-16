@@ -14,6 +14,7 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoading = true;
   bool _hasInstitution = false;
+  String _userRole = 'admin';
 
   @override
   void initState() {
@@ -29,13 +30,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
       final data = await Supabase.instance.client
           .from('profiles')
-          .select('institution_id')
+          .select('institution_id, role')
           .eq('id', user.id)
           .maybeSingle();
       
       if (mounted) {
         setState(() {
           _hasInstitution = data != null && data['institution_id'] != null;
+          _userRole = (data?['role'] as String? ?? 'admin').toLowerCase();
           _isLoading = false;
         });
       }
@@ -60,7 +62,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
 
     if (_hasInstitution) {
-      return const DashboardScreen();
+      return DashboardScreen(userRole: _userRole);
     } else {
       return const InstitutionSelectionScreen();
     }

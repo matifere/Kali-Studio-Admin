@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
 class DashboardSidebar extends StatelessWidget {
   final String currentPage;
+  final String userRole;
   final void Function(String page) onNavigate;
 
   const DashboardSidebar({
     super.key,
     required this.currentPage,
     required this.onNavigate,
+    this.userRole = 'admin',
   });
 
   @override
   Widget build(BuildContext context) {
+    final isSudo = userRole == 'sudo';
+
     return Container(
       width: 240,
       color: KaliColors.sand,
@@ -27,7 +30,7 @@ class DashboardSidebar extends StatelessWidget {
           _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
           _buildMenuItem(Icons.people_outline, 'Alumnos'),
           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
-          _buildMenuItem(Icons.payment_outlined, 'Pagos'),
+          if (isSudo) _buildMenuItem(Icons.payment_outlined, 'Pagos'),
           const Spacer(),
           _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
         ],

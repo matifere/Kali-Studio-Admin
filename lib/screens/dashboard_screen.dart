@@ -14,16 +14,22 @@ import 'package:kali_studio/screens/pagos_screen.dart';
 import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final String userRole;
+
+  const DashboardScreen({super.key, this.userRole = 'admin'});
 
   Widget _buildCurrentPage(String page) {
+    final isSudo = userRole == 'sudo';
+
     switch (page) {
       case 'Alumnos':
         return const AlumnosScreen();
       case 'Turnos':
         return const TurnosScreen();
       case 'Pagos':
-        return const PagosScreen();
+        // Solo los usuarios con role 'sudo' pueden acceder a Pagos
+        if (isSudo) return const PagosScreen();
+        return const _DashboardHome();
       default:
         return const _DashboardHome();
     }
@@ -41,6 +47,7 @@ class DashboardScreen extends StatelessWidget {
               ? Drawer(
                   child: DashboardSidebar(
                     currentPage: navState.currentPage,
+                    userRole: userRole,
                     onNavigate: (page) {
                       context.read<NavigationBloc>().add(
                             NavigationPageChanged(page),
@@ -55,6 +62,7 @@ class DashboardScreen extends StatelessWidget {
               if (!isMobile)
                 DashboardSidebar(
                   currentPage: navState.currentPage,
+                  userRole: userRole,
                   onNavigate: (page) {
                     context.read<NavigationBloc>().add(
                           NavigationPageChanged(page),
