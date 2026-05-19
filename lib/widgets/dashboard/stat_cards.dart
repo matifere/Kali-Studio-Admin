@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 
 class DashboardStatCards extends StatelessWidget {
   const DashboardStatCards({super.key});
@@ -21,17 +22,24 @@ class DashboardStatCards extends StatelessWidget {
               return _buildSkeletonRow(isNarrow: isNarrow);
             }
 
-            final widgets = [
-              _buildStatCard(
-                title: 'INGRESOS TOTALES',
-                value:
-                    '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
-                icon: Icons.payments_outlined,
-                bottomWidget: Text(
-                  'Ingresos del mes actual',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+            final widgets = <Widget>[];
+
+            if (!ProfileCache.isAdmin) {
+              widgets.add(
+                _buildStatCard(
+                  title: 'INGRESOS TOTALES',
+                  value:
+                      '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
+                  icon: Icons.payments_outlined,
+                  bottomWidget: Text(
+                    'Ingresos del mes actual',
+                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                  ),
                 ),
-              ),
+              );
+            }
+
+            widgets.add(
               _buildStatCard(
                 title: 'TURNOS ACTIVOS HOY',
                 value: state.turnosActivosHoy.toString(),
@@ -43,6 +51,9 @@ class DashboardStatCards extends StatelessWidget {
                   style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                 ),
               ),
+            );
+
+            widgets.add(
               _buildDarkStatCard(
                 title: 'ALUMNOS PRESENTES',
                 value: state.alumnosPresentesHoy.toString(),
@@ -50,27 +61,25 @@ class DashboardStatCards extends StatelessWidget {
                 capacityText: '$percentage% de capacidad diaria alcanzada',
                 progress: state.capacidadPorcentaje,
               ),
-            ];
+            );
 
             if (isNarrow) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  widgets[0],
-                  const SizedBox(height: 24),
-                  widgets[1],
-                  const SizedBox(height: 24),
-                  widgets[2],
+                  for (int i = 0; i < widgets.length; i++) ...[
+                    widgets[i],
+                    if (i < widgets.length - 1) const SizedBox(height: 24),
+                  ]
                 ],
               );
             } else {
               return Row(
                 children: [
-                  Expanded(child: widgets[0]),
-                  const SizedBox(width: 24),
-                  Expanded(child: widgets[1]),
-                  const SizedBox(width: 24),
-                  Expanded(child: widgets[2]),
+                  for (int i = 0; i < widgets.length; i++) ...[
+                    Expanded(child: widgets[i]),
+                    if (i < widgets.length - 1) const SizedBox(width: 24),
+                  ]
                 ],
               );
             }
@@ -81,26 +90,26 @@ class DashboardStatCards extends StatelessWidget {
   }
 
   Widget _buildSkeletonRow({required bool isNarrow}) {
-    final cards = List.generate(3, (_) => _buildSkeletonCard());
+    final cardsCount = ProfileCache.isAdmin ? 2 : 3;
+    final cards = List.generate(cardsCount, (_) => _buildSkeletonCard());
+    
     if (isNarrow) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          cards[0],
-          const SizedBox(height: 24),
-          cards[1],
-          const SizedBox(height: 24),
-          cards[2],
+          for (int i = 0; i < cards.length; i++) ...[
+            cards[i],
+            if (i < cards.length - 1) const SizedBox(height: 24),
+          ]
         ],
       );
     }
     return Row(
       children: [
-        Expanded(child: cards[0]),
-        const SizedBox(width: 24),
-        Expanded(child: cards[1]),
-        const SizedBox(width: 24),
-        Expanded(child: cards[2]),
+        for (int i = 0; i < cards.length; i++) ...[
+          Expanded(child: cards[i]),
+          if (i < cards.length - 1) const SizedBox(width: 24),
+        ]
       ],
     );
   }
