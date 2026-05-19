@@ -49,8 +49,11 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
     );
     if (picked != null) {
       setState(() {
-        if (isStart) _startTime = picked;
-        else _endTime = picked;
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
       });
     }
   }
@@ -103,7 +106,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 450,
+        constraints: const BoxConstraints(maxWidth: 450),
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Form(

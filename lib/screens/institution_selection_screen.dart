@@ -122,7 +122,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Container(
-              width: 500,
+              constraints: const BoxConstraints(maxWidth: 500),
               decoration: BoxDecoration(
                 color: KaliColors.warmWhite,
                 borderRadius: BorderRadius.circular(16),
@@ -166,7 +166,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                               const SizedBox(height: 24),
                               KaliTextField(
                                 label: 'NOMBRE DE LA INSTITUCIÓN',
-                                hint: 'Ej. Kali Studio',
+                                hint: 'Ej. Chimpance Admin',
                                 controller: _createNameCtrl,
                               ),
                               const Spacer(),

@@ -6,6 +6,7 @@ class DashboardState {
   final int capacidadTotalHoy;
   final double ingresosMensuales;
   final bool isLoading;
+  final bool hasLoaded;
   final String? error;
 
   DashboardState({
@@ -14,6 +15,7 @@ class DashboardState {
     this.capacidadTotalHoy = 0,
     this.ingresosMensuales = 0.0,
     this.isLoading = false,
+    this.hasLoaded = false,
     this.error,
   });
 
@@ -23,6 +25,7 @@ class DashboardState {
     int? capacidadTotalHoy,
     double? ingresosMensuales,
     bool? isLoading,
+    bool? hasLoaded,
     String? error,
   }) {
     return DashboardState(
@@ -31,6 +34,7 @@ class DashboardState {
       capacidadTotalHoy: capacidadTotalHoy ?? this.capacidadTotalHoy,
       ingresosMensuales: ingresosMensuales ?? this.ingresosMensuales,
       isLoading: isLoading ?? this.isLoading,
+      hasLoaded: hasLoaded ?? this.hasLoaded,
       error: error,
     );
   }

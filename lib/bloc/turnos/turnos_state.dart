@@ -14,7 +14,7 @@ class TurnosState {
   final String? selectedInstructor;
   final String? selectedRoom;
 
-  const TurnosState({
+  TurnosState({
     this.sessions = const [],
     required this.currentWeekStart,
     this.isLoading = true,
@@ -26,44 +26,41 @@ class TurnosState {
 
   bool get hasSelection => selectedTurno != null;
 
-  List<String> get availableInstructors {
-    final instructors = sessions
-        .map((s) => s.instructorName)
-        .where((name) => name != null && name.isNotEmpty)
-        .cast<String>()
-        .toSet()
-        .toList();
-    instructors.sort();
-    return instructors;
-  }
+  // Computados una sola vez por instancia de estado (late final = lazy + cached).
+  late final List<String> availableInstructors = () {
+    final set = <String>{};
+    for (final s in sessions) {
+      final name = s.instructorName;
+      if (name != null && name.isNotEmpty) set.add(name);
+    }
+    return set.toList()..sort();
+  }();
 
-  List<String> get availableRooms {
-    final rooms = sessions
-        .map((s) => s.name)
-        .where((name) => name.isNotEmpty)
-        .toSet()
-        .toList();
-    rooms.sort();
-    return rooms;
-  }
+  late final List<String> availableRooms = () {
+    final set = <String>{};
+    for (final s in sessions) {
+      if (s.name.isNotEmpty) set.add(s.name);
+    }
+    return set.toList()..sort();
+  }();
 
-  List<ClassSession> get filteredSessions {
+  late final List<ClassSession> filteredSessions = () {
+    final noInstructor = selectedInstructor == null || selectedInstructor!.isEmpty;
+    final noRoom = selectedRoom == null || selectedRoom!.isEmpty;
+    if (noInstructor && noRoom) return sessions;
     return sessions.where((s) {
-      if (selectedInstructor != null && selectedInstructor!.isNotEmpty) {
-        if (s.instructorName != selectedInstructor) return false;
-      }
-      if (selectedRoom != null && selectedRoom!.isNotEmpty) {
-        if (s.name != selectedRoom) return false;
-      }
+      if (!noInstructor && s.instructorName != selectedInstructor) return false;
+      if (!noRoom && s.name != selectedRoom) return false;
       return true;
     }).toList();
-  }
+  }();
 
   TurnosState copyWith({
     List<ClassSession>? sessions,
     DateTime? currentWeekStart,
     bool? isLoading,
     String? error,
+    bool clearError = false,
     ClassSession? selectedTurno,
     bool clearSelection = false,
     String? Function()? selectedInstructor,
@@ -73,11 +70,10 @@ class TurnosState {
       sessions: sessions ?? this.sessions,
       currentWeekStart: currentWeekStart ?? this.currentWeekStart,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
       selectedTurno: clearSelection ? null : (selectedTurno ?? this.selectedTurno),
       selectedInstructor: selectedInstructor != null ? selectedInstructor() : this.selectedInstructor,
       selectedRoom: selectedRoom != null ? selectedRoom() : this.selectedRoom,
     );
   }
 }
-

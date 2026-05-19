@@ -92,18 +92,31 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
       final payload = {
         'user_id': _selectedStudentId,
         'plan_id': _selectedPlanId,
-        'status': 'pending', // El estado inicial siempre debe ser pendiente
-        'start_date': startDate.toIso8601String().split('T')[0], // Fecha actual
-        'end_date': endDate.toIso8601String().split('T')[0], // Se agrega fecha de fin (30 días por defecto)
+        'status': 'active',
+        'start_date': startDate.toIso8601String().split('T')[0],
+        'end_date': endDate.toIso8601String().split('T')[0],
         if (instId != null) 'institution_id': instId,
       };
 
-      await db.from('subscriptions').insert(payload);
+      final subRes = await db
+          .from('subscriptions')
+          .insert(payload)
+          .select('id')
+          .single();
+
+      final subscriptionId = subRes['id'] as String;
+      final selectedPlan = _plans.firstWhere((p) => p['id'] == _selectedPlanId);
+      await db.from('payments').insert({
+        'user_id': _selectedStudentId,
+        'subscription_id': subscriptionId,
+        'amount': selectedPlan['price'],
+        'currency': selectedPlan['currency'] ?? 'ARS',
+      });
 
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Plan asignado exitosamente (Pendiente)')),
+          const SnackBar(content: Text('Plan asignado exitosamente')),
         );
       }
     } catch (e) {
@@ -120,7 +133,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 450,
+        constraints: const BoxConstraints(maxWidth: 450),
         padding: const EdgeInsets.all(24),
         child: _isLoading
             ? const SizedBox(
@@ -140,7 +153,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Asigna un plan a un estudiante. El estado inicial será "pendiente".',
+                        'Asigna un plan a un estudiante. Se activa inmediatamente por 30 días.',
                         style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                       ),
                       const SizedBox(height: 24),
@@ -154,7 +167,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                       Text('Alumno', style: KaliText.label(KaliColors.espresso)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedStudentId,
+                        initialValue: _selectedStudentId,
                         decoration: _inputDecoration('Selecciona un alumno'),
                         items: _students.map((s) {
                           return DropdownMenuItem<String>(
@@ -176,7 +189,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                       Text('Plan', style: KaliText.label(KaliColors.espresso)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedPlanId,
+                        initialValue: _selectedPlanId,
                         decoration: _inputDecoration('Selecciona un plan'),
                         items: _plans.map((p) {
                           final name = p['name'] ?? 'Sin nombre';

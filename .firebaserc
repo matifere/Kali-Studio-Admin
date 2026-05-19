@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "chimpance-admin"
+  },
+  "targets": {
+    "chimpance-admin": {
+      "hosting": {
+        "chimpance-admin": [
+          "chimpance-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

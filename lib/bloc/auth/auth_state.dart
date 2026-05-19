@@ -11,6 +11,9 @@ class AuthLoading extends AuthState {}
 /// Autenticación exitosa.
 class AuthSuccess extends AuthState {}
 
+/// Registro exitoso pero cuenta pendiente de aprobación.
+class AuthPending extends AuthState {}
+
 /// El perfil del usuario fue actualizado con éxito.
 class AuthProfileUpdated extends AuthState {}
 

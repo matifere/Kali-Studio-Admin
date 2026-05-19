@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kali_studio/models/schedule_template.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,10 +21,12 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
 
   String _name = '';
   String? _instructor;
+  List<String> _instructorNames = [];
+  bool _loadingInstructors = true;
   int _capacity = 6;
   Set<String> _selectedDays = {'monday'};
-  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
+  final TextEditingController _startTimeCtrl = TextEditingController(text: '09:00');
+  final TextEditingController _endTimeCtrl = TextEditingController(text: '10:00');
   String? _description;
 
   final List<String> _daysOfWeek = [
@@ -40,12 +43,41 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
       _instructor = t.instructorName;
       _capacity = t.capacity;
       _selectedDays = {t.dayOfWeek.toLowerCase()};
-      
-      final startParts = t.startTime.split(':');
-      _startTime = TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1]));
-      
-      final endParts = t.endTime.split(':');
-      _endTime = TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]));
+      _startTimeCtrl.text = t.startTime.substring(0, 5);
+      _endTimeCtrl.text = t.endTime.substring(0, 5);
+    }
+    _loadInstructors();
+  }
+
+  @override
+  void dispose() {
+    _startTimeCtrl.dispose();
+    _endTimeCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInstructors() async {
+    try {
+      final res = await Supabase.instance.client
+          .from('profiles')
+          .select('full_name')
+          .eq('role', 'admin')
+          .order('full_name', ascending: true);
+
+      final names = (res as List)
+          .map((p) => p['full_name'] as String?)
+          .whereType<String>()
+          .where((n) => n.isNotEmpty)
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _instructorNames = names;
+          _loadingInstructors = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loadingInstructors = false);
     }
   }
 
@@ -64,27 +96,26 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
     }
   }
 
-  Future<void> _pickTime(bool isStart) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _startTime : _endTime,
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStart) _startTime = picked;
-        else _endTime = picked;
-      });
-    }
-  }
-
-  String _formatTime(TimeOfDay time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  bool _isValidTime(String value) {
+    final parts = value.split(':');
+    if (parts.length != 2) return false;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    return h != null && m != null && h >= 0 && h < 24 && m >= 0 && m < 60;
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedDays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecciona al menos un día')));
+      return;
+    }
+    if (!_isValidTime(_startTimeCtrl.text)) {
+      setState(() => _error = 'Hora de inicio inválida. Usá el formato HH:MM');
+      return;
+    }
+    if (!_isValidTime(_endTimeCtrl.text)) {
+      setState(() => _error = 'Hora de fin inválida. Usá el formato HH:MM');
       return;
     }
     _formKey.currentState!.save();
@@ -103,8 +134,8 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
         await Supabase.instance.client.from('schedule_templates').update({
           'name': _name,
           'description': _description,
-          'start_time': _formatTime(_startTime),
-          'end_time': _formatTime(_endTime),
+          'start_time': _startTimeCtrl.text,
+          'end_time': _endTimeCtrl.text,
           'capacity': _capacity,
           'instructor_name': _instructor,
         }).eq('id', widget.templateToEdit!.id);
@@ -112,9 +143,9 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
         final payload = _selectedDays.map((day) => {
           'name': _name,
           'description': _description,
-          'day_of_week': day, 
-          'start_time': _formatTime(_startTime),
-          'end_time': _formatTime(_endTime),
+          'day_of_week': day,
+          'start_time': _startTimeCtrl.text,
+          'end_time': _endTimeCtrl.text,
           'capacity': _capacity,
           'instructor_name': _instructor,
           'is_active': true,
@@ -183,11 +214,23 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
                 // Instructor
                 Text('Instructor', style: KaliText.label(KaliColors.espresso)),
                 const SizedBox(height: 8),
-                TextFormField(
-                  initialValue: _instructor,
-                  decoration: _inputDecoration('Ej. Micaela'),
-                  onSaved: (v) => _instructor = v?.isEmpty == true ? null : v,
-                ),
+                _loadingInstructors
+                    ? const SizedBox(
+                        height: 52,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : DropdownButtonFormField<String>(
+                        initialValue: _instructorNames.contains(_instructor) ? _instructor : null,
+                        decoration: _inputDecoration('Selecciona un instructor'),
+                        items: _instructorNames
+                            .map((name) => DropdownMenuItem(
+                                  value: name,
+                                  child: Text(name, style: KaliText.body(KaliColors.espresso)),
+                                ))
+                            .toList(),
+                        onChanged: (v) => setState(() => _instructor = v),
+                        onSaved: (v) => _instructor = v,
+                      ),
                 const SizedBox(height: 16),
 
                 // Capacity
@@ -223,7 +266,7 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
                         setState(() {
                           if (selected) {
                             _selectedDays.add(d);
-                          } else if (_selectedDays.length > 1) { // Prevents removing the last remaining day
+                          } else if (_selectedDays.length > 1) {
                             _selectedDays.remove(d);
                           }
                         });
@@ -251,17 +294,14 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
                         children: [
                           Text('Hora de Inicio', style: KaliText.label(KaliColors.espresso)),
                           const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () => _pickTime(true),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(_formatTime(_startTime)),
-                            ),
+                          TextField(
+                            controller: _startTimeCtrl,
+                            keyboardType: TextInputType.datetime,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+                              LengthLimitingTextInputFormatter(5),
+                            ],
+                            decoration: _inputDecoration('HH:MM'),
                           ),
                         ],
                       ),
@@ -273,17 +313,14 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
                         children: [
                           Text('Hora de Fin', style: KaliText.label(KaliColors.espresso)),
                           const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () => _pickTime(false),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(_formatTime(_endTime)),
-                            ),
+                          TextField(
+                            controller: _endTimeCtrl,
+                            keyboardType: TextInputType.datetime,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9:]')),
+                              LengthLimitingTextInputFormatter(5),
+                            ],
+                            decoration: _inputDecoration('HH:MM'),
                           ),
                         ],
                       ),
@@ -309,7 +346,7 @@ class _CreateTemplateDialogState extends State<CreateTemplateDialog> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: _isSaving 
+                      child: _isSaving
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                         : Text('Guardar Plantilla', style: KaliText.body(Colors.white, weight: FontWeight.w600)),
                     ),

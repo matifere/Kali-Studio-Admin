@@ -12,12 +12,12 @@ class AlumnosLoading extends AlumnosState {}
 class AlumnosLoaded extends AlumnosState {
   final List<Student> students;
   final List<Student> filteredStudents;
-  final List<String> availablePlans;
+  final List<String> availablePatologias;
   final int currentPage;
 
   // Filtros activos
   final String searchQuery;
-  final String? planFilter;
+  final String? patologiaFilter;
   final bool? isActiveFilter;
 
   static const int perPage = 4;
@@ -25,57 +25,55 @@ class AlumnosLoaded extends AlumnosState {
   AlumnosLoaded._({
     required this.students,
     required this.filteredStudents,
-    required this.availablePlans,
+    required this.availablePatologias,
     required this.currentPage,
     required this.searchQuery,
-    this.planFilter,
+    this.patologiaFilter,
     this.isActiveFilter,
   });
 
-  /// Factory constructor que precalcula los alumnos filtrados y los planes disponibles en O(n).
+  /// Factory que precalcula los alumnos filtrados y las patologías disponibles en O(n).
   factory AlumnosLoaded({
     required List<Student> students,
     int currentPage = 1,
     String searchQuery = '',
-    String? planFilter,
+    String? patologiaFilter,
     bool? isActiveFilter,
   }) {
     final queryLower = searchQuery.toLowerCase().trim();
+    final patologiaLower = patologiaFilter?.toLowerCase().trim();
     final List<Student> filtered = [];
-    final Set<String> plansSet = {};
+    final Set<String> patologiasSet = {};
 
-    // Calculamos filtros y planes en una sola pasada (O(n))
     for (final s in students) {
-      if (s.plan.isNotEmpty) {
-        plansSet.add(s.plan);
+      for (final p in s.patologias) {
+        if (p.isNotEmpty) patologiasSet.add(p);
       }
-      
+
       bool matches = true;
       if (queryLower.isNotEmpty) {
-        matches = s.name.toLowerCase().contains(queryLower) || 
+        matches = s.name.toLowerCase().contains(queryLower) ||
                   s.email.toLowerCase().contains(queryLower);
       }
-      if (matches && planFilter != null && planFilter.isNotEmpty) {
-        matches = s.plan == planFilter;
+      if (matches && patologiaLower != null && patologiaLower.isNotEmpty) {
+        matches = s.patologias.any((p) => p.toLowerCase() == patologiaLower);
       }
       if (matches && isActiveFilter != null) {
         matches = s.isActive == isActiveFilter;
       }
-      
-      if (matches) {
-        filtered.add(s);
-      }
+
+      if (matches) filtered.add(s);
     }
 
-    final plansList = plansSet.toList()..sort();
+    final patologiasList = patologiasSet.toList()..sort();
 
     return AlumnosLoaded._(
       students: students,
       filteredStudents: filtered,
-      availablePlans: plansList,
+      availablePatologias: patologiasList,
       currentPage: currentPage,
       searchQuery: searchQuery,
-      planFilter: planFilter,
+      patologiaFilter: patologiaFilter,
       isActiveFilter: isActiveFilter,
     );
   }
@@ -94,10 +92,10 @@ class AlumnosLoaded extends AlumnosState {
   AlumnosLoaded copyWithPage(int page) => AlumnosLoaded._(
         students: students,
         filteredStudents: filteredStudents,
-        availablePlans: availablePlans,
+        availablePatologias: availablePatologias,
         currentPage: page,
         searchQuery: searchQuery,
-        planFilter: planFilter,
+        patologiaFilter: patologiaFilter,
         isActiveFilter: isActiveFilter,
       );
 }

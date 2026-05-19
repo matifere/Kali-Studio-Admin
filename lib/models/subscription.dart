@@ -48,8 +48,10 @@ class Subscription {
   }
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
-    final profile = json['profiles'] ?? {};
-    final plan = json['plans'] ?? {};
+    final profileRaw = json['profiles'];
+    final profile = (profileRaw is List ? profileRaw.firstOrNull : profileRaw) as Map? ?? {};
+    final planRaw = json['plans'];
+    final plan = (planRaw is List ? planRaw.firstOrNull : planRaw) as Map? ?? {};
 
     return Subscription(
       id: json['id'] ?? '',

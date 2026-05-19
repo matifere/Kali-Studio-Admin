@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:kali_studio/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:kali_studio/widgets/alumnos/student_directory.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
 import 'package:kali_studio/services/auth_service.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 
 /// Pantalla de gestión de alumnos.
 ///
@@ -22,14 +24,12 @@ class AlumnosScreen extends StatefulWidget {
 }
 
 class _AlumnosScreenState extends State<AlumnosScreen> {
+  final bool _isProfesor = ProfileCache.isAdmin;
+
   @override
   void initState() {
     super.initState();
-    // Solo carga si el bloc todavía no tiene datos (evita re-fetch al volver).
-    final bloc = context.read<AlumnosBloc>();
-    if (bloc.state is AlumnosInitial) {
-      bloc.add(AlumnosLoadRequested());
-    }
+    context.read<AlumnosBloc>().add(AlumnosLoadRequested());
   }
 
   @override
@@ -38,10 +38,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
 
     return Column(
       children: [
-        // Top Navigation Bar
         const DashboardTopNavBar(),
-
-        // Content
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
@@ -51,7 +48,6 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Row
                 if (isSmall)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,8 +60,10 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                           color: KaliColors.espresso,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const _AddStudentButton(),
+                      if (!_isProfesor) ...[
+                        const SizedBox(height: 16),
+                        const _AddStudentButton(),
+                      ],
                     ],
                   )
                 else
@@ -86,7 +84,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Gestiona tu comunidad de Kali Studio.',
+                            'Gestiona tu comunidad de Chimpance Admin.',
                             style: KaliText.body(
                               KaliColors.espresso.withValues(alpha: 0.6),
                               size: 14,
@@ -94,16 +92,16 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                           ),
                         ],
                       ),
-                      const _AddStudentButton(),
+                      if (!_isProfesor) const _AddStudentButton(),
                     ],
                   ),
                 const SizedBox(height: 32),
 
-                // Stat Cards
-                const AlumnosStatCards(),
-                const SizedBox(height: 32),
+                if (!_isProfesor) ...[
+                  const AlumnosStatCards(),
+                  const SizedBox(height: 32),
+                ],
 
-                // Student Directory Table
                 const StudentDirectory(),
                 const SizedBox(height: 40),
               ],
@@ -128,8 +126,8 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
@@ -217,9 +215,16 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
 
     if (result == 'Ok') {
       if (mounted) {
-        // Trigger list reload
-        context.read<AlumnosBloc>().add(AlumnosLoadRequested());
+        final bloc = context.read<AlumnosBloc>();
+        final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
+        bloc.add(AlumnosLoadRequested());
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Alumno "$name" registrado correctamente.'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } else {
       if (mounted) {
@@ -236,94 +241,98 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: KaliColors.warmWhite,
-      child: Container(
-        width: 420,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Añadir Nuevo Alumno',
-              style: GoogleFonts.cormorantGaramond(
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
-                color: KaliColors.espresso,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Se registrará con rol de usuario cliente.',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-            ),
-            const SizedBox(height: 32),
-            KaliTextField(
-              controller: _nameController,
-              label: 'Nombre completo',
-              hint: 'Ej. María Pérez',
-            ),
-            const SizedBox(height: 16),
-            KaliTextField(
-              controller: _emailController,
-              label: 'Correo Electrónico',
-              hint: 'correo@ejemplo.com',
-            ),
-            const SizedBox(height: 16),
-            KaliTextField(
-              controller: _passwordController,
-              label: 'Contraseña temporal',
-              hint: 'Mínimo 6 caracteres',
-              obscureText: true,
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage!,
-                style: KaliText.body(const Color(0xFFD4685C)),
-              ),
-            ],
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextButton(
-                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancelar',
-                    style: KaliText.body(KaliColors.espresso),
+                Text(
+                  'Añadir Nuevo Alumno',
+                  style: GoogleFonts.cormorantGaramond(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    color: KaliColors.espresso,
                   ),
                 ),
-                const SizedBox(width: 16),
-                MouseRegion(
-                  cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: _isLoading ? null : _submit,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: _isLoading ? KaliColors.espresso.withValues(alpha: 0.6) : KaliColors.espresso,
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                color: KaliColors.warmWhite,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Registrar Alumno',
-                              style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
-                            ),
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  'Se registrará con rol de usuario cliente.',
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                ),
+                const SizedBox(height: 32),
+                KaliTextField(
+                  controller: _nameController,
+                  label: 'Nombre completo',
+                  hint: 'Ej. María Pérez',
+                ),
+                const SizedBox(height: 16),
+                KaliTextField(
+                  controller: _emailController,
+                  label: 'Correo Electrónico',
+                  hint: 'correo@ejemplo.com',
+                ),
+                const SizedBox(height: 16),
+                KaliTextField(
+                  controller: _passwordController,
+                  label: 'Contraseña temporal',
+                  hint: 'Mínimo 6 caracteres',
+                  obscureText: true,
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: KaliText.body(const Color(0xFFD4685C)),
                   ),
+                ],
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Cancelar',
+                        style: KaliText.body(KaliColors.espresso),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    MouseRegion(
+                      cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: _isLoading ? null : _submit,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: _isLoading ? KaliColors.espresso.withValues(alpha: 0.6) : KaliColors.espresso,
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    color: KaliColors.warmWhite,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Registrar Alumno',
+                                  style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

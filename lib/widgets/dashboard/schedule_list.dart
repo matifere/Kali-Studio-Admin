@@ -21,7 +21,7 @@ class _DashboardScheduleListState extends State<DashboardScheduleList> {
   void initState() {
     super.initState();
     final bloc = context.read<TurnosBloc>();
-    // Cargar la semana actual si aún no hay datos
+    // Only load if the week's sessions haven't been fetched yet.
     if (bloc.state.sessions.isEmpty) {
       bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
     }

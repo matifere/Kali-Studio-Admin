@@ -1,23 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DashboardSidebar extends StatelessWidget {
+class DashboardSidebar extends StatefulWidget {
   final String currentPage;
-  final String userRole;
   final void Function(String page) onNavigate;
 
   const DashboardSidebar({
     super.key,
     required this.currentPage,
     required this.onNavigate,
-    this.userRole = 'admin',
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isSudo = userRole == 'sudo';
+  State<DashboardSidebar> createState() => _DashboardSidebarState();
+}
 
+class _DashboardSidebarState extends State<DashboardSidebar> {
+  // El rol está en el JWT local — sin round trip a la base de datos.
+  late final String _role = ProfileCache.role;
+
+  static const _blockedForAdmin = {'Panel', 'Entrenadores', 'Pagos'};
+
+  @override
+  void initState() {
+    super.initState();
+    if (_role == 'admin' && _blockedForAdmin.contains(widget.currentPage)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onNavigate('Alumnos');
+      });
+    }
+  }
+
+  String get currentPage => widget.currentPage;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 240,
       color: KaliColors.sand,
@@ -25,34 +44,27 @@ class DashboardSidebar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLogo(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'CHIMPANCE ADMIN',
+                  style: KaliText.label(KaliColors.clayDark),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 48),
-          _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
+          if (_role != 'admin') _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
           _buildMenuItem(Icons.people_outline, 'Alumnos'),
+          if (_role != 'admin')
+            _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
-          if (isSudo) _buildMenuItem(Icons.payment_outlined, 'Pagos'),
+          if (_role != 'admin') _buildMenuItem(Icons.payment_outlined, 'Pagos'),
           const Spacer(),
           _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Kali Studio',
-            style: KaliText.display(KaliColors.espresso).copyWith(fontSize: 28),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'PORTAL DE GESTIÓN',
-            style: KaliText.label(KaliColors.clayDark),
-          ),
         ],
       ),
     );
@@ -84,7 +96,7 @@ class DashboardSidebar extends StatelessWidget {
             weight: isActive ? FontWeight.bold : FontWeight.w500,
           ),
         ),
-        onTap: () => onNavigate(title),
+        onTap: () => widget.onNavigate(title),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );

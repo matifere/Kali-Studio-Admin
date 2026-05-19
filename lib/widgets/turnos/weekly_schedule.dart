@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/turnos/turno_card.dart';
 import 'package:intl/intl.dart';
 
-/// Grilla del calendario semanal.
+/// Grilla del calendario semanal 7 columnas (Lun–Dom).
 ///
-/// Usa [StaggeredGrid] del paquete `flutter_staggered_grid_view`
-/// para posicionar las tarjetas de turnos en una grilla de 7 columnas
-/// (Lun–Dom) donde cada turno ocupa un número variable de celdas
-/// verticales según su duración.
+/// Cada turno se posiciona con [Stack] + [Positioned] según su hora de inicio
+/// y duración. Turnos solapados se muestran en carriles side-by-side.
 class WeeklySchedule extends StatelessWidget {
   final DateTime currentWeekStart;
   final List<ClassSession> sessions;
   final ClassSession? selectedTurno;
   final ValueChanged<ClassSession> onTurnoSelected;
-  final bool isCompactMode;
 
   const WeeklySchedule({
     super.key,
@@ -24,33 +20,11 @@ class WeeklySchedule extends StatelessWidget {
     required this.sessions,
     this.selectedTurno,
     required this.onTurnoSelected,
-    required this.isCompactMode,
   });
 
   // Rango horario visible en la grilla.
-  int get _startHour {
-    if (!isCompactMode || sessions.isEmpty) return 7;
-    int minHour = 24;
-    for (var s in sessions) {
-      if (s.parsedStartTime.hour < minHour) {
-        minHour = s.parsedStartTime.hour;
-      }
-    }
-    return minHour;
-  }
-
-  int get _endHour {
-    if (!isCompactMode || sessions.isEmpty) return 22;
-    int maxHour = 0;
-    for (var s in sessions) {
-      int endH = s.parsedEndTime.hour;
-      if (s.parsedEndTime.minute > 0) endH += 1;
-      if (endH > maxHour) {
-        maxHour = endH;
-      }
-    }
-    return maxHour;
-  }
+  int get _startHour => 7;
+  int get _endHour => 22;
 
   int get _totalHours {
     final start = _startHour;
@@ -62,15 +36,27 @@ class WeeklySchedule extends StatelessWidget {
   static const int _slotsPerHour = 2;
   int get _totalSlots => _totalHours * _slotsPerHour;
   
-  double get _slotHeight => isCompactMode ? 24.0 : 48.0;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildDayHeaders(),
-        Expanded(child: _buildScheduleBody()),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double minWidth = 680.0;
+        final needsScroll = constraints.maxWidth < minWidth;
+        final schedule = Column(
+          children: [
+            _buildDayHeaders(),
+            Expanded(child: _buildScheduleBody()),
+          ],
+        );
+        if (needsScroll) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(width: minWidth, child: schedule),
+          );
+        }
+        return schedule;
+      },
     );
   }
 
@@ -86,16 +72,15 @@ class WeeklySchedule extends StatelessWidget {
           ),
         ),
       ),
-      child: StaggeredGrid.count(
-        crossAxisCount: 7,
+      child: Row(
         children: List.generate(7, (i) {
           final dayDate = currentWeekStart.add(Duration(days: i));
           final isToday = dayDate.year == now.year && dayDate.month == now.month && dayDate.day == now.day;
           final dayName = DateFormat('EEE', 'es_ES').format(dayDate).toUpperCase();
-          return StaggeredGridTile.fit(
-            crossAxisCellCount: 1,
+          return Expanded(
             child: Center(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     dayName,
@@ -133,22 +118,24 @@ class WeeklySchedule extends StatelessWidget {
     );
   }
 
-  // ── Cuerpo del calendario: horas + grilla staggered por día ────────────────
+  // ── Cuerpo del calendario: horas + grilla por día ─────────────────────────
   Widget _buildScheduleBody() {
     final now = DateTime.now();
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 4),
-      child: SizedBox(
-        height: _totalSlots * _slotHeight,
-        child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double minSlotH = 17.0;
+        final double slotH = (constraints.maxHeight / _totalSlots).clamp(minSlotH, double.infinity);
+        final double totalH = slotH * _totalSlots;
+
+        final row = Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Columna de horas
-            _buildTimeLabels(),
-            // 7 columnas de días
+            _buildTimeLabels(slotH),
             ...List.generate(7, (dayIdx) {
               final dayDate = currentWeekStart.add(Duration(days: dayIdx));
-              final isToday = dayDate.year == now.year && dayDate.month == now.month && dayDate.day == now.day;
+              final isToday = dayDate.year == now.year &&
+                  dayDate.month == now.month &&
+                  dayDate.day == now.day;
               return Expanded(
                 child: _DayColumn(
                   dayIndex: dayIdx,
@@ -157,20 +144,27 @@ class WeeklySchedule extends StatelessWidget {
                   selectedTurno: selectedTurno,
                   onTurnoSelected: onTurnoSelected,
                   startHour: _startHour,
-                  slotHeight: _slotHeight,
-                  isCompactMode: isCompactMode,
+                  slotHeight: slotH,
                   totalSlots: _totalSlots,
                 ),
               );
             }),
           ],
-        ),
-      ),
+        );
+
+        if (totalH > constraints.maxHeight) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SizedBox(height: totalH, child: row),
+          );
+        }
+        return SizedBox(height: constraints.maxHeight, child: row);
+      },
     );
   }
 
   // ── Columna lateral de horas ───────────────────────────────────────────────
-  Widget _buildTimeLabels() {
+  Widget _buildTimeLabels(double slotH) {
     return SizedBox(
       width: 60,
       child: Column(
@@ -178,7 +172,7 @@ class WeeklySchedule extends StatelessWidget {
           final hour = _startHour + i ~/ _slotsPerHour;
           final isFullHour = i % _slotsPerHour == 0;
           return SizedBox(
-            height: _slotHeight,
+            height: slotH,
             child: isFullHour
                 ? Align(
                     alignment: Alignment.topRight,
@@ -188,7 +182,7 @@ class WeeklySchedule extends StatelessWidget {
                         '${hour.toString().padLeft(2, '0')}:00',
                         style: KaliText.label(
                           KaliColors.espresso.withValues(alpha: 0.3),
-                        ).copyWith(fontSize: isCompactMode ? 10 : null),
+                        ),
                       ),
                     ),
                   )
@@ -209,7 +203,6 @@ class _DayColumn extends StatelessWidget {
   final ValueChanged<ClassSession> onTurnoSelected;
   final int startHour;
   final double slotHeight;
-  final bool isCompactMode;
   final int totalSlots;
 
   const _DayColumn({
@@ -220,7 +213,6 @@ class _DayColumn extends StatelessWidget {
     required this.onTurnoSelected,
     required this.startHour,
     required this.slotHeight,
-    required this.isCompactMode,
     required this.totalSlots,
   });
 
@@ -237,8 +229,61 @@ class _DayColumn extends StatelessWidget {
     return (durationMinutes / 30) * slotHeight;
   }
 
+  // Asigna carriles (colIndex, totalCols) a cada turno para evitar solapamiento visual.
+  List<_SessionLayout> _computeLayouts() {
+    if (turnos.isEmpty) return [];
+
+    final sorted = [...turnos]..sort((a, b) {
+        final aM = a.parsedStartTime.hour * 60 + a.parsedStartTime.minute;
+        final bM = b.parsedStartTime.hour * 60 + b.parsedStartTime.minute;
+        return aM.compareTo(bM);
+      });
+
+    // colEnd[c] = minuto de fin del último turno colocado en el carril c
+    final List<int> colEnd = [];
+    final Map<String, int> colOf = {};
+
+    for (final t in sorted) {
+      final tStart = t.parsedStartTime.hour * 60 + t.parsedStartTime.minute;
+      final tEnd = t.parsedEndTime.hour * 60 + t.parsedEndTime.minute;
+
+      int placed = -1;
+      for (int c = 0; c < colEnd.length; c++) {
+        if (colEnd[c] <= tStart) {
+          placed = c;
+          colEnd[c] = tEnd;
+          break;
+        }
+      }
+      if (placed == -1) {
+        placed = colEnd.length;
+        colEnd.add(tEnd);
+      }
+      colOf[t.id] = placed;
+    }
+
+    // totalCols de cada turno = carril máximo entre todos los que se solapan + 1
+    return sorted.map((t) {
+      final tStart = t.parsedStartTime.hour * 60 + t.parsedStartTime.minute;
+      final tEnd = t.parsedEndTime.hour * 60 + t.parsedEndTime.minute;
+      int maxCol = colOf[t.id]!;
+      for (final o in sorted) {
+        if (o.id == t.id) continue;
+        final oStart = o.parsedStartTime.hour * 60 + o.parsedStartTime.minute;
+        final oEnd = o.parsedEndTime.hour * 60 + o.parsedEndTime.minute;
+        if (tStart < oEnd && oStart < tEnd) {
+          final oCol = colOf[o.id]!;
+          if (oCol > maxCol) maxCol = oCol;
+        }
+      }
+      return _SessionLayout(t, colOf[t.id]!, maxCol + 1);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final layouts = _computeLayouts();
+
     return Container(
       decoration: BoxDecoration(
         color: isToday
@@ -250,56 +295,75 @@ class _DayColumn extends StatelessWidget {
           ),
         ),
       ),
-      child: Stack(
-        children: [
-          // Líneas horizontales de grilla
-          ...List.generate(
-            totalSlots,
-            (i) => Positioned(
-              top: i * slotHeight,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 1,
-                color: i % 2 == 0
-                    ? KaliColors.espresso.withValues(alpha: 0.04)
-                    : Colors.transparent,
-              ),
-            ),
-          ),
-          // Tarjetas de turnos posicionadas
-          ...turnos.map((t) {
-            final isSelected = selectedTurno?.id == t.id;
-            return Positioned(
-              top: _topForTurno(t),
-              left: 4,
-              right: 4,
-              height: _heightForTurno(t) - 4,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: isSelected
-                    ? BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: KaliColors.espresso
-                                .withValues(alpha: 0.15),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      )
-                    : null,
-                child: TurnoCard(
-                  turno: t,
-                  isCompactMode: isCompactMode,
-                  onTap: () => onTurnoSelected(t),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final colWidth = constraints.maxWidth;
+          return Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              // Líneas horizontales de grilla
+              ...List.generate(
+                totalSlots,
+                (i) => Positioned(
+                  top: i * slotHeight,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 1,
+                    color: i % 2 == 0
+                        ? KaliColors.espresso.withValues(alpha: 0.04)
+                        : Colors.transparent,
+                  ),
                 ),
               ),
-            );
-          }),
-        ],
+              // Tarjetas de turnos posicionadas con solapamiento resuelto
+              ...layouts.map((layout) {
+                final t = layout.turno;
+                final cardHeight = _heightForTurno(t) - 4;
+                if (cardHeight < 4) return const SizedBox.shrink();
+                final isSelected = selectedTurno?.id == t.id;
+
+                final slotW = (colWidth - 8) / layout.totalCols;
+                final cardLeft = 4.0 + layout.colIndex * slotW;
+                final cardWidth = slotW - 2;
+
+                return Positioned(
+                  top: _topForTurno(t),
+                  left: cardLeft,
+                  width: cardWidth,
+                  height: cardHeight,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: isSelected
+                        ? BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: KaliColors.espresso.withValues(alpha: 0.15),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          )
+                        : null,
+                    child: TurnoCard(
+                      turno: t,
+                      onTap: () => onTurnoSelected(t),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }
+}
+
+class _SessionLayout {
+  final ClassSession turno;
+  final int colIndex;
+  final int totalCols;
+  const _SessionLayout(this.turno, this.colIndex, this.totalCols);
 }

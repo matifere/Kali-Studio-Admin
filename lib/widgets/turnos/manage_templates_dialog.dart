@@ -19,12 +19,34 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
   String _searchQuery = '';
   String? _selectedDay;
 
+  static const _dayOrder = [
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+  ];
+  static const _dayLabels = {
+    'monday': 'Lunes', 'tuesday': 'Martes', 'wednesday': 'Miércoles',
+    'thursday': 'Jueves', 'friday': 'Viernes', 'saturday': 'Sábado', 'sunday': 'Domingo',
+  };
+
   List<ScheduleTemplate> get _filteredTemplates {
     return _templates.where((t) {
       final matchesSearch = t.name.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesDay = _selectedDay == null || t.dayOfWeek.toLowerCase() == _selectedDay;
       return matchesSearch && matchesDay;
     }).toList();
+  }
+
+  Map<String, List<ScheduleTemplate>> get _groupedTemplates {
+    final filtered = _filteredTemplates;
+    final map = <String, List<ScheduleTemplate>>{};
+    for (final t in filtered) {
+      map.putIfAbsent(t.name, () => []).add(t);
+    }
+    // Sort each group's entries by day order
+    for (final group in map.values) {
+      group.sort((a, b) => _dayOrder.indexOf(a.dayOfWeek.toLowerCase())
+          .compareTo(_dayOrder.indexOf(b.dayOfWeek.toLowerCase())));
+    }
+    return map;
   }
 
   @override
@@ -65,18 +87,19 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
     }
   }
 
-  Future<void> _deleteTemplate(ScheduleTemplate template) async {
+  Future<void> _deleteTemplateGroup(List<ScheduleTemplate> group) async {
+    final name = group.first.name;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar plantilla'),
-        content: Text('¿Seguro que deseas eliminar la clase ${template.name}? Las clases ya agendadas de este tipo no se borrarán.'),
+        content: Text('¿Seguro que deseas eliminar "$name"? Las clases ya agendadas de este tipo no se borrarán.'),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true), 
+            onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Eliminar')
+            child: const Text('Eliminar'),
           ),
         ],
       ),
@@ -85,14 +108,17 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
     if (confirm != true) return;
 
     try {
+      final ids = group.map((t) => t.id).toList();
       await Supabase.instance.client
           .from('schedule_templates')
           .update({'is_active': false})
-          .eq('id', template.id);
-      
+          .inFilter('id', ids);
+
       _loadTemplates();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -110,8 +136,7 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 700,
-        height: 600,
+        constraints: const BoxConstraints(maxWidth: 700, maxHeight: 600),
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,31 +223,43 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
                   ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
                   : _filteredTemplates.isEmpty
                     ? Center(child: Text('No hay plantillas que coincidan con la búsqueda.', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
-                    : ListView.separated(
-                        itemCount: _filteredTemplates.length,
-                        separatorBuilder: (_, __) => Divider(color: KaliColors.espresso.withValues(alpha: 0.1)),
-                        itemBuilder: (context, index) {
-                          final t = _filteredTemplates[index];
-                          return ListTile(
-                            title: Text(t.name, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
-                            subtitle: Text('${t.dayNameSpanish} • ${t.startTime.substring(0,5)} - ${t.endTime.substring(0,5)} • Cap: ${t.capacity}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined, size: 20),
-                                  onPressed: () => _openCreateOrEdit(t),
-                                  tooltip: 'Editar',
+                    : ListView(
+                        children: _groupedTemplates.entries.map((entry) {
+                          final name = entry.key;
+                          final group = entry.value;
+                          final days = group
+                              .map((t) => _dayLabels[t.dayOfWeek.toLowerCase()] ?? t.dayOfWeek)
+                              .join(', ');
+                          final representative = group.first;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                contentPadding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                                title: Text(name, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+                                subtitle: Text(
+                                  '$days • ${representative.startTime.substring(0,5)} - ${representative.endTime.substring(0,5)} • Cap: ${representative.capacity}',
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                                  onPressed: () => _deleteTemplate(t),
-                                  tooltip: 'Desactivar',
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined, size: 20),
+                                      onPressed: () => _openCreateOrEdit(representative),
+                                      tooltip: 'Editar',
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                                      onPressed: () => _deleteTemplateGroup(group),
+                                      tooltip: 'Desactivar',
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Divider(color: KaliColors.espresso.withValues(alpha: 0.08)),
+                            ],
                           );
-                        },
+                        }).toList(),
                       ),
             ),
           ],

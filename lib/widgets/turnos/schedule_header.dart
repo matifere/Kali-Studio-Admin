@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:intl/intl.dart';
 
@@ -7,10 +8,10 @@ class ScheduleHeader extends StatelessWidget {
   final DateTime currentWeekStart;
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
-  final VoidCallback onCreateTurno;
-  final VoidCallback onCreateTemplate;
-  final bool isCompactMode;
-  final ValueChanged<bool> onCompactModeChanged;
+  final VoidCallback? onCreateTurno;
+  final VoidCallback? onCreateTemplate;
+  final bool showInstructorFilter;
+  final bool showDropdownFilters;
   final String? selectedInstructor;
   final String? selectedRoom;
   final List<String> availableInstructors;
@@ -22,10 +23,10 @@ class ScheduleHeader extends StatelessWidget {
     required this.currentWeekStart,
     required this.onPreviousWeek,
     required this.onNextWeek,
-    required this.onCreateTurno,
-    required this.onCreateTemplate,
-    required this.isCompactMode,
-    required this.onCompactModeChanged,
+    this.onCreateTurno,
+    this.onCreateTemplate,
+    this.showInstructorFilter = true,
+    this.showDropdownFilters = true,
     required this.selectedInstructor,
     required this.selectedRoom,
     required this.availableInstructors,
@@ -114,54 +115,39 @@ class ScheduleHeader extends StatelessWidget {
                   runSpacing: 12,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _FilterDropdown(
-                      label: selectedInstructor ?? 'Todos los Instructores',
-                      options: ['Todos los Instructores', ...availableInstructors],
-                      selectedValue: selectedInstructor ?? 'Todos los Instructores',
-                      onChanged: (val) {
-                        onFilterChanged(
-                          val == 'Todos los Instructores' ? null : val,
-                          selectedRoom,
-                        );
-                      },
-                    ),
-                    _FilterDropdown(
-                      label: selectedRoom ?? 'Todas las Salas',
-                      options: ['Todas las Salas', ...availableRooms],
-                      selectedValue: selectedRoom ?? 'Todas las Salas',
-                      onChanged: (val) {
-                        onFilterChanged(
-                          selectedInstructor,
-                          val == 'Todas las Salas' ? null : val,
-                        );
-                      },
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(width: 8),
-                        Text('Modo Compacto',
-                            style: KaliText.body(
-                                KaliColors.espresso.withValues(alpha: 0.6))),
-                        const SizedBox(width: 8),
-                        Switch(
-                          value: isCompactMode,
-                          onChanged: onCompactModeChanged,
-                          activeColor: KaliColors.warmWhite,
-                          activeTrackColor: KaliColors.espresso,
-                          inactiveThumbColor:
-                              KaliColors.espresso.withValues(alpha: 0.4),
-                          inactiveTrackColor: KaliColors.sand,
-                        ),
-                      ],
-                    ),
+                    if (showDropdownFilters && showInstructorFilter)
+                      _FilterDropdown(
+                        label: selectedInstructor ?? 'Todos los Instructores',
+                        options: ['Todos los Instructores', ...availableInstructors],
+                        selectedValue: selectedInstructor ?? 'Todos los Instructores',
+                        onChanged: (val) {
+                          onFilterChanged(
+                            val == 'Todos los Instructores' ? null : val,
+                            selectedRoom,
+                          );
+                        },
+                      ),
+                    if (showDropdownFilters)
+                      _FilterDropdown(
+                        label: selectedRoom ?? 'Todas las Salas',
+                        options: ['Todas las Salas', ...availableRooms],
+                        selectedValue: selectedRoom ?? 'Todas las Salas',
+                        onChanged: (val) {
+                          onFilterChanged(
+                            selectedInstructor,
+                            val == 'Todas las Salas' ? null : val,
+                          );
+                        },
+                      ),
                   ],
                 ),
                 // Botones de Acción
+                if (onCreateTurno != null || onCreateTemplate != null)
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
+                    if (onCreateTemplate != null)
                     OutlinedButton.icon(
                       onPressed: onCreateTemplate,
                       icon: Icon(Icons.settings_outlined,
@@ -183,6 +169,7 @@ class ScheduleHeader extends StatelessWidget {
                             color: KaliColors.espresso.withValues(alpha: 0.2)),
                       ),
                     ),
+                    if (onCreateTurno != null)
                     ElevatedButton.icon(
                       onPressed: onCreateTurno,
                       icon: const Icon(Icons.add_rounded,
@@ -257,8 +244,8 @@ class _FilterDropdownState extends State<_FilterDropdown> {
         );
       }).toList(),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+        onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+        onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

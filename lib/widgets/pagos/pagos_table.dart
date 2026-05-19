@@ -42,8 +42,24 @@ class PagosTable extends StatelessWidget {
                           'Las suscripciones a planes aparecerán aquí.',
                     )
                   else ...[
-                    _buildColumnHeaders(),
-                    ...state.pagePayments.map((p) => SubscriptionRow(subscription: p)),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        const double minWidth = 680.0;
+                        final tableRows = Column(
+                          children: [
+                            _buildColumnHeaders(),
+                            ...state.pagePayments.map((p) => SubscriptionRow(subscription: p)),
+                          ],
+                        );
+                        if (constraints.maxWidth < minWidth) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: SizedBox(width: minWidth, child: tableRows),
+                          );
+                        }
+                        return tableRows;
+                      },
+                    ),
                     KaliPagination(
                       currentPage: state.currentPage,
                       totalPages: state.totalPages,

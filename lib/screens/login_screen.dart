@@ -5,6 +5,7 @@ import 'package:kali_studio/screens/register_screen.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
 import 'package:kali_studio/widgets/auth_wrapper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,6 +24,65 @@ class _LoginScreenState extends State<LoginScreen> {
     emailControl.dispose();
     contraControl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleForgotPassword() async {
+    final emailCtrl = TextEditingController(text: emailControl.text.trim());
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Restablecer contraseña'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Ingresá tu email y te enviamos un link para crear una nueva contraseña.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'tu@email.com',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    final email = emailCtrl.text.trim();
+    if (email.isEmpty) return;
+
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'https://chimpance-admin.web.app',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('¡Listo! Revisá tu email para restablecer tu contraseña')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   void _handleLogin(BuildContext context) {
@@ -74,16 +134,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 8,
                   children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: KaliColors.espresso,
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(14.0),
-                        child: Icon(
-                          Icons.self_improvement,
-                          color: KaliColors.background,
+                    ClipOval(
+                      child: Image.network(
+                        'https://chimpance-admin.web.app/favicon.png',
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: KaliColors.espresso,
+                          ),
+                          child: const Icon(Icons.pets, color: KaliColors.background),
                         ),
                       ),
                     ),
@@ -115,18 +179,34 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: emailControl,
                             suffixIcon: Icons.mail,
                           ),
-                          KaliTextField(
-                            label: "CONTRASEÑA",
-                            hint: "••••••••",
-                            actionLabel: "olvide mi contraseña",
-                            controller: contraControl,
-                            obscureText: _isPassObscured,
-                            suffixIcon: _isPassObscured
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            onSuffixTap: () => setState(
-                              () => _isPassObscured = !_isPassObscured,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              KaliTextField(
+                                label: "CONTRASEÑA",
+                                hint: "••••••••",
+                                controller: contraControl,
+                                obscureText: _isPassObscured,
+                                suffixIcon: _isPassObscured
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                onSuffixTap: () => setState(
+                                  () => _isPassObscured = !_isPassObscured,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _handleForgotPassword,
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  'olvide mi contraseña',
+                                  style: KaliText.caption(KaliColors.clayDark),
+                                ),
+                              ),
+                            ],
                           ),
                           SizedBox(
                             width: double.infinity,

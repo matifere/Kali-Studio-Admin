@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
+import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
 import 'package:kali_studio/widgets/pagos/edit_plan_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,7 +30,7 @@ class _PlansTableState extends State<PlansTable> {
     try {
       final res = await Supabase.instance.client
           .from('plans')
-          .select()
+          .select('id, name, description, price, currency, max_reservations_per_week, is_active')
           .order('name', ascending: true);
       if (mounted) {
         setState(() {
@@ -47,46 +49,105 @@ class _PlansTableState extends State<PlansTable> {
   }
 
   Future<void> _deletePlan(Map<String, dynamic> plan) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Eliminar Plan',
-            style: KaliText.heading(KaliColors.espresso, size: 20)),
-        content: Text(
-            '¿Estás seguro de que deseas eliminar el plan "${plan['name']}"?',
-            style: KaliText.body(KaliColors.espresso)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancelar',
-                style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Eliminar',
-                style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
+    final planName = plan['name'] as String;
+    final planId = plan['id'] as String;
 
-    if (confirmed == true) {
-      try {
-        await Supabase.instance.client
-            .from('plans')
-            .delete()
-            .eq('id', plan['id']);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Plan eliminado con éxito')),
-          );
+    // Verificar si hay suscripciones que referencian este plan
+    final subs = await Supabase.instance.client
+        .from('subscriptions')
+        .select('id')
+        .eq('plan_id', planId)
+        .limit(1);
+    final hasSubscriptions = (subs as List).isNotEmpty;
+
+    if (!mounted) return;
+
+    if (hasSubscriptions) {
+      // No se puede eliminar — ofrecer desactivar
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('No se puede eliminar', style: KaliText.heading(KaliColors.espresso, size: 20)),
+          content: Text(
+            'El plan "$planName" tiene suscripciones asociadas y no puede eliminarse.\n\n¿Querés desactivarlo? No aparecerá al asignar nuevos planes pero las suscripciones existentes se mantienen.',
+            style: KaliText.body(KaliColors.espresso),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Desactivar', style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && mounted) {
+        try {
+          await Supabase.instance.client
+              .from('plans')
+              .update({'is_active': false})
+              .eq('id', planId);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Plan "$planName" desactivado')),
+            );
+            _loadPlans();
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error al desactivar plan: $e')),
+            );
+          }
         }
-        _loadPlans();
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al eliminar plan: $e')),
-          );
+      }
+    } else {
+      // Sin suscripciones — eliminar normalmente
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Eliminar Plan', style: KaliText.heading(KaliColors.espresso, size: 20)),
+          content: Text(
+            '¿Estás seguro de que deseas eliminar el plan "$planName"? Esta acción no se puede deshacer.',
+            style: KaliText.body(KaliColors.espresso),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Eliminar', style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && mounted) {
+        try {
+          await Supabase.instance.client
+              .from('plans')
+              .delete()
+              .eq('id', planId);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Plan "$planName" eliminado')),
+            );
+            _loadPlans();
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error al eliminar plan: $e')),
+            );
+          }
         }
       }
     }
@@ -136,21 +197,37 @@ class _PlansTableState extends State<PlansTable> {
               ),
             )
           else ...[
-            _buildColumnHeaders(),
-            ..._plans.map((p) => _PlanRow(
-                  plan: p,
-                  onEdit: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => EditPlanDialog(
-                        plan: p,
-                        onRefresh: _loadPlans,
-                      ),
-                    );
-                  },
-                  onDelete: () => _deletePlan(p),
-                )),
-            const SizedBox(height: 24),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const double minWidth = 700.0;
+                final tableRows = Column(
+                  children: [
+                    _buildColumnHeaders(),
+                    ..._plans.map((p) => _PlanRow(
+                          plan: p,
+                          onEdit: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => EditPlanDialog(
+                                plan: p,
+                                onRefresh: _loadPlans,
+                              ),
+                            );
+                          },
+                          onDelete: () => _deletePlan(p),
+                        )),
+                    const SizedBox(height: 24),
+                  ],
+                );
+                if (constraints.maxWidth < minWidth) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(width: minWidth, child: tableRows),
+                  );
+                }
+                return tableRows;
+              },
+            ),
           ],
         ],
       ),
@@ -167,10 +244,16 @@ class _PlansTableState extends State<PlansTable> {
             'Planes del Estudio',
             style: KaliText.headingItalic(KaliColors.espresso, size: 22),
           ),
-          KaliIconButton(
-            Icons.refresh_rounded,
-            tooltip: 'Refrescar planes',
-            onTap: _loadPlans,
+          Row(
+            children: [
+              _CreatePlanButton(onCreated: _loadPlans),
+              const SizedBox(width: 8),
+              KaliIconButton(
+                Icons.refresh_rounded,
+                tooltip: 'Refrescar planes',
+                onTap: _loadPlans,
+              ),
+            ],
           ),
         ],
       ),
@@ -190,6 +273,54 @@ class _PlansTableState extends State<PlansTable> {
           Expanded(flex: 2, child: Text('ESTADO', style: style)),
           Expanded(flex: 2, child: Text('ACCIONES', style: style)),
         ],
+      ),
+    );
+  }
+}
+
+class _CreatePlanButton extends StatefulWidget {
+  final VoidCallback onCreated;
+  const _CreatePlanButton({required this.onCreated});
+
+  @override
+  State<_CreatePlanButton> createState() => _CreatePlanButtonState();
+}
+
+class _CreatePlanButtonState extends State<_CreatePlanButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      child: GestureDetector(
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (context) => const CreatePlanDialog(),
+          );
+          widget.onCreated();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: _hovered ? KaliColors.espressoL : KaliColors.espresso,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.add, size: 15, color: KaliColors.warmWhite),
+              const SizedBox(width: 6),
+              Text(
+                'Crear Plan',
+                style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -225,8 +356,8 @@ class _PlanRowState extends State<_PlanRow> {
     final bool isActive = p['is_active'] ?? true;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeIn,

@@ -1,61 +1,130 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupaAuthClass {
   final GoTrueClient auth = Supabase.instance.client.auth;
 
+  // Registra un nuevo usuario via REST API directamente para no interferir
+  // con la sesión del admin (el tempClient compartía SharedPreferences con el
+  // cliente principal y lo deslogueaba al hacer signOut).
+  Future<String> _signUpViaHttp({
+    required String email,
+    required String password,
+    required Map<String, dynamic> metadata,
+  }) async {
+    final supabaseUrl = kIsWeb
+        ? 'https://tmfcnvtjzmtpqhzvfxos.supabase.co'
+        : dotenv.env['URL']!;
+    final supabaseAnon = kIsWeb
+        ? 'sb_publishable_TkebjBTlimQS7Uu4HWE-tQ_v3ylhC_b'
+        : dotenv.env['ANON']!;
+    final response = await http.post(
+      Uri.parse('$supabaseUrl/auth/v1/signup'),
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnon,
+      },
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'data': metadata,
+      }),
+    );
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      return 'Error:${body['message'] ?? body['msg'] ?? 'Error al registrar usuario'}';
+    }
+
+    // Sin confirmación por email: `{ "user": { "id": "..." }, ... }`
+    // Con confirmación por email: `{ "id": "...", "email": "..." }`
+    final userId = (body['user']?['id'] ?? body['id']) as String?;
+    if (userId == null) return 'Error:No se recibió ID del nuevo usuario';
+    return userId;
+  }
+
   Future<String> registrarAlumno(
       String email, String password, String fullName) async {
     try {
-      // Obtenemos el institution_id del admin actual
       final adminId = Supabase.instance.client.auth.currentUser?.id;
       if (adminId == null) return 'Error: Sin sesión de administrador';
-      
+
       final adminProfile = await Supabase.instance.client
           .from('profiles')
           .select('institution_id')
           .eq('id', adminId)
           .maybeSingle();
-          
-      final instId = adminProfile?['institution_id'];
 
-      // Creamos un cliente temporal sin persistencia para no sobreescribir la sesión del admin
-      final tempClient = SupabaseClient(
-        dotenv.env['URL']!,
-        dotenv.env['ANON']!,
-        authOptions: AuthClientOptions(
-          pkceAsyncStorage: _DummyAsyncStorage(),
-          autoRefreshToken: false,
-        ),
-      );
+      final instId = adminProfile?['institution_id'] as String?;
+      if (instId == null) return 'Error: No se pudo obtener la institución del administrador';
 
-      final AuthResponse respuesta = await tempClient.auth.signUp(
+      final result = await _signUpViaHttp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'client', 'institution_id': instId},
+        metadata: {'full_name': fullName, 'role': 'client', 'institution_id': instId},
       );
 
-      if (respuesta.user != null) {
-        try {
-          // Usamos el cliente temporal (el alumno) para actualizar SU PROPIO perfil,
-          // esto es permitido por la política RLS (id = auth.uid())
-          await tempClient.from('profiles').update({
-            'full_name': fullName,
-            'role': 'client',
-            'institution_id': instId,
-          }).eq('id', respuesta.user!.id);
-        } catch (e) {
-          // Error profile
-          print('Error actualizando el perfil del alumno: $e');
-        }
-        await tempClient.auth.signOut();
-        tempClient.dispose();
-        return 'Ok';
-      } else {
-        await tempClient.auth.signOut();
-        tempClient.dispose();
-        return 'Error session == null';
-      }
+      if (result.startsWith('Error:')) return result.substring(6);
+
+      final newUserId = result;
+
+      // El trigger ya creó el perfil; este upsert asegura que todos los campos estén correctos.
+      await Supabase.instance.client.from('profiles').upsert({
+        'id': newUserId,
+        'full_name': fullName,
+        'email': email,
+        'role': 'client',
+        'institution_id': instId,
+        'is_active': true,
+      });
+
+      return 'Ok';
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (e) {
+      return '$e';
+    }
+  }
+
+  Future<String> registrarEntrenador(
+      String email, String password, String fullName) async {
+    try {
+      final adminId = Supabase.instance.client.auth.currentUser?.id;
+      if (adminId == null) return 'Error: Sin sesión de administrador';
+
+      final adminProfile = await Supabase.instance.client
+          .from('profiles')
+          .select('institution_id')
+          .eq('id', adminId)
+          .maybeSingle();
+
+      final instId = adminProfile?['institution_id'] as String?;
+      if (instId == null) return 'Error: No se pudo obtener la institución del administrador';
+
+      final result = await _signUpViaHttp(
+        email: email,
+        password: password,
+        metadata: {'full_name': fullName, 'role': 'admin', 'institution_id': instId},
+      );
+
+      if (result.startsWith('Error:')) return result.substring(6);
+
+      final newUserId = result;
+
+      await Supabase.instance.client.from('profiles').upsert({
+        'id': newUserId,
+        'full_name': fullName,
+        'email': email,
+        'role': 'admin',
+        'institution_id': instId,
+        'is_active': true,
+      });
+
+      return 'Ok:$newUserId';
     } on AuthException catch (e) {
       return e.message;
     } catch (e) {
@@ -69,18 +138,18 @@ class SupaAuthClass {
       final AuthResponse respuesta = await auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'admin'},
+        data: {'full_name': fullName, 'role': 'sudo'},
       );
       if (respuesta.user != null) {
         try {
           await Supabase.instance.client.from('profiles').update({
             'full_name': fullName,
-            'role': 'admin',
+            'role': 'sudo',
+            'is_active': false,
           }).eq('id', respuesta.user!.id);
-        } catch (e) {
-          //print('Error actualizando el perfil: $e');
-        }
-        return 'Ok';
+        } catch (_) {}
+        await auth.signOut();
+        return 'Pending';
       } else {
         return 'Error session == null';
       }
@@ -101,7 +170,7 @@ class SupaAuthClass {
         try {
           final profile = await Supabase.instance.client
               .from('profiles')
-              .select('role')
+              .select('role, is_active')
               .eq('id', respuesta.user!.id)
               .maybeSingle();
 
@@ -109,9 +178,11 @@ class SupaAuthClass {
             await auth.signOut();
             return 'Acceso denegado: No tienes permisos de administrador.';
           }
-        } catch (e) {
-          //print('Error obteniendo el rol: $e');
-        }
+          if (profile != null && profile['is_active'] == false) {
+            await auth.signOut();
+            return 'Tu cuenta está pendiente de aprobación. Contactá al administrador.';
+          }
+        } catch (_) {}
         return 'Ok';
       } else {
         return 'Error session == null';
@@ -133,11 +204,4 @@ class SupaAuthClass {
       return '$e';
     }
   }
-}
-
-class _DummyAsyncStorage extends GotrueAsyncStorage {
-  final Map<String, String> _map = {};
-  @override Future<String?> getItem({required String key}) async => _map[key];
-  @override Future<void> removeItem({required String key}) async => _map.remove(key);
-  @override Future<void> setItem({required String key, required String value}) async { _map[key] = value; }
 }

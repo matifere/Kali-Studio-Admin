@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/models/payment.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
@@ -19,8 +20,8 @@ class _PaymentRowState extends State<PaymentRow> {
     final p = widget.payment;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered

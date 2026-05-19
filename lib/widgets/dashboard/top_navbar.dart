@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
+
 
 // ── Barra de navegación superior ──────────────────────────────────────────────
 //
 // Convertida a StatefulWidget para poder redibujar la sección del nombre
-// luego de una actualización de perfil exitosa (AuthProfileUpdated).
+// luego de que el diálogo de edición de perfil cierra con éxito.
 class DashboardTopNavBar extends StatefulWidget {
   const DashboardTopNavBar({super.key});
 
@@ -19,20 +21,38 @@ class DashboardTopNavBar extends StatefulWidget {
 }
 
 class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
+  // Rol leído del caché en memoria, sin round trip a la base de datos.
+  final String _role = ProfileCache.role;
+
   // ── Logout ──────────────────────────────────────────────────────────────────
   void _handleLogout(BuildContext ctx) {
     ctx.read<AuthBloc>().add(AuthLogoutRequested());
   }
 
   // ── Editar Perfil ───────────────────────────────────────────────────────────
-  void _openEditProfile(BuildContext ctx, String currentName) {
-    showDialog(
+  void _openEditProfile(BuildContext ctx) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    final metadata = user?.userMetadata ?? {};
+    final success = await showDialog<bool>(
       context: ctx,
-      builder: (dialogCtx) => BlocProvider.value(
-        value: ctx.read<AuthBloc>(),
-        child: _EditProfileDialog(currentName: currentName),
+      builder: (_) => _EditProfileDialog(
+        currentName: metadata['full_name'] as String? ?? '',
+        currentEmail: user?.email ?? '',
       ),
     );
+    if (success == true && ctx.mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Perfil actualizado. Si cambiaste el correo, confirmá el cambio desde tu bandeja de entrada.',
+          ),
+          backgroundColor: KaliColors.espresso,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 
   @override
@@ -42,29 +62,13 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
       // que ya existía cuando este widget se monta en otra pantalla.
       listenWhen: (previous, current) =>
           previous is! AuthInitial &&
-          (current is AuthSuccess ||
-          current is AuthProfileUpdated ||
-          current is AuthFailure),
+          (current is AuthSuccess || current is AuthFailure),
       listener: (ctx, state) {
         if (state is AuthSuccess) {
-          // Logout exitoso → volver al login limpiando el stack
           ctx.read<AuthBloc>().add(AuthReset());
           Navigator.of(ctx).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginScreen()),
             (route) => false,
-          );
-        } else if (state is AuthProfileUpdated) {
-          ctx.read<AuthBloc>().add(AuthReset());
-          // Refrescar la UI para mostrar el nuevo nombre
-          setState(() {});
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(
-              content: const Text('Perfil actualizado correctamente'),
-              backgroundColor: KaliColors.espresso,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
           );
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(ctx).showSnackBar(
@@ -83,10 +87,11 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
         final user = Supabase.instance.client.auth.currentUser;
         final metadata = user?.userMetadata ?? {};
         final fullName = metadata['full_name'] as String? ?? 'Usuario Admin';
-        final rawRole = metadata['role'] as String? ?? 'admin';
-        final displayRole = rawRole.toUpperCase() == 'ADMIN'
-            ? 'GESTOR DEL ESTUDIO'
-            : rawRole.toUpperCase();
+        final displayRole = switch (_role.toLowerCase()) {
+          'sudo'  => 'DUEÑO',
+          'admin' => 'PROFESOR',
+          _       => _role.toUpperCase(),
+        };
         final avatarUrl = metadata['avatar_url'] as String?;
         final initial = fullName.isNotEmpty ? fullName[0].toUpperCase() : '?';
         final bool isMobile = MediaQuery.of(ctx).size.width < 1100;
@@ -121,7 +126,7 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
                 initial: initial,
                 avatarUrl: avatarUrl,
                 isLoading: state is AuthLoading,
-                onEditProfile: () => _openEditProfile(ctx, fullName),
+                onEditProfile: () => _openEditProfile(ctx),
                 onLogout: () => _handleLogout(ctx),
               ),
             ],
@@ -163,8 +168,8 @@ class _UserProfileButtonState extends State<_UserProfileButton> {
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTapDown: (details) => _showUserMenu(context, details.globalPosition),
         child: AnimatedContainer(
@@ -262,7 +267,7 @@ class _UserProfileButtonState extends State<_UserProfileButton> {
                     KaliColors.espresso.withValues(alpha: 0.5)),
               ),
               const SizedBox(height: 8),
-              Divider(color: KaliColors.sand2, height: 1),
+              const Divider(color: KaliColors.sand2, height: 1),
             ],
           ),
         ),
@@ -305,8 +310,12 @@ class _UserProfileButtonState extends State<_UserProfileButton> {
 // ── Diálogo de Edición de Perfil ──────────────────────────────────────────────
 class _EditProfileDialog extends StatefulWidget {
   final String currentName;
+  final String currentEmail;
 
-  const _EditProfileDialog({required this.currentName});
+  const _EditProfileDialog({
+    required this.currentName,
+    required this.currentEmail,
+  });
 
   @override
   State<_EditProfileDialog> createState() => _EditProfileDialogState();
@@ -314,24 +323,89 @@ class _EditProfileDialog extends StatefulWidget {
 
 class _EditProfileDialogState extends State<_EditProfileDialog> {
   late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmController;
+  bool _isLoading = false;
+  bool _showPassword = false;
+  bool _showConfirm = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
+    _emailController = TextEditingController(text: widget.currentEmail);
+    _passwordController = TextEditingController();
+    _confirmController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    context.read<AuthBloc>().add(AuthProfileUpdateRequested(fullName: name));
-    Navigator.of(context).pop();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirm = _confirmController.text;
+
+    if (name.isEmpty) {
+      setState(() => _error = 'El nombre no puede estar vacío');
+      return;
+    }
+    if (email.isEmpty) {
+      setState(() => _error = 'El correo no puede estar vacío');
+      return;
+    }
+    if (password.isNotEmpty) {
+      if (password.length < 6) {
+        setState(() => _error = 'La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+      if (password != confirm) {
+        setState(() => _error = 'Las contraseñas no coinciden');
+        return;
+      }
+    }
+
+    setState(() { _isLoading = true; _error = null; });
+
+    try {
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) throw Exception('No hay sesión activa');
+
+      final bool nameChanged = name != widget.currentName;
+      final bool emailChanged = email != widget.currentEmail;
+      final bool passwordChanged = password.isNotEmpty;
+
+      // Build a single updateUser call with all changes
+      await client.auth.updateUser(UserAttributes(
+        email: emailChanged ? email : null,
+        password: passwordChanged ? password : null,
+        data: nameChanged ? {'full_name': name} : null,
+      ));
+
+      // Keep profiles table in sync for the name
+      if (nameChanged) {
+        await client
+            .from('profiles')
+            .update({'full_name': name})
+            .eq('id', userId);
+      }
+
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() { _isLoading = false; _error = 'No se pudo guardar: $e'; });
+      }
+    }
   }
 
   @override
@@ -340,73 +414,223 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: KaliColors.warmWhite,
       child: Container(
-        width: 400,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Título
-            Text(
-              'Editar Perfil',
-              style: GoogleFonts.cormorantGaramond(
-                fontSize: 32,
-                fontWeight: FontWeight.w600,
-                color: KaliColors.espresso,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Los cambios se reflejarán inmediatamente.',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-            ),
-            const SizedBox(height: 32),
-
-            // Campo de nombre
-            KaliTextField(
-              controller: _nameController,
-              label: 'Nombre completo',
-              hint: 'Tu nombre',
-            ),
-            const SizedBox(height: 40),
-
-            // Botones
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancelar',
-                    style: KaliText.body(
-                        KaliColors.espresso.withValues(alpha: 0.6)),
+        constraints: const BoxConstraints(maxWidth: 460, maxHeight: 700),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header ────────────────────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Editar Perfil',
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      color: KaliColors.espresso,
+                    ),
                   ),
+                  IconButton(
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close, color: KaliColors.espresso),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // ── Sección: Información personal ──────────────────────────────
+              const _SectionLabel('INFORMACIÓN PERSONAL'),
+              const SizedBox(height: 16),
+              _ProfileField(
+                label: 'Nombre completo',
+                controller: _nameController,
+                hint: 'Tu nombre completo',
+              ),
+              const SizedBox(height: 28),
+
+              // ── Sección: Cuenta ────────────────────────────────────────────
+              const _SectionLabel('CUENTA'),
+              const SizedBox(height: 16),
+              _ProfileField(
+                label: 'Correo electrónico',
+                controller: _emailController,
+                hint: 'correo@ejemplo.com',
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.info_outline, size: 13, color: Color(0xFF8A7C6E)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Si cambiás el correo, recibirás un link de confirmación en la nueva dirección.',
+                      style: KaliText.caption(
+                          KaliColors.espresso.withValues(alpha: 0.5)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _ProfileField(
+                label: 'Nueva contraseña',
+                controller: _passwordController,
+                hint: 'Dejar vacío para no cambiarla',
+                obscureText: !_showPassword,
+                suffix: IconButton(
+                  icon: Icon(
+                    _showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    size: 18,
+                    color: KaliColors.espresso.withValues(alpha: 0.45),
+                  ),
+                  onPressed: () => setState(() => _showPassword = !_showPassword),
                 ),
-                const SizedBox(width: 16),
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: _save,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: KaliColors.espresso,
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      child: Text(
-                        'Guardar',
-                        style: KaliText.body(KaliColors.warmWhite,
-                            weight: FontWeight.w600, size: 13),
+              ),
+              const SizedBox(height: 16),
+              _ProfileField(
+                label: 'Confirmar contraseña',
+                controller: _confirmController,
+                hint: 'Repetí la nueva contraseña',
+                obscureText: !_showConfirm,
+                suffix: IconButton(
+                  icon: Icon(
+                    _showConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    size: 18,
+                    color: KaliColors.espresso.withValues(alpha: 0.45),
+                  ),
+                  onPressed: () => setState(() => _showConfirm = !_showConfirm),
+                ),
+              ),
+
+              // ── Error ──────────────────────────────────────────────────────
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _error!,
+                  style: KaliText.body(const Color(0xFFD4685C), size: 13),
+                ),
+              ],
+
+              const SizedBox(height: 32),
+
+              // ── Botones ────────────────────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Cancelar',
+                      style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  MouseRegion(
+                    cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: _isLoading ? null : _save,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: _isLoading
+                              ? KaliColors.espresso.withValues(alpha: 0.6)
+                              : KaliColors.espresso,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: KaliColors.warmWhite,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Guardar cambios',
+                                style: KaliText.body(KaliColors.warmWhite,
+                                    weight: FontWeight.w600, size: 13),
+                              ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+// ── Helpers internos del diálogo ──────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.4)),
+    );
+  }
+}
+
+class _ProfileField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final Widget? suffix;
+
+  const _ProfileField({
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.obscureText = false,
+    this.keyboardType,
+    this.suffix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 13),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          style: KaliText.body(KaliColors.espresso, size: 14),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: KaliText.body(KaliColors.espresso.withValues(alpha: 0.35), size: 14),
+            suffixIcon: suffix,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.15)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: KaliColors.espresso),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          ),
+        ),
+      ],
     );
   }
 }

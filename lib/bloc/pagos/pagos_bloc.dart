@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/models/subscription.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,60 +18,53 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     on<PagosSearchChanged>(_onSearchChanged);
   }
 
-  // ── Carga inicial (mock — listo para Supabase) ─────────────────────────────
+  // ── Carga inicial ──────────────────────────────────────────────────────────
   Future<void> _onLoadRequested(
     PagosLoadRequested event,
     Emitter<PagosState> emit,
   ) async {
+    if (Supabase.instance.client.auth.currentSession == null) {
+      emit(PagosLoaded(payments: []));
+      return;
+    }
     emit(PagosLoading());
     try {
+      // Un solo query con joins en lugar de 3 round trips secuenciales.
       final response = await Supabase.instance.client
           .from('subscriptions')
-          .select('*, profiles!subscriptions_user_id_fkey(*), plans(*)')
-          .order('created_at', ascending: false);
+          .select(
+            'id, user_id, status, start_date, end_date, plan_id, '
+            'profiles:profiles!subscriptions_user_id_fkey(id, full_name, avatar_url), '
+            'plans(id, name, price, currency)',
+          );
 
-      var subscriptions = response
-          .map<Subscription>((data) => Subscription.fromJson(data))
+      final subscriptions = response
+          .map<Subscription>((row) => Subscription.fromJson(row))
           .toList();
 
-      // Check for automatic expiration
       final now = DateTime.now();
-      bool anyUpdated = false;
+      final today = DateTime(now.year, now.month, now.day);
+      final expiredIds = <String>[];
 
-      final updatedSubscriptions = <Subscription>[];
-      for (var sub in subscriptions) {
-        // We consider it overdue if now is after the end date (ignoring time)
-        // using the end of the day or just comparing dates.
-        final today = DateTime(now.year, now.month, now.day);
+      final updatedSubscriptions = subscriptions.map((sub) {
         final endDate = DateTime(sub.endDate.year, sub.endDate.month, sub.endDate.day);
-        
-        if (sub.status != 'expired' && sub.status != 'cancelled') {
-          if (today.isAfter(endDate)) {
-            // Update in Supabase asynchronously (don't await to avoid blocking UI)
-            Supabase.instance.client
-                .from('subscriptions')
-                .update({'status': 'expired'})
-                .eq('id', sub.id)
-                .then((_) => debugPrint('Auto-updated ${sub.id} to expired'))
-                .catchError((e) => debugPrint('Error auto-updating ${sub.id}: $e'));
-
-            updatedSubscriptions.add(sub.copyWith(status: 'expired'));
-            anyUpdated = true;
-            continue;
-          }
+        if (sub.status != 'expired' && sub.status != 'cancelled' && today.isAfter(endDate)) {
+          expiredIds.add(sub.id);
+          return sub.copyWith(status: 'expired');
         }
-        updatedSubscriptions.add(sub);
+        return sub;
+      }).toList();
+
+      if (expiredIds.isNotEmpty) {
+        Supabase.instance.client
+            .from('subscriptions')
+            .update({'status': 'expired'})
+            .inFilter('id', expiredIds)
+            .catchError((_) {});
       }
 
-      if (anyUpdated) {
-        subscriptions = updatedSubscriptions;
-      }
-
-      emit(PagosLoaded(payments: subscriptions));
-    } catch (e) {
-      debugPrint('Error fetching subscriptions: $e');
-      // Si hay error en Supabase o parseo, emitimos estado con error (se podría crear PagosError si hace falta)
-      // Por el momento, si falla podemos dejar la lista vacía o manejarlo si existiese PagosError.
+      emit(PagosLoaded(payments: updatedSubscriptions));
+    } catch (_) {
       emit(PagosLoaded(payments: []));
     }
   }
@@ -112,9 +104,8 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
           payments: updatedList,
           currentPage: current.currentPage,
         ));
-      } catch (e) {
-        debugPrint('Error updating subscription status: $e');
-        // Opcional: mostrar un error o revertir optimísticamente
+      } catch (_) {
+        // El estado local ya refleja el cambio; si falla el server, la próxima carga lo corregirá
       }
     }
   }

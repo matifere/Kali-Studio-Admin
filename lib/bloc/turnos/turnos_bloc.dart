@@ -11,6 +11,12 @@ part 'turnos_state.dart';
 class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   final ActivityBloc? _activityBloc;
 
+  // Cached from the first profile fetch — avoids a round-trip on every week
+  // change and every create/assign operation.
+  String? _cachedInstId;
+  String? _cachedInstructorFilter;
+  bool _profileCached = false;
+
   TurnosBloc({ActivityBloc? activityBloc})
       : _activityBloc = activityBloc,
         super(TurnosState(currentWeekStart: _getStartOfWeek(DateTime.now()))) {
@@ -43,7 +49,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     TurnosLoadRequested event,
     Emitter<TurnosState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, error: null));
+    emit(state.copyWith(isLoading: true, clearError: true));
     try {
       final start = event.weekStart;
       final end = start.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
@@ -51,11 +57,34 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final startIso = DateFormat('yyyy-MM-dd').format(start);
       final endIso = DateFormat('yyyy-MM-dd').format(end);
 
-      final response = await Supabase.instance.client
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+
+      if (!_profileCached && userId != null) {
+        final profile = await client
+            .from('profiles')
+            .select('role, full_name, institution_id')
+            .eq('id', userId)
+            .maybeSingle();
+        _cachedInstId = profile?['institution_id'] as String?;
+        if (profile != null && profile['role'] == 'admin') {
+          _cachedInstructorFilter = profile['full_name'] as String?;
+        }
+        _profileCached = true;
+      }
+      final instructorFilter = _cachedInstructorFilter;
+
+      const sessionSelect = '*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
+
+      var query = client
           .from('class_sessions')
-          .select('*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))')
+          .select(sessionSelect)
           .gte('date', startIso)
           .lte('date', endIso);
+
+      final response = instructorFilter != null
+          ? await query.eq('instructor_name', instructorFilter)
+          : await query;
 
       final sessions = response.map<ClassSession>((data) => ClassSession.fromJson(data)).toList();
 
@@ -95,9 +124,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      final profile = await Supabase.instance.client.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
-      final instId = profile?['institution_id'];
+      final instId = _cachedInstId;
 
       final insertData = <Map<String, dynamic>>[];
 
@@ -133,7 +160,9 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         }
       }
 
-      await Supabase.instance.client.from('class_sessions').insert(insertData);
+      await Supabase.instance.client
+          .from('class_sessions')
+          .upsert(insertData, onConflict: 'template_id,date', ignoreDuplicates: true);
       
       final firstTemp = event.templates.first;
       _activityBloc?.add(ActivityLogged(ActivityEntry(
@@ -221,9 +250,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     try {
       final db = Supabase.instance.client;
-      final user = db.auth.currentUser;
-      final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
-      final instId = profile?['institution_id'];
+      final instId = _cachedInstId;
 
       final inserts = <Map<String, dynamic>>[];
       

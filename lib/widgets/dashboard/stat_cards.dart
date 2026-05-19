@@ -17,23 +17,19 @@ class DashboardStatCards extends StatelessWidget {
           builder: (context, constraints) {
             final bool isNarrow = constraints.maxWidth < 700;
 
+            if (state.isLoading && !state.hasLoaded) {
+              return _buildSkeletonRow(isNarrow: isNarrow);
+            }
+
             final widgets = [
               _buildStatCard(
                 title: 'INGRESOS TOTALES',
                 value:
                     '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
                 icon: Icons.payments_outlined,
-                bottomWidget: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: KaliColors.clay.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '+12% vs mes anterior',
-                    style: KaliText.label(KaliColors.espresso),
-                  ),
+                bottomWidget: Text(
+                  'Ingresos del mes actual',
+                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                 ),
               ),
               _buildStatCard(
@@ -81,6 +77,79 @@ class DashboardStatCards extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildSkeletonRow({required bool isNarrow}) {
+    final cards = List.generate(3, (_) => _buildSkeletonCard());
+    if (isNarrow) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          cards[0],
+          const SizedBox(height: 24),
+          cards[1],
+          const SizedBox(height: 24),
+          cards[2],
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: cards[0]),
+        const SizedBox(width: 24),
+        Expanded(child: cards[1]),
+        const SizedBox(width: 24),
+        Expanded(child: cards[2]),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 12,
+            width: 120,
+            decoration: BoxDecoration(
+              color: KaliColors.espresso.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 40,
+            width: 80,
+            decoration: BoxDecoration(
+              color: KaliColors.espresso.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 12,
+            width: 160,
+            decoration: BoxDecoration(
+              color: KaliColors.espresso.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

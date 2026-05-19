@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/models/subscription.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
 import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
 
 /// Barra de filtros y acciones de la sección de pagos.
@@ -44,8 +44,8 @@ class PagosFilters extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.start,
               children: [
                 // Búsqueda
-                SizedBox(
-                  width: 280,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 280),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -172,16 +172,6 @@ class PagosFilters extends StatelessWidget {
                   },
                 ),
                 _FilledActionBtn(
-                  icon: Icons.add_card_rounded,
-                  label: 'Crear Plan',
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => const CreatePlanDialog(),
-                    );
-                  },
-                ),
-                _FilledActionBtn(
                   icon: Icons.person_add_alt_1_rounded,
                   label: 'Asignar Plan',
                   onTap: () async {
@@ -303,8 +293,8 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -356,8 +346,8 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

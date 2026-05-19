@@ -14,26 +14,22 @@ class AlumnosFilterDialog extends StatefulWidget {
 }
 
 class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
-  String? _selectedPlan;
+  String? _selectedPatologia;
   bool? _isActive;
 
   @override
   void initState() {
     super.initState();
-    _selectedPlan = widget.state.planFilter;
+    _selectedPatologia = widget.state.patologiaFilter;
     _isActive = widget.state.isActiveFilter;
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   void _applyFilters() {
     context.read<AlumnosBloc>().add(
           AlumnosFilterChanged(
-            searchQuery: "",
-            planFilter: _selectedPlan,
+            // Preserva la búsqueda de texto actual
+            searchQuery: widget.state.searchQuery,
+            patologiaFilter: _selectedPatologia,
             isActiveFilter: _isActive,
           ),
         );
@@ -43,8 +39,8 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
   void _clearFilters() {
     context.read<AlumnosBloc>().add(
           AlumnosFilterChanged(
-            searchQuery: '',
-            planFilter: null,
+            searchQuery: widget.state.searchQuery,
+            patologiaFilter: null,
             isActiveFilter: null,
           ),
         );
@@ -53,6 +49,8 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final hasActiveFilters = _selectedPatologia != null || _isActive != null;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: KaliColors.warmWhite,
@@ -89,95 +87,71 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
             const SizedBox(height: 32),
 
             // Filtro de Estado
-            Text('Estado del Alumno',
-                style: KaliText.label(KaliColors.espresso)),
+            Text('Estado del Alumno', style: KaliText.label(KaliColors.espresso)),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: KaliColors.sand,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: KaliColors.sand2, width: 1.2),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<bool?>(
-                  value: _isActive,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: KaliColors.clayDark),
-                  dropdownColor: KaliColors.warmWhite,
-                  style: KaliText.body(KaliColors.espresso, size: 14),
-                  items: const [
-                    DropdownMenuItem(
-                        value: null, child: Text('Todos los estados')),
-                    DropdownMenuItem(value: true, child: Text('Activos')),
-                    DropdownMenuItem(value: false, child: Text('Inactivos')),
-                  ],
-                  onChanged: (val) => setState(() => _isActive = val),
-                ),
-              ),
+            _buildDropdown<bool?>(
+              value: _isActive,
+              items: const [
+                DropdownMenuItem(value: null, child: Text('Todos los estados')),
+                DropdownMenuItem(value: true, child: Text('Activos')),
+                DropdownMenuItem(value: false, child: Text('Inactivos')),
+              ],
+              onChanged: (val) => setState(() => _isActive = val),
             ),
             const SizedBox(height: 24),
 
-            // Filtro de Plan
-            Text('Plan', style: KaliText.label(KaliColors.espresso)),
+            // Filtro de Patología
+            Text('Patología', style: KaliText.label(KaliColors.espresso)),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: KaliColors.sand,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: KaliColors.sand2, width: 1.2),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String?>(
-                  value: _selectedPlan,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: KaliColors.clayDark),
-                  dropdownColor: KaliColors.warmWhite,
-                  style: KaliText.body(KaliColors.espresso, size: 14),
-                  items: [
-                    const DropdownMenuItem(
-                        value: null, child: Text('Cualquier plan')),
-                    ...widget.state.availablePlans.map(
-                      (plan) =>
-                          DropdownMenuItem(value: plan, child: Text(plan)),
+            widget.state.availablePatologias.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      'No hay patologías registradas aún.',
+                      style: KaliText.body(
+                        KaliColors.espresso.withValues(alpha: 0.45),
+                        size: 13,
+                      ),
                     ),
-                  ],
-                  onChanged: (val) => setState(() => _selectedPlan = val),
-                ),
-              ),
-            ),
+                  )
+                : _buildDropdown<String?>(
+                    value: _selectedPatologia,
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('Cualquier patología')),
+                      ...widget.state.availablePatologias.map(
+                        (p) => DropdownMenuItem(value: p, child: Text(p)),
+                      ),
+                    ],
+                    onChanged: (val) => setState(() => _selectedPatologia = val),
+                  ),
             const SizedBox(height: 40),
 
             // Botones de acción
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: _clearFilters,
-                  child: Text(
-                    'Limpiar',
-                    style: KaliText.body(
-                        KaliColors.espresso.withValues(alpha: 0.6)),
+                if (hasActiveFilters)
+                  TextButton(
+                    onPressed: _clearFilters,
+                    child: Text(
+                      'Limpiar filtros',
+                      style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
+                if (hasActiveFilters) const SizedBox(width: 8),
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: _applyFilters,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
                         color: KaliColors.espresso,
                         borderRadius: BorderRadius.circular(28),
                       ),
                       child: Text(
-                        'Aplicar Filtros',
+                        'Aplicar',
                         style: KaliText.body(KaliColors.warmWhite,
                             weight: FontWeight.w600, size: 13),
                       ),
@@ -187,6 +161,32 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required T value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: KaliColors.sand,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: KaliColors.sand2, width: 1.2),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: KaliColors.clayDark),
+          dropdownColor: KaliColors.warmWhite,
+          style: KaliText.body(KaliColors.espresso, size: 14),
+          items: items,
+          onChanged: onChanged,
         ),
       ),
     );

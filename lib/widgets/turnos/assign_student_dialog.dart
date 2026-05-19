@@ -94,14 +94,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               disabledReason = 'Sin plan activo';
             } else {
               final plansData = sub['plans'];
-              // plansData can be null if not populated or no plan linked
-              maxRes = (plansData != null && plansData['max_reservations_per_week'] != null) 
-                  ? plansData['max_reservations_per_week'] as int 
+              maxRes = (plansData != null && plansData['max_reservations_per_week'] != null)
+                  ? plansData['max_reservations_per_week'] as int
                   : 0;
-
-              if (currRes >= maxRes) {
-                disabledReason = 'Límite semanal alcanzado';
-              }
+              // El admin puede inscribir más allá del límite semanal del alumno.
             }
 
             p['disabledReason'] = disabledReason;
@@ -160,8 +156,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 450,
-        height: 600,
+        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 600),
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +239,17 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                             )),
                             subtitle: disabledReason != null
                                 ? Text(disabledReason, style: TextStyle(color: Colors.red[700], fontSize: 12))
-                                : Text('Disponible ($currRes/$maxRes reservas)', style: const TextStyle(color: KaliColors.clay, fontSize: 12)),
+                                : Text(
+                                    (maxRes ?? 0) > 0
+                                        ? '$currRes/$maxRes reservas esta semana'
+                                        : 'Con plan activo',
+                                    style: TextStyle(
+                                      color: ((maxRes ?? 0) > 0 && (currRes ?? 0) >= maxRes!)
+                                          ? Colors.orange[700]
+                                          : KaliColors.clay,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                             trailing: TextButton(
                               onPressed: disabledReason != null ? null : () => _assign(p['id']),
                               child: Text(disabledReason != null ? 'No elegible' : 'Inscribir'),

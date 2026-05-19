@@ -56,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
-          current is AuthSuccess || current is AuthFailure,
+          current is AuthSuccess || current is AuthFailure || current is AuthPending,
       listener: (context, state) {
         if (state is AuthSuccess) {
           context.read<AuthBloc>().add(AuthReset());
@@ -67,6 +67,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             MaterialPageRoute(builder: (_) => const AuthWrapper()),
             (route) => false,
           );
+        } else if (state is AuthPending) {
+          context.read<AuthBloc>().add(AuthReset());
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cuenta creada. Esperá que el administrador te dé acceso.'),
+              duration: Duration(seconds: 5),
+            ),
+          );
+          Navigator.of(context).pop();
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
@@ -85,8 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Container(
-                        width: 900,
-                        height: 600,
+                        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 600),
                         decoration: BoxDecoration(
                           color: KaliColors.warmWhite,
                           borderRadius: BorderRadius.circular(16),
@@ -170,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       const SizedBox(height: 20),
                                       KaliTextField(
                                         label: "EMAIL DE TRABAJO",
-                                        hint: "admin@kali-studio.com",
+                                        hint: "admin@chimpance-admin.com",
                                         controller: emailControl,
                                       ),
                                       const SizedBox(height: 20),

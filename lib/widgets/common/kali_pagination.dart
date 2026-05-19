@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/theme/kali_theme.dart';
 
 /// Control de paginación reutilizable.
@@ -122,8 +123,8 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

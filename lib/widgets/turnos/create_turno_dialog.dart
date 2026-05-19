@@ -92,17 +92,19 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
-      child: Container(
-        width: 450,
-        padding: const EdgeInsets.all(24),
-        child: _isLoadingTemplates 
-          ? const SizedBox(
-              height: 200, 
-              child: Center(child: CircularProgressIndicator())
-            )
-          : Form(
-              key: _formKey,
-              child: Column(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: _isLoadingTemplates
+              ? const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : Form(
+                  key: _formKey,
+                  child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -126,7 +128,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                   Text('Plantilla de Clase (Días)', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<List<ScheduleTemplate>>(
-                    value: _selectedTemplates,
+                    initialValue: _selectedTemplates,
                     isExpanded: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -186,7 +188,7 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                   Text('Frecuencia de Repetición', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: _recurrenceWeeks,
+                    initialValue: _recurrenceWeeks,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -229,6 +231,8 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                 ],
               ),
             ),
+          ),
+        ),
       ),
     );
   }

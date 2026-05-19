@@ -14,13 +14,13 @@ class StudentProfileDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        width: 500,
+        constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
+        child: SingleChildScrollView(child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,25 +28,31 @@ class StudentProfileDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    StudentAvatar(student: student, radius: 32),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          student.name,
-                          style: KaliText.headingItalic(KaliColors.espresso, size: 24),
+                Expanded(
+                  child: Row(
+                    children: [
+                      StudentAvatar(student: student, radius: 32),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              student.name,
+                              style: KaliText.headingItalic(KaliColors.espresso, size: 24),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              student.email,
+                              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          student.email,
-                          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -99,7 +105,7 @@ class StudentProfileDialog extends StatelessWidget {
                     style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
                   ),
           ],
-        ),
+        )),
       ),
     );
   }

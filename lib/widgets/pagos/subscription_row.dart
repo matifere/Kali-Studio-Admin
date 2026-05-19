@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/models/subscription.dart';
@@ -22,8 +23,8 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
     final s = widget.subscription;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered
@@ -57,12 +58,15 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                       ),
                     ),
                   const SizedBox(width: 12),
-                  Text(
-                    s.studentName,
-                    style: KaliText.body(
-                      KaliColors.espresso,
-                      weight: FontWeight.w600,
-                      size: 14,
+                  Expanded(
+                    child: Text(
+                      s.studentName,
+                      style: KaliText.body(
+                        KaliColors.espresso,
+                        weight: FontWeight.w600,
+                        size: 14,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

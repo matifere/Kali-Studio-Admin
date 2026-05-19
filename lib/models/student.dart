@@ -14,6 +14,7 @@ class Student {
   final DateTime createdAt;
   final List<String> patologias;
   final DateTime? planEndDate;
+  final int attendedThisMonth;
 
   const Student({
     required this.id,
@@ -28,6 +29,7 @@ class Student {
     required this.patologias,
     this.planEndDate,
     this.reactivate = false,
+    this.attendedThisMonth = 0,
   });
   String get initials {
     //si bien puede tener un nombre mas largo (por ejemplo nombre segundo nombre apellido segundo apellido), despues nos complicaria la UI asi que lo voy a dejar asi
@@ -53,13 +55,17 @@ class Student {
     DateTime? endDate;
     if (json['subscriptions'] != null &&
         (json['subscriptions'] as List).isNotEmpty) {
-      // Tomamos la primera suscripción (idealmente la query la trae filtrada/ordenada por activa)
-      final firstSub = json['subscriptions'][0];
-      if (firstSub['plans'] != null) {
-        currentPlan = firstSub['plans']['name'] ?? 'Sin plan';
+      final subs = json['subscriptions'] as List;
+      // Preferir suscripción activa; si no hay, tomar la primera
+      final sub = subs.firstWhere(
+        (s) => s['status'] == 'active',
+        orElse: () => subs.first,
+      );
+      if (sub['plans'] != null) {
+        currentPlan = sub['plans']['name'] ?? 'Sin plan';
       }
-      if (firstSub['end_date'] != null) {
-        endDate = DateTime.tryParse(firstSub['end_date']);
+      if (sub['end_date'] != null) {
+        endDate = DateTime.tryParse(sub['end_date']);
       }
     }
 
@@ -88,13 +94,32 @@ class Student {
       }
     }
 
-    // 3. Retorno de la instancia
+    // 3. Contar asistencias del mes actual
+    final now = DateTime.now();
+    final firstOfMonth = DateTime(now.year, now.month, 1);
+    final lastOfMonth = DateTime(now.year, now.month + 1, 0);
+    int attendedThisMonth = 0;
+    if (json['reservations'] != null) {
+      for (final r in json['reservations'] as List) {
+        if (r['status'] == 'attended' && r['class_sessions'] != null) {
+          final dateStr = r['class_sessions']['date'] as String?;
+          if (dateStr != null) {
+            final date = DateTime.tryParse(dateStr);
+            if (date != null &&
+                !date.isBefore(firstOfMonth) &&
+                !date.isAfter(lastOfMonth)) {
+              attendedThisMonth++;
+            }
+          }
+        }
+      }
+    }
+
+    // 4. Retorno de la instancia
     return Student(
       id: json['id'] ?? '',
       avatarImage: json['avatar_url'],
       name: json['full_name'] ?? 'Sin nombre',
-      // NOTA: Como vimos en el diagrama, email no está en profiles.
-      // Deberás agregarlo a la tabla o crear una vista (view) en SQL que una auth.users con profiles.
       email: json['email'] ?? 'correo@pendiente.com',
       plan: currentPlan,
       isActive: json['is_active'] ?? false,
@@ -103,8 +128,8 @@ class Student {
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now() : DateTime.now(),
       patologias: json['patologias'] != null ? List<String>.from(json['patologias']) : [],
       planEndDate: endDate,
-      reactivate:
-          false, // Asumo que esto es puramente para la UI y no viene de la DB
+      reactivate: false,
+      attendedThisMonth: attendedThisMonth,
     );
   }
 }

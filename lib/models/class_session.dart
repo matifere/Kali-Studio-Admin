@@ -63,6 +63,7 @@ class ClassSession {
     List<TurnoReservation> reservations = [];
     if (json['reservations'] != null && json['reservations'] is List) {
       reservations = (json['reservations'] as List)
+          .where((r) => (r['status'] as String?) != 'cancelled')
           .map((r) => TurnoReservation.fromJson(r))
           .toList();
     }
@@ -96,12 +97,11 @@ class ClassSession {
     }
   }
 
-  /// Parses HH:mm formatted strings into a TimeOfDay
   TimeOfDay _parseTime(String timeStr) {
     final parts = timeStr.split(':');
     return TimeOfDay(
-      hour: int.parse(parts[0]),
-      minute: int.parse(parts[1]),
+      hour: int.tryParse(parts[0]) ?? 0,
+      minute: parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/models/class_session.dart';
@@ -251,7 +252,7 @@ class TurnoDetailPanel extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           IconButton(
-                            icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withOpacity(0.5)),
+                            icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
                             onPressed: () {
                               context.read<TurnosBloc>().add(TurnoStudentRemoved(student.id));
                             },
@@ -353,8 +354,8 @@ class _ActionButtonState extends State<_ActionButton> {
         : KaliColors.espresso;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

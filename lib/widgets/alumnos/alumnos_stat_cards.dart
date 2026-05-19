@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
@@ -213,14 +214,14 @@ class _PlanCarouselState extends State<_PlanCarousel> {
   Widget build(BuildContext context) {
     // Mientras carga, mostrar skeleton
     if (widget.isLoading) {
-      return _ClayPlanCard(planName: '...', count: null);
+      return const _ClayPlanCard(planName: '...', count: null);
     }
 
     final entries = widget.countByPlan.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value)); // Mayor primero
 
     if (entries.isEmpty) {
-      return _ClayPlanCard(planName: 'Sin datos', count: 0);
+      return const _ClayPlanCard(planName: 'Sin datos', count: 0);
     }
 
     if (entries.length == 1) {
@@ -384,8 +385,8 @@ class _NavArrowState extends State<_NavArrow> {
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

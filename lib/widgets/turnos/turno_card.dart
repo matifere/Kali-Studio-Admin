@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:kali_studio/models/class_session.dart';
 import 'package:kali_studio/models/turno.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
@@ -10,9 +11,8 @@ import 'package:kali_studio/theme/kali_theme.dart';
 class TurnoCard extends StatefulWidget {
   final ClassSession turno;
   final VoidCallback? onTap;
-  final bool isCompactMode;
 
-  const TurnoCard({super.key, required this.turno, this.onTap, this.isCompactMode = false});
+  const TurnoCard({super.key, required this.turno, this.onTap});
 
   @override
   State<TurnoCard> createState() => _TurnoCardState();
@@ -29,13 +29,13 @@ class _TurnoCardState extends State<TurnoCard> {
     final isPrivate = t.uiTurnoType == TurnoType.privateSpecial;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
+      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: EdgeInsets.all(widget.isCompactMode ? 6 : 10),
+          clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(10),
@@ -57,55 +57,24 @@ class _TurnoCardState extends State<TurnoCard> {
                   ]
                 : [],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: widget.isCompactMode ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
-            children: [
-              // Parte superior: nombre + instructor
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    t.name,
-                    style: KaliText.label(fg.withValues(alpha: widget.isCompactMode ? 0.9 : 0.7)).copyWith(
-                      fontSize: widget.isCompactMode ? 12 : null,
-                      fontWeight: widget.isCompactMode ? FontWeight.bold : null,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          child: LayoutBuilder(
+            builder: (ctx, constraints) {
+              final h = constraints.maxHeight;
+              if (h < 14) return const SizedBox.shrink();
+              final vPad = h < 22 ? 2.0 : 6.0;
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
+                child: Text(
+                  t.name,
+                  style: KaliText.label(fg.withValues(alpha: 0.9)).copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                   ),
-                  if (!widget.isCompactMode) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      t.instructorName ?? 'Sin instructor',
-                      style: KaliText.body(fg, weight: FontWeight.w600, size: 13),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-
-              // Parte inferior: ocupación
-              if (!widget.isCompactMode)
-                Row(
-                  children: [
-                    Text(
-                      t.occupancyText,
-                      style: KaliText.label(
-                        fg.withValues(alpha: t.isFull ? 0.9 : 0.55),
-                      ),
-                    ),
-                    if (t.isFull) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        'full',
-                        style: KaliText.label(fg.withValues(alpha: 0.55)),
-                      ),
-                    ],
-                  ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-            ],
+              );
+            },
           ),
         ),
       ),

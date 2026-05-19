@@ -9,6 +9,7 @@ import 'package:kali_studio/widgets/turnos/turno_detail_panel.dart';
 import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
 import 'package:kali_studio/widgets/turnos/manage_templates_dialog.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 
 /// Pantalla principal de Turnos (calendario semanal).
 class TurnosScreen extends StatefulWidget {
@@ -19,17 +20,13 @@ class TurnosScreen extends StatefulWidget {
 }
 
 class _TurnosScreenState extends State<TurnosScreen> {
-  bool _isCompactMode = false;
+  final bool _isProfesor = ProfileCache.isAdmin;
 
   @override
   void initState() {
     super.initState();
     final bloc = context.read<TurnosBloc>();
-    if (bloc.state.sessions.isEmpty && !bloc.state.isLoading) {
-      bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
-    } else if (bloc.state.isLoading == true && bloc.state.sessions.isEmpty) {
-       bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
-    }
+    bloc.add(TurnosLoadRequested(bloc.state.currentWeekStart));
   }
 
   void _showCreateDialog() {
@@ -51,8 +48,40 @@ class _TurnosScreenState extends State<TurnosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TurnosBloc, TurnosState>(
+    return BlocConsumer<TurnosBloc, TurnosState>(
+      listenWhen: (prev, curr) {
+        final isMobile = MediaQuery.of(context).size.width < 700;
+        return isMobile && !prev.hasSelection && curr.hasSelection;
+      },
+      listener: (ctx, state) {
+        if (!state.hasSelection) return;
+        showModalBottomSheet(
+          context: ctx,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (sheetCtx) => BlocProvider.value(
+            value: ctx.read<TurnosBloc>(),
+            child: Container(
+              height: MediaQuery.of(ctx).size.height * 0.88,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: TurnoDetailPanel(
+                turno: state.selectedTurno!,
+                onClose: () {
+                  ctx.read<TurnosBloc>().add(TurnoDeselected());
+                  Navigator.of(sheetCtx).pop();
+                },
+              ),
+            ),
+          ),
+        ).then((_) {
+          if (ctx.mounted) ctx.read<TurnosBloc>().add(TurnoDeselected());
+        });
+      },
       builder: (context, state) {
+        final isMobile = MediaQuery.of(context).size.width < 700;
         return Column(
           children: [
             const DashboardTopNavBar(),
@@ -62,18 +91,18 @@ class _TurnosScreenState extends State<TurnosScreen> {
                   // ── Contenido principal ─────────────────────────────────
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(40, 16, 24, 24),
+                      padding: EdgeInsets.fromLTRB(isMobile ? 16 : 40, 16, isMobile ? 16 : 24, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ScheduleHeader(
                             currentWeekStart: state.currentWeekStart,
-                            isCompactMode: _isCompactMode,
-                            onCompactModeChanged: (val) => setState(() => _isCompactMode = val),
                             selectedInstructor: state.selectedInstructor,
                             selectedRoom: state.selectedRoom,
                             availableInstructors: state.availableInstructors,
                             availableRooms: state.availableRooms,
+                            showInstructorFilter: !_isProfesor,
+                            showDropdownFilters: !_isProfesor,
                             onFilterChanged: (instructor, room) {
                               context.read<TurnosBloc>().add(
                                     TurnosFilterChanged(
@@ -90,8 +119,8 @@ class _TurnosScreenState extends State<TurnosScreen> {
                               final next = state.currentWeekStart.add(const Duration(days: 7));
                               context.read<TurnosBloc>().add(TurnosWeekChanged(next));
                             },
-                            onCreateTurno: _showCreateDialog,
-                            onCreateTemplate: _showManageTemplatesDialog,
+                            onCreateTurno: _isProfesor ? null : _showCreateDialog,
+                            onCreateTemplate: _isProfesor ? null : _showManageTemplatesDialog,
                           ),
                           Expanded(
                             child: Container(
@@ -122,7 +151,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                                   currentWeekStart: state.currentWeekStart,
                                                   sessions: state.filteredSessions,
                                                   selectedTurno: state.selectedTurno,
-                                                  isCompactMode: _isCompactMode,
                                                   onTurnoSelected: (turno) {
                                                   context.read<TurnosBloc>().add(
                                                         TurnoSelected(turno),
@@ -142,22 +170,23 @@ class _TurnosScreenState extends State<TurnosScreen> {
                     ),
                   ),
 
-                  // ── Panel lateral de detalles ───────────────────────────
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutCubic,
-                    child: state.hasSelection
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 16, 24, 24),
-                            child: TurnoDetailPanel(
-                              turno: state.selectedTurno!, // Note: detail panel will need to be updated to support ClassSession instead of Turno
-                              onClose: () {
-                                context.read<TurnosBloc>().add(TurnoDeselected());
-                              },
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+                  // ── Panel lateral de detalles (solo desktop) ────────────
+                  if (!isMobile)
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutCubic,
+                      child: state.hasSelection
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 16, 24, 24),
+                              child: TurnoDetailPanel(
+                                turno: state.selectedTurno!,
+                                onClose: () {
+                                  context.read<TurnosBloc>().add(TurnoDeselected());
+                                },
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                 ],
               ),
             ),

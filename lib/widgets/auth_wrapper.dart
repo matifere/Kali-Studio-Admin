@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kali_studio/screens/dashboard_screen.dart';
 import 'package:kali_studio/screens/institution_selection_screen.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
 class AuthWrapper extends StatefulWidget {
@@ -14,39 +15,43 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoading = true;
   bool _hasInstitution = false;
-  String _userRole = 'admin';
 
   @override
   void initState() {
     super.initState();
-    _checkInstitution();
+    _checkProfile();
   }
 
-  Future<void> _checkInstitution() async {
+  Future<void> _checkProfile() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
+        if (mounted) setState(() => _isLoading = false);
         return;
       }
+
+      // Fetch role + institution en una sola query y pobla el caché global.
       final data = await Supabase.instance.client
           .from('profiles')
-          .select('institution_id, role')
+          .select('role, institution_id')
           .eq('id', user.id)
           .maybeSingle();
-      
+
+      if (data != null) {
+        ProfileCache.set(
+          role: data['role'] as String? ?? 'sudo',
+          institutionId: data['institution_id'] as String?,
+        );
+      }
+
       if (mounted) {
         setState(() {
           _hasInstitution = data != null && data['institution_id'] != null;
-          _userRole = (data?['role'] as String? ?? 'admin').toLowerCase();
           _isLoading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -61,10 +66,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
-    if (_hasInstitution) {
-      return DashboardScreen(userRole: _userRole);
-    } else {
-      return const InstitutionSelectionScreen();
-    }
+    return _hasInstitution
+        ? const DashboardScreen()
+        : const InstitutionSelectionScreen();
   }
 }

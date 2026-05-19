@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.0
-  flutter_staggered_grid_view: ^0.7.0
   flutter_bloc: ^8.1.6
   equatable: ^2.0.7
   google_fonts: ^6.1.0
@@ -21,7 +20,9 @@ dependencies:
   csv: ^6.0.0
   file_saver: ^0.2.11
   url_launcher: ^6.3.0
+  http: ^1.2.0
   window_manager: ^0.4.3
+  file_picker: ^8.0.0
 
 dev_dependencies:
   flutter_test:

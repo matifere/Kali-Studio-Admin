@@ -15,12 +15,12 @@ class AlumnosPageChanged extends AlumnosEvent {
 /// Se aplicaron nuevos filtros en el directorio de alumnos.
 class AlumnosFilterChanged extends AlumnosEvent {
   final String searchQuery;
-  final String? planFilter;
+  final String? patologiaFilter;
   final bool? isActiveFilter;
 
   AlumnosFilterChanged({
     required this.searchQuery,
-    this.planFilter,
+    this.patologiaFilter,
     this.isActiveFilter,
   });
 }

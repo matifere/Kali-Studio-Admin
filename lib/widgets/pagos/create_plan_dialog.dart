@@ -72,7 +72,7 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
       child: Container(
-        width: 450,
+        constraints: const BoxConstraints(maxWidth: 450),
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Form(
@@ -145,7 +145,7 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
                           Text('Moneda', style: KaliText.label(KaliColors.espresso)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _currency,
+                            initialValue: _currency,
                             decoration: _inputDecoration('ARS'),
                             items: _currencies.map((c) {
                               return DropdownMenuItem<String>(
@@ -182,7 +182,8 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
                   onChanged: (v) => setState(() => _isActive = v),
                   title: Text('Plan Activo', style: KaliText.body(KaliColors.espresso, size: 14)),
                   subtitle: Text('Determina si el plan está disponible.', style: KaliText.caption(KaliColors.espresso.withValues(alpha: 0.6))),
-                  activeColor: KaliColors.espresso,
+                  activeThumbColor: KaliColors.warmWhite,
+                  activeTrackColor: KaliColors.espresso,
                   contentPadding: EdgeInsets.zero,
                 ),
 

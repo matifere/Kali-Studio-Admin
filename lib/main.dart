@@ -1,8 +1,9 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_manager/window_manager.dart';
 import 'package:kali_studio/bloc/activity/activity_bloc.dart';
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
@@ -12,8 +13,9 @@ import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
 import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
 import 'package:kali_studio/screens/login_screen.dart';
+import 'package:kali_studio/screens/new_password_screen.dart';
 import 'package:kali_studio/widgets/auth_wrapper.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme/kali_theme.dart';
@@ -35,10 +37,20 @@ Future<void> main() async {
     });
   }
 
-  await dotenv.load(fileName: ".env");
+  final String url;
+  final String anon;
+
+  if (kIsWeb) {
+    url = 'https://tmfcnvtjzmtpqhzvfxos.supabase.co';
+    anon = 'sb_publishable_TkebjBTlimQS7Uu4HWE-tQ_v3ylhC_b';
+  } else {
+    await dotenv.load(fileName: ".env");
+    url = dotenv.env['URL'] ?? '';
+    anon = dotenv.env['ANON'] ?? '';
+  }
+
   await initializeDateFormatting('es_ES', null);
-  await Supabase.initialize(
-      url: dotenv.env['URL'] ?? '', anonKey: dotenv.env['ANON'] ?? '');
+  await Supabase.initialize(url: url, anonKey: anon);
   runApp(const KaliApp());
 }
 
@@ -73,7 +85,7 @@ class _KaliAppState extends State<KaliApp> {
     _alumnosBloc = AlumnosBloc(activityBloc: _activityBloc);
     _turnosBloc = TurnosBloc(activityBloc: _activityBloc);
     _pagosBloc = PagosBloc()..add(PagosLoadRequested());
-    _dashboardBloc = DashboardBloc()..add(DashboardLoadRequested());
+    _dashboardBloc = DashboardBloc();
   }
 
   @override
@@ -105,16 +117,45 @@ class _KaliAppState extends State<KaliApp> {
   }
 }
 
-// ─── _KaliAppView: solo UI, sin lógica de creación ───────────────────────────
-class _KaliAppView extends StatelessWidget {
+// ─── _KaliAppView: UI + manejo de recuperación de contraseña ─────────────────
+class _KaliAppView extends StatefulWidget {
   const _KaliAppView();
+
+  @override
+  State<_KaliAppView> createState() => _KaliAppViewState();
+}
+
+class _KaliAppViewState extends State<_KaliAppView> {
+  bool _isPasswordRecovery = false;
+  late final StreamSubscription _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub =
+        Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      if (!mounted) return;
+      if (event.event == AuthChangeEvent.passwordRecovery) {
+        setState(() => _isPasswordRecovery = true);
+      } else if (event.event == AuthChangeEvent.userUpdated ||
+          event.event == AuthChangeEvent.signedOut) {
+        setState(() => _isPasswordRecovery = false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
 
     return MaterialApp(
-      title: 'Kali Studio',
+      title: 'Chimpance Admin',
       theme: KaliTheme.theme,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
@@ -125,7 +166,11 @@ class _KaliAppView extends StatelessWidget {
       supportedLocales: const [
         Locale('es', 'ES'),
       ],
-      home: isLoggedIn ? const AuthWrapper() : const LoginScreen(),
+      home: _isPasswordRecovery
+          ? const NewPasswordScreen()
+          : isLoggedIn
+              ? const AuthWrapper()
+              : const LoginScreen(),
     );
   }
 }

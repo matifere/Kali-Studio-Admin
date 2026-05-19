@@ -37,11 +37,15 @@ class KaliTextField extends StatelessWidget {
               style: KaliText.label(KaliColors.espresso),
             ),
             if (actionLabel != null)
-              GestureDetector(
+              InkWell(
                 onTap: onActionTap,
-                child: Text(
-                  actionLabel!,
-                  style: KaliText.caption(KaliColors.clayDark),
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    actionLabel!,
+                    style: KaliText.caption(KaliColors.clayDark),
+                  ),
                 ),
               ),
           ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
 import 'package:kali_studio/widgets/pagos/pagos_stat_cards.dart';
@@ -8,8 +10,19 @@ import 'package:kali_studio/widgets/pagos/pagos_table.dart';
 import 'package:kali_studio/widgets/pagos/plans_table.dart';
 
 /// Pantalla principal de Pagos.
-class PagosScreen extends StatelessWidget {
+class PagosScreen extends StatefulWidget {
   const PagosScreen({super.key});
+
+  @override
+  State<PagosScreen> createState() => _PagosScreenState();
+}
+
+class _PagosScreenState extends State<PagosScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<PagosBloc>().add(PagosLoadRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
