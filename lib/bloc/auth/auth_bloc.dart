@@ -93,6 +93,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await client
           .from('profiles')
           .update({'full_name': event.fullName}).eq('id', userId);
+      ProfileCache.set(
+        role: ProfileCache.role,
+        institutionId: ProfileCache.institutionId,
+        fullName: event.fullName,
+      );
       emit(AuthProfileUpdated());
     } catch (e) {
       emit(AuthFailure('No se pudo actualizar el perfil: $e'));

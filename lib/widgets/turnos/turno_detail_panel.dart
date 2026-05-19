@@ -7,6 +7,7 @@ import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/common/kali_icon_button.dart';
 import 'package:kali_studio/widgets/turnos/edit_turno_dialog.dart';
 import 'package:kali_studio/widgets/turnos/assign_student_dialog.dart';
+import 'package:kali_studio/services/profile_cache.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {
@@ -18,6 +19,14 @@ class TurnoDetailPanel extends StatelessWidget {
     required this.turno,
     required this.onClose,
   });
+
+  bool get _canModifyStudents {
+    if (ProfileCache.isAdmin) {
+      if (turno.instructorName == null || ProfileCache.fullName == null) return false;
+      return turno.instructorName == ProfileCache.fullName;
+    }
+    return true; // Sudo u otros roles pueden modificar siempre
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +52,10 @@ class TurnoDetailPanel extends StatelessWidget {
             _buildDescription(),
           const SizedBox(height: 16),
           Expanded(child: _buildEnrolledStudents(context)),
-          _buildActions(context),
-          const SizedBox(height: 16),
+          if (_canModifyStudents) ...[
+            _buildActions(context),
+            const SizedBox(height: 16),
+          ],
         ],
       ),
     );
@@ -179,7 +190,7 @@ class TurnoDetailPanel extends StatelessWidget {
                 'ALUMNOS INSCRIPTOS',
                 style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
               ),
-              if (!turno.isFull)
+              if (!turno.isFull && _canModifyStudents)
                 InkWell(
                   onTap: () {
                     showDialog(
@@ -232,7 +243,7 @@ class TurnoDetailPanel extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: Row(
+                      trailing: _canModifyStudents ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Tooltip(
@@ -261,7 +272,9 @@ class TurnoDetailPanel extends StatelessWidget {
                             constraints: const BoxConstraints(),
                           ),
                         ],
-                      ),
+                      ) : (student.status == 'attended'
+                          ? const Icon(Icons.check_circle, size: 16, color: KaliColors.clay)
+                          : const SizedBox()),
                     );
                   },
                 ),

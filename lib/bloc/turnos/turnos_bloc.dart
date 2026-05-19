@@ -67,12 +67,10 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
             .eq('id', userId)
             .maybeSingle();
         _cachedInstId = profile?['institution_id'] as String?;
-        if (profile != null && profile['role'] == 'admin') {
-          _cachedInstructorFilter = profile['full_name'] as String?;
-        }
         _profileCached = true;
       }
-      final instructorFilter = _cachedInstructorFilter;
+      // instructorFilter is used by the UI filter dropdown now, not automatically for admins.
+      final instructorFilter = state.selectedInstructor;
 
       const sessionSelect = '*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
 

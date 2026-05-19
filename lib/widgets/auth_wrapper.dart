@@ -33,7 +33,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       // Fetch role + institution en una sola query y pobla el caché global.
       final data = await Supabase.instance.client
           .from('profiles')
-          .select('role, institution_id')
+          .select('role, institution_id, full_name')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -41,6 +41,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ProfileCache.set(
           role: data['role'] as String? ?? 'sudo',
           institutionId: data['institution_id'] as String?,
+          fullName: data['full_name'] as String?,
         );
       }
 
