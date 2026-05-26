@@ -178,10 +178,6 @@ class SupaAuthClass {
             await auth.signOut();
             return 'Acceso denegado: No tienes permisos de administrador.';
           }
-          if (profile != null && profile['is_active'] == false) {
-            await auth.signOut();
-            return 'Tu cuenta está pendiente de aprobación. Contactá al administrador.';
-          }
         } catch (_) {}
         return 'Ok';
       } else {
