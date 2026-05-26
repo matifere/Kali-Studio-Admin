@@ -104,12 +104,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
+    if (!_hasInstitution) {
+      return const InstitutionSelectionScreen();
+    }
+
     if (!_isActive) {
       return const InactiveScreen();
     }
 
-    return _hasInstitution
-        ? const DashboardScreen()
-        : const InstitutionSelectionScreen();
+    return const DashboardScreen();
   }
 }

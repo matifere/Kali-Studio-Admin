@@ -142,12 +142,16 @@ class SupaAuthClass {
       );
       if (respuesta.user != null) {
         try {
-          await Supabase.instance.client.from('profiles').update({
+          await Supabase.instance.client.from('profiles').upsert({
+            'id': respuesta.user!.id,
+            'email': email,
             'full_name': fullName,
             'role': 'sudo',
             'is_active': false,
-          }).eq('id', respuesta.user!.id);
-        } catch (_) {}
+          });
+        } catch (e) {
+          print('Error upserting profile: $e');
+        }
         await auth.signOut();
         return 'Pending';
       } else {

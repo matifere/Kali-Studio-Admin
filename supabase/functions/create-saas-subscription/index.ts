@@ -55,7 +55,6 @@ Deno.serve(async (req) => {
           transaction_amount: plan.price,
           currency_id: plan.currency,
         },
-        payer_email: payer_email,
         back_url: "https://tu-aplicacion.com/dashboard", // URL de retorno para el usuario
         external_reference: institution_id, // Asociamos el pago con el ID de la institución para el Webhook
       }),
@@ -86,7 +85,10 @@ Deno.serve(async (req) => {
 
     // Retornar el punto de inicio del checkout para que Flutter lo abra
     return new Response(
-      JSON.stringify({ init_point: mpData.init_point }),
+      JSON.stringify({ 
+        init_point: mpData.init_point,
+        sandbox_init_point: mpData.sandbox_init_point
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

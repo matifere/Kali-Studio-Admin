@@ -12,23 +12,13 @@ class InstitutionSelectionScreen extends StatefulWidget {
   State<InstitutionSelectionScreen> createState() => _InstitutionSelectionScreenState();
 }
 
-class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> {
   final TextEditingController _createNameCtrl = TextEditingController();
-  final TextEditingController _joinIdCtrl = TextEditingController();
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
   void dispose() {
-    _tabController.dispose();
     _createNameCtrl.dispose();
-    _joinIdCtrl.dispose();
     super.dispose();
   }
 
@@ -47,40 +37,24 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
       // Usamos una función RPC para evitar el problema de RLS
-      // (No podemos seleccionar la institución recién creada si nuestro perfil aún no tiene su ID)
       await Supabase.instance.client.rpc('create_institution', params: {
         'inst_name': name,
         'inst_slug': slug,
       });
 
-      if (mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const AuthWrapper()));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al crear institución: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
+      // Buscamos la institución recién creada
+      final instRes = await Supabase.instance.client
+          .from('institutions')
+          .select('id')
+          .eq('slug', slug)
+          .single();
+      
+      final instId = instRes['id'];
 
-  Future<void> _handleJoin() async {
-    final instId = _joinIdCtrl.text.trim();
-    if (instId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingresa el ID de la institución')));
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('No session');
-
-      // Intentar actualizar directamente. Si falla por FK, es que no existe.
+      // Actualizamos el perfil del usuario actual para asignarlo a la institución
       await Supabase.instance.client.from('profiles').update({
         'institution_id': instId,
-        'role': 'admin',
+        'role': 'sudo',
       }).eq('id', user.id);
 
       if (mounted) {
@@ -88,7 +62,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo unir a la institución. Verifica que el ID sea correcto.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al crear institución: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -134,98 +108,40 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                   )
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    labelColor: KaliColors.espresso,
-                    unselectedLabelColor: KaliColors.clayDark,
-                    indicatorColor: KaliColors.espresso,
-                    tabs: const [
-                      Tab(text: 'Crear Institución'),
-                      Tab(text: 'Unirse a Institución'),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 320,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Tab Crear
-                        Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Crea una nueva institución para empezar a gestionar tu estudio.',
-                                style: KaliText.body(KaliColors.clayDark),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              KaliTextField(
-                                label: 'NOMBRE DE LA INSTITUCIÓN',
-                                hint: 'Ej. Chimpance Admin',
-                                controller: _createNameCtrl,
-                              ),
-                              const Spacer(),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _handleCreate,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: KaliColors.espresso,
-                                    foregroundColor: KaliColors.warmWhite,
-                                  ),
-                                  child: _isLoading 
-                                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: KaliColors.warmWhite, strokeWidth: 2))
-                                    : const Text('CREAR Y CONTINUAR'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Tab Unirse
-                        Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Ingresa el ID proporcionado por el administrador de la institución.',
-                                style: KaliText.body(KaliColors.clayDark),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              KaliTextField(
-                                label: 'ID DE INSTITUCIÓN',
-                                hint: 'xxxx-xxxx-xxxx-xxxx',
-                                controller: _joinIdCtrl,
-                              ),
-                              const Spacer(),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _handleJoin,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: KaliColors.espresso,
-                                    foregroundColor: KaliColors.warmWhite,
-                                  ),
-                                  child: _isLoading 
-                                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: KaliColors.warmWhite, strokeWidth: 2))
-                                    : const Text('UNIRSE Y CONTINUAR'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Crea una nueva institución para empezar a gestionar tu estudio.',
+                      style: KaliText.body(KaliColors.clayDark),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 32),
+                    KaliTextField(
+                      label: 'NOMBRE DE LA INSTITUCIÓN',
+                      hint: 'Ej. Chimpance Admin',
+                      controller: _createNameCtrl,
+                    ),
+                    const SizedBox(height: 48),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleCreate,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: KaliColors.espresso,
+                          foregroundColor: KaliColors.warmWhite,
+                        ),
+                        child: _isLoading 
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: KaliColors.warmWhite, strokeWidth: 2))
+                          : const Text('CREAR Y CONTINUAR'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
