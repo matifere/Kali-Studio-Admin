@@ -66,7 +66,11 @@ class _InactiveScreenState extends State<InactiveScreen> {
 
       final data = response.data;
       if (data != null) {
-        final urlString = data['sandbox_init_point'] ?? data['init_point'];
+        // En sandbox (token TEST-...) usar sandbox_init_point. En producción usa init_point.
+        final urlString =
+            (data['sandbox_init_point'] as String?)?.isNotEmpty == true
+                ? data['sandbox_init_point']
+                : data['init_point'];
         if (urlString != null) {
           final url = Uri.parse(urlString);
           if (await canLaunchUrl(url)) {
