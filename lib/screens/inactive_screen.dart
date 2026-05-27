@@ -60,13 +60,13 @@ class _InactiveScreenState extends State<InactiveScreen> {
         body: {
           'institution_id': ProfileCache.institutionId,
           'saas_plan_id': plan['id'],
-          'payer_email': user.email,
         },
       );
 
       final data = response.data;
       if (data != null) {
-        // En sandbox (token TEST-...) usar sandbox_init_point. En producción usa init_point.
+        // Preferir sandbox_init_point si está disponible (entorno de pruebas),
+        // de lo contrario usar init_point (producción).
         final urlString =
             (data['sandbox_init_point'] as String?)?.isNotEmpty == true
                 ? data['sandbox_init_point']

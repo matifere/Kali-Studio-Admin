@@ -137,8 +137,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
   @override
   void initState() {
     super.initState();
-    _authSub =
-        Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       if (!mounted) return;
       if (event.event == AuthChangeEvent.passwordRecovery) {
         setState(() => _isPasswordRecovery = true);
@@ -160,7 +159,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
     final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
 
     return MaterialApp(
-      title: 'Chimpance Admin',
+      title: 'Turnos App',
       theme: KaliTheme.theme,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
