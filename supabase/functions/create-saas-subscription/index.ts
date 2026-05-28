@@ -24,85 +24,85 @@ Deno.serve(async (req) => {
     const { institution_id, saas_plan_id } = await req.json();
 
     if (!institution_id || !saas_plan_id) {
-      throw new Error(
-        "Faltan parámetros requeridos: institution_id, saas_plan_id.",
-      );
+      throw new Error("Faltan parámetros: institution_id, saas_plan_id.");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1. Obtener los datos del plan desde la base de datos
+    // 1. Obtener datos del plan
     const { data: plan, error: planError } = await supabase
       .from("saas_plans")
       .select("*")
       .eq("id", saas_plan_id)
-      .eq("is_active", true)
       .single();
 
     if (planError || !plan) {
-      throw new Error(
-        `El plan seleccionado no es válido o no existe. ID: ${saas_plan_id}`,
-      );
+      throw new Error("El plan seleccionado no es válido o no existe.");
     }
 
-    // 2. Crear la suscripción (Preapproval) en Mercado Pago.
-    // Flujo: "suscripción sin plan asociado con pago pendiente".
-    // MP devuelve un init_point (checkout web) donde el comprador
-    // ingresa su medio de pago. No se requiere card_token_id ni payer_email.
-    const idempotencyKey = `${institution_id}-${saas_plan_id}-${Date.now()}`;
+    // 2. Crear preferencia de pago via Checkout Pro.
+    // Este endpoint es el estándar de MP, funciona en sandbox y producción
+    // sin restricciones de permisos adicionales.
+    const webhookUrl = `${SUPABASE_URL}/functions/v1/mp-webhook`;
 
-    // El header X-scope: stage es requerido por MP para el entorno sandbox (tokens TEST-).
-    const isSandbox = MP_ACCESS_TOKEN.startsWith("TEST-");
-    const mpHeaders: Record<string, string> = {
-      "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
-      "Content-Type": "application/json",
-      "X-Idempotency-Key": idempotencyKey,
-    };
-    if (isSandbox) {
-      mpHeaders["X-scope"] = "stage";
-    }
-
-    const mpResponse = await fetch("https://api.mercadopago.com/preapproval", {
-      method: "POST",
-      headers: mpHeaders,
-      body: JSON.stringify({
-        reason: `Suscripción Chimpancé: ${plan.name}`,
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: "months",
-          transaction_amount: plan.price,
-          currency_id: plan.currency,
+    const mpResponse = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
         },
-        back_url:
-          "https://tmfcnvtjzmtpqhzvfxos.supabase.co/functions/v1/mp-webhook",
-        external_reference: institution_id,
-      }),
-    });
+        body: JSON.stringify({
+          items: [
+            {
+              id: saas_plan_id,
+              title: `Suscripción Chimpancé: ${plan.name}`,
+              description: plan.description ?? "",
+              quantity: 1,
+              unit_price: Number(plan.price),
+              currency_id: plan.currency ?? "ARS",
+            },
+          ],
+          back_urls: {
+            success: webhookUrl,
+            failure: webhookUrl,
+            pending: webhookUrl,
+          },
+          auto_return: "approved",
+          notification_url: webhookUrl,
+          external_reference: institution_id,
+          statement_descriptor: "Chimpance SaaS",
+        }),
+      },
+    );
 
     const mpData = await mpResponse.json();
 
     if (!mpResponse.ok) {
-      // Mostrar el JSON completo de MP para diagnóstico
-      throw new Error(
-        `MP ${mpResponse.status}: ${JSON.stringify(mpData)}`,
-      );
+      throw new Error(`MP ${mpResponse.status}: ${JSON.stringify(mpData)}`);
     }
 
-    // 3. Registrar la suscripción como 'pending' en la base de datos
+    // 3. Registrar el intento de pago como 'pending'
     const { error: dbError } = await supabase
       .from("tenant_subscriptions")
-      .upsert({
-        institution_id,
-        saas_plan_id,
-        status: "pending",
-        mp_preapproval_id: mpData.id,
-      }, { onConflict: "institution_id" });
+      .upsert(
+        {
+          institution_id,
+          saas_plan_id,
+          status: "pending",
+          mp_preapproval_id: mpData.id,
+        },
+        { onConflict: "institution_id" },
+      );
 
     if (dbError) {
       throw new Error(`Error en base de datos: ${dbError.message}`);
     }
 
-    // 4. Devolver el init_point al cliente para abrir el checkout
+    // 4. Devolver los links de checkout
+    // sandbox_init_point: checkout de pruebas (sin cobro real)
+    // init_point: checkout de producción
     return new Response(
       JSON.stringify({
         init_point: mpData.init_point,
