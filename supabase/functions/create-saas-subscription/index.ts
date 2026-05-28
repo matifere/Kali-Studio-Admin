@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1. Obtener datos del plan
+    // 1. Obtener datos del plan de nuestra DB
     const { data: plan, error: planError } = await supabase
       .from("saas_plans")
       .select("*")
@@ -40,50 +40,48 @@ Deno.serve(async (req) => {
       throw new Error("El plan seleccionado no es válido o no existe.");
     }
 
-    // 2. Crear preferencia de pago via Checkout Pro.
-    // Este endpoint es el estándar de MP, funciona en sandbox y producción
-    // sin restricciones de permisos adicionales.
+    // 2. Crear un preapproval_plan en MP con el institution_id codificado en back_url.
+    //
+    // Usamos preapproval_plan directamente (sin preapproval individual) porque
+    // el endpoint /preapproval requiere permisos adicionales en cuentas de prueba.
+    //
+    // El institution_id se pasa en el back_url para que el webhook pueda
+    // identificar qué institución completó la suscripción.
     const webhookUrl = `${SUPABASE_URL}/functions/v1/mp-webhook`;
+    const backUrl = `${webhookUrl}?institution_id=${encodeURIComponent(institution_id)}&saas_plan_id=${encodeURIComponent(saas_plan_id)}`;
 
-    const mpResponse = await fetch(
-      "https://api.mercadopago.com/checkout/preferences",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              id: saas_plan_id,
-              title: `Suscripción Chimpancé: ${plan.name}`,
-              description: plan.description ?? "",
-              quantity: 1,
-              unit_price: Number(plan.price),
-              currency_id: plan.currency ?? "ARS",
-            },
-          ],
-          back_urls: {
-            success: webhookUrl,
-            failure: webhookUrl,
-            pending: webhookUrl,
-          },
-          auto_return: "approved",
-          notification_url: webhookUrl,
-          external_reference: institution_id,
-          statement_descriptor: "Chimpance SaaS",
-        }),
+    const mpRes = await fetch("https://api.mercadopago.com/preapproval_plan", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        reason: `Suscripción Chimpancé: ${plan.name}`,
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: "months",
+          transaction_amount: Number(plan.price),
+          currency_id: plan.currency ?? "ARS",
+        },
+        back_url: backUrl,
+      }),
+    });
 
-    const mpData = await mpResponse.json();
+    const mpData = await mpRes.json();
 
-    if (!mpResponse.ok) {
-      throw new Error(`MP ${mpResponse.status}: ${JSON.stringify(mpData)}`);
+    if (!mpRes.ok) {
+      throw new Error(
+        `MP preapproval_plan ${mpRes.status}: ${JSON.stringify(mpData)}`,
+      );
     }
 
-    // 3. Registrar el intento de pago como 'pending'
+    console.log(
+      `[create-sub] Plan creado: ${mpData.id} init_point=${mpData.init_point}`,
+    );
+
+    // 3. Registrar el intento de suscripción como 'pending' en nuestra DB.
+    //    Guardamos el mp_plan_id para poder buscar la suscripción después.
     const { error: dbError } = await supabase
       .from("tenant_subscriptions")
       .upsert(
@@ -91,7 +89,7 @@ Deno.serve(async (req) => {
           institution_id,
           saas_plan_id,
           status: "pending",
-          mp_preapproval_id: mpData.id,
+          mp_preapproval_id: mpData.id, // aquí guardamos el preapproval_plan id
         },
         { onConflict: "institution_id" },
       );
@@ -100,13 +98,11 @@ Deno.serve(async (req) => {
       throw new Error(`Error en base de datos: ${dbError.message}`);
     }
 
-    // 4. Devolver los links de checkout
-    // sandbox_init_point: checkout de pruebas (sin cobro real)
-    // init_point: checkout de producción
+    // 4. Devolver el init_point del plan al cliente
     return new Response(
       JSON.stringify({
         init_point: mpData.init_point,
-        sandbox_init_point: mpData.sandbox_init_point,
+        sandbox_init_point: mpData.init_point, // mismo link, MP detecta el entorno
       }),
       {
         status: 200,
@@ -115,6 +111,7 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[create-sub] Error:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
