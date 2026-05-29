@@ -1,0 +1,7 @@
+{
+  "workspace": [
+    "./mp-webhook",
+    "./create-saas-subscription",
+    "./check-expired-subscriptions"
+  ]
+}

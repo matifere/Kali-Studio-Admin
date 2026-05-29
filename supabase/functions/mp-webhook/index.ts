@@ -57,6 +57,15 @@ Deno.serve(async (req) => {
         });
       }
 
+      // ⚙️ Desactivación manual para testing — simula vencimiento sin depender de MP
+      if (payload.type === "manual_deactivate" && payload.institution_id) {
+        await deactivateInstitution(supabase, String(payload.institution_id));
+        return new Response(JSON.stringify({ ok: true, action: "deactivated" }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Evento de suscripción (preapproval) — activación inicial o cambio de estado
       if (payload.type === "subscription_preapproval" && payload.data?.id) {
         await processPreapproval(supabase, MP_ACCESS_TOKEN, String(payload.data.id));
@@ -152,7 +161,8 @@ async function processPreapproval(
 
   if (status === "authorized") {
     await activateInstitution(supabase, institutionId, preapprovalId);
-  } else if (status === "cancelled") {
+  } else if (status === "cancelled" || status === "expired") {
+    // 'expired' ocurre cuando MP no puede cobrar en reiterados intentos
     await deactivateInstitution(supabase, institutionId);
   } else if (status === "paused") {
     // Paused: mantener activa pero registrar estado
@@ -247,9 +257,16 @@ async function activateInstitution(
 ) {
   console.log(`[activateInstitution] institution=${institutionId} ref=${ref}`);
 
+  // Valores sentinel que NO deben sobreescribir un mp_preapproval_id real ya guardado
+  const SENTINEL_VALUES = ["already_active", "redirect", "manual"];
+  const isRealId = ref && !SENTINEL_VALUES.includes(ref);
+
+  const updatePayload: Record<string, unknown> = { status: "active" };
+  if (isRealId) updatePayload.mp_preapproval_id = ref;
+
   await supabase
     .from("tenant_subscriptions")
-    .update({ status: "active", mp_preapproval_id: ref })
+    .update(updatePayload)
     .eq("institution_id", institutionId);
 
   const { error } = await supabase
@@ -265,6 +282,7 @@ async function activateInstitution(
     .update({ is_active: true })
     .eq("id", institutionId);
 }
+
 
 // ── Desactiva la institución (suscripción cancelada) ─────────────────────────
 async function deactivateInstitution(
@@ -283,4 +301,10 @@ async function deactivateInstitution(
     .update({ is_active: false })
     .eq("institution_id", institutionId)
     .eq("role", "sudo");
+
+  // Espejo de activateInstitution: también desactivar la institución
+  await supabase
+    .from("institutions")
+    .update({ is_active: false })
+    .eq("id", institutionId);
 }
