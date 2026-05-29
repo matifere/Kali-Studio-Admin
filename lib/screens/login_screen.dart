@@ -4,7 +4,6 @@ import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/screens/register_screen.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
-import 'package:kali_studio/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class LoginScreen extends StatefulWidget {
@@ -111,9 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Reseteamos ANTES de navegar para que si hay un rebuild
           // posterior (hot reload, etc.) el listener no se re-dispare.
           context.read<AuthBloc>().add(AuthReset());
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const AuthWrapper()),
-          );
+          // La navegación real es manejada por onAuthStateChange en main.dart
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),

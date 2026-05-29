@@ -16,8 +16,11 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
-  bool _isLoading = true;
-  bool _hasInstitution = false;
+  // Si ProfileCache ya tiene datos (re-montaje en la misma sesión),
+  // renderizamos sin ninguna espera. Si no, esperamos silenciosamente
+  // (scaffold en blanco, imperceptible) hasta que _checkProfile() confirme.
+  bool _profileChecked = ProfileCache.isLoaded;
+  bool _hasInstitution = ProfileCache.institutionId != null;
   bool _isActive = true;
   StreamSubscription<List<Map<String, dynamic>>>? _profileSub;
 
@@ -40,12 +43,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
           if (data.isNotEmpty && mounted) {
             final profile = data.first;
             final currentIsActive = profile['is_active'] as bool? ?? true;
-
-            // If the active state changes, update the UI immediately
             if (currentIsActive != _isActive) {
-              setState(() {
-                _isActive = currentIsActive;
-              });
+              setState(() => _isActive = currentIsActive);
             }
           }
         });
@@ -61,11 +60,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
-        if (mounted) setState(() => _isLoading = false);
+        // Sin sesión: no tocar el estado para no mostrar InstitutionSelectionScreen.
+        // _KaliAppViewState manejará la navegación a LoginScreen.
         return;
       }
 
-      // Fetch role + institution en una sola query y pobla el caché global.
       final data = await Supabase.instance.client
           .from('profiles')
           .select('role, institution_id, full_name, is_active')
@@ -82,36 +81,28 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       if (mounted) {
         setState(() {
-          _isActive =
-              data != null ? (data['is_active'] as bool? ?? true) : true;
+          _isActive = data != null ? (data['is_active'] as bool? ?? true) : true;
           _hasInstitution = data != null && data['institution_id'] != null;
-          _isLoading = false;
+          _profileChecked = true;
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
+      // En caso de error, marcamos como verificado para no quedar bloqueados.
+      if (mounted) setState(() => _profileChecked = true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: KaliColors.warmWhite,
-        body: Center(
-          child: CircularProgressIndicator(color: KaliColors.espresso),
-        ),
-      );
+    // Hasta que el perfil esté confirmado mostramos un scaffold en blanco —
+    // sin spinner, invisible para el usuario (~100-200ms).
+    if (!_profileChecked) {
+      return const Scaffold(backgroundColor: KaliColors.warmWhite);
     }
 
-    if (!_hasInstitution) {
-      return const InstitutionSelectionScreen();
-    }
-
-    if (!_isActive) {
-      return const InactiveScreen();
-    }
-
+    if (!_hasInstitution) return const InstitutionSelectionScreen();
+    if (!_isActive) return const InactiveScreen();
     return const DashboardScreen();
   }
 }
+

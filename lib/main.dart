@@ -131,10 +131,7 @@ class _KaliAppView extends StatefulWidget {
 }
 
 class _KaliAppViewState extends State<_KaliAppView> {
-  bool _isPasswordRecovery = false;
-  // Arrancamos sin saber si hay sesión hasta que Supabase lo confirme.
-  bool _sessionResolved = false;
-  bool _isLoggedIn = false;
+  final _navigatorKey = GlobalKey<NavigatorState>();
   late final StreamSubscription _authSub;
 
   @override
@@ -143,30 +140,36 @@ class _KaliAppViewState extends State<_KaliAppView> {
     _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       if (!mounted) return;
 
-      // El primer evento (initialSession / signedIn) nos dice si hay sesión.
-      final hasSession = event.session != null;
+      // Usar currentUser es más seguro que event.session para evitar 
+      // race conditions si initialSession llega tarde después de un login rápido.
+      final hasSession = Supabase.instance.client.auth.currentUser != null;
 
       if (event.event == AuthChangeEvent.passwordRecovery) {
-        setState(() {
-          _sessionResolved = true;
-          _isLoggedIn = hasSession;
-          _isPasswordRecovery = true;
-        });
+        _navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const NewPasswordScreen()),
+          (route) => false,
+        );
       } else if (event.event == AuthChangeEvent.signedOut) {
-        setState(() {
-          _sessionResolved = true;
-          _isLoggedIn = false;
-          _isPasswordRecovery = false;
-        });
+        _navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
       } else {
-        // initialSession, signedIn, tokenRefreshed, userUpdated, etc.
-        setState(() {
-          _sessionResolved = true;
-          _isLoggedIn = hasSession;
-          if (event.event == AuthChangeEvent.userUpdated) {
-            _isPasswordRecovery = false;
+        // Forzamos la navegación a la raíz si hubo un evento importante,
+        // garantizando que no se dupliquen pantallas en el stack.
+        if (event.event == AuthChangeEvent.signedIn || event.event == AuthChangeEvent.initialSession) {
+          if (hasSession) {
+            _navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const AuthWrapper()),
+              (route) => false,
+            );
+          } else if (event.event == AuthChangeEvent.initialSession) {
+            _navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+            );
           }
-        });
+        }
       }
     });
   }
@@ -179,25 +182,12 @@ class _KaliAppViewState extends State<_KaliAppView> {
 
   @override
   Widget build(BuildContext context) {
-    // Mientras Supabase no haya emitido el estado inicial, mostramos un
-    // splash neutro para evitar el flash de LoginScreen → DashboardScreen.
-    Widget home;
-    if (!_sessionResolved) {
-      home = const Scaffold(
-        backgroundColor: KaliColors.warmWhite,
-        body: Center(
-          child: CircularProgressIndicator(color: KaliColors.espresso),
-        ),
-      );
-    } else if (_isPasswordRecovery) {
-      home = const NewPasswordScreen();
-    } else if (_isLoggedIn) {
-      home = const AuthWrapper();
-    } else {
-      home = const LoginScreen();
-    }
+    // Scaffold neutro (fondo liso) como estado inicial, 
+    // toda la navegación la maneja _navigatorKey dinámicamente.
+    Widget home = const Scaffold(backgroundColor: KaliColors.warmWhite);
 
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'Turnos App',
       theme: KaliTheme.theme,
       debugShowCheckedModeBanner: false,

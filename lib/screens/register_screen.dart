@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 import 'package:kali_studio/widgets/kali_text_field.dart';
-import 'package:kali_studio/widgets/auth_wrapper.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -63,10 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registro exitoso')),
           );
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const AuthWrapper()),
-            (route) => false,
-          );
+          // La navegación a AuthWrapper es manejada por onAuthStateChange en main.dart
         } else if (state is AuthPending) {
           context.read<AuthBloc>().add(AuthReset());
           ScaffoldMessenger.of(context).showSnackBar(

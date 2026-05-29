@@ -8,22 +8,27 @@ class ProfileCache {
   static String _role = 'sudo';
   static String? _institutionId;
   static String? _fullName;
+  static bool _loaded = false;
 
   static String get role => _role;
   static String? get institutionId => _institutionId;
   static String? get fullName => _fullName;
   static bool get isAdmin => _role == 'admin';
   static bool get isSudo => _role == 'sudo';
+  /// true si el caché fue poblado al menos una vez (sesión activa previa).
+  static bool get isLoaded => _loaded;
 
   static void set({required String role, String? institutionId, String? fullName}) {
     _role = role;
     _institutionId = institutionId;
     _fullName = fullName;
+    _loaded = true;
   }
 
   static void clear() {
     _role = 'sudo';
     _institutionId = null;
     _fullName = null;
+    _loaded = false;
   }
 }

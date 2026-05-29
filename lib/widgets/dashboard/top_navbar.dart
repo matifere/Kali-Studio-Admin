@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:kali_studio/bloc/auth/auth_bloc.dart';
 import 'package:kali_studio/bloc/notifications/notifications_cubit.dart';
-import 'package:kali_studio/screens/login_screen.dart';
 import 'package:kali_studio/services/profile_cache.dart';
 import 'package:kali_studio/theme/kali_theme.dart';
 
@@ -67,10 +66,8 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
       listener: (ctx, state) {
         if (state is AuthSuccess) {
           ctx.read<AuthBloc>().add(AuthReset());
-          Navigator.of(ctx).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (route) => false,
-          );
+          // La navegación (ej. hacia LoginScreen al cerrar sesión)
+          // es manejada de forma centralizada por main.dart.
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(ctx).showSnackBar(
             SnackBar(
