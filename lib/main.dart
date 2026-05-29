@@ -132,6 +132,9 @@ class _KaliAppView extends StatefulWidget {
 
 class _KaliAppViewState extends State<_KaliAppView> {
   bool _isPasswordRecovery = false;
+  // Arrancamos sin saber si hay sesión hasta que Supabase lo confirme.
+  bool _sessionResolved = false;
+  bool _isLoggedIn = false;
   late final StreamSubscription _authSub;
 
   @override
@@ -139,11 +142,31 @@ class _KaliAppViewState extends State<_KaliAppView> {
     super.initState();
     _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       if (!mounted) return;
+
+      // El primer evento (initialSession / signedIn) nos dice si hay sesión.
+      final hasSession = event.session != null;
+
       if (event.event == AuthChangeEvent.passwordRecovery) {
-        setState(() => _isPasswordRecovery = true);
-      } else if (event.event == AuthChangeEvent.userUpdated ||
-          event.event == AuthChangeEvent.signedOut) {
-        setState(() => _isPasswordRecovery = false);
+        setState(() {
+          _sessionResolved = true;
+          _isLoggedIn = hasSession;
+          _isPasswordRecovery = true;
+        });
+      } else if (event.event == AuthChangeEvent.signedOut) {
+        setState(() {
+          _sessionResolved = true;
+          _isLoggedIn = false;
+          _isPasswordRecovery = false;
+        });
+      } else {
+        // initialSession, signedIn, tokenRefreshed, userUpdated, etc.
+        setState(() {
+          _sessionResolved = true;
+          _isLoggedIn = hasSession;
+          if (event.event == AuthChangeEvent.userUpdated) {
+            _isPasswordRecovery = false;
+          }
+        });
       }
     });
   }
@@ -156,7 +179,23 @@ class _KaliAppViewState extends State<_KaliAppView> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
+    // Mientras Supabase no haya emitido el estado inicial, mostramos un
+    // splash neutro para evitar el flash de LoginScreen → DashboardScreen.
+    Widget home;
+    if (!_sessionResolved) {
+      home = const Scaffold(
+        backgroundColor: KaliColors.warmWhite,
+        body: Center(
+          child: CircularProgressIndicator(color: KaliColors.espresso),
+        ),
+      );
+    } else if (_isPasswordRecovery) {
+      home = const NewPasswordScreen();
+    } else if (_isLoggedIn) {
+      home = const AuthWrapper();
+    } else {
+      home = const LoginScreen();
+    }
 
     return MaterialApp(
       title: 'Turnos App',
@@ -170,11 +209,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
       supportedLocales: const [
         Locale('es', 'ES'),
       ],
-      home: _isPasswordRecovery
-          ? const NewPasswordScreen()
-          : isLoggedIn
-              ? const AuthWrapper()
-              : const LoginScreen(),
+      home: home,
     );
   }
 }
