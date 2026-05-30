@@ -58,7 +58,7 @@ class KaliText {
       GoogleFonts.dmSans(fontSize: size, fontWeight: weight, color: color);
 
   static TextStyle label(Color color) => GoogleFonts.dmSans(
-        fontSize: 9,
+        fontSize: 13,
         fontWeight: FontWeight.w500,
         letterSpacing: 1.4,
         color: color,

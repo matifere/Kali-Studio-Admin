@@ -84,7 +84,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Gestiona tu comunidad de Chimpance Admin.',
+                            'Gestiona tu comunidad en Minerva.',
                             style: KaliText.body(
                               KaliColors.espresso.withValues(alpha: 0.6),
                               size: 14,
@@ -96,12 +96,10 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                     ],
                   ),
                 const SizedBox(height: 32),
-
                 if (!_isProfesor) ...[
                   const AlumnosStatCards(),
                   const SizedBox(height: 32),
                 ],
-
                 const StudentDirectory(),
                 const SizedBox(height: 40),
               ],
@@ -126,8 +124,12 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
@@ -261,7 +263,8 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
                 const SizedBox(height: 8),
                 Text(
                   'Se registrará con rol de usuario cliente.',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                  style:
+                      KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 32),
                 KaliTextField(
@@ -294,7 +297,8 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      onPressed:
+                          _isLoading ? null : () => Navigator.of(context).pop(),
                       child: Text(
                         'Cancelar',
                         style: KaliText.body(KaliColors.espresso),
@@ -302,14 +306,19 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
                     ),
                     const SizedBox(width: 16),
                     MouseRegion(
-                      cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                      cursor: _isLoading
+                          ? SystemMouseCursors.basic
+                          : SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: _isLoading ? null : _submit,
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                           decoration: BoxDecoration(
-                            color: _isLoading ? KaliColors.espresso.withValues(alpha: 0.6) : KaliColors.espresso,
+                            color: _isLoading
+                                ? KaliColors.espresso.withValues(alpha: 0.6)
+                                : KaliColors.espresso,
                             borderRadius: BorderRadius.circular(28),
                           ),
                           child: _isLoading
@@ -323,7 +332,8 @@ class _AddStudentDialogState extends State<_AddStudentDialog> {
                                 )
                               : Text(
                                   'Registrar Alumno',
-                                  style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                                  style: KaliText.body(KaliColors.warmWhite,
+                                      weight: FontWeight.w600, size: 13),
                                 ),
                         ),
                       ),

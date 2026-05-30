@@ -50,7 +50,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'CHIMPANCE ADMIN',
+                  'MINERVA ADMIN',
                   style: KaliText.label(KaliColors.clayDark),
                 ),
               ],
@@ -72,15 +72,12 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
 
   Widget _buildMenuItem(IconData icon, String title) {
     final isActive = currentPage == title;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isActive
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        tileColor: isActive
             ? Colors.black.withValues(alpha: 0.05)
             : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
         leading: Icon(
           icon,
           color: isActive

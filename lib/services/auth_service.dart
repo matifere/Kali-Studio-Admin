@@ -60,12 +60,17 @@ class SupaAuthClass {
           .maybeSingle();
 
       final instId = adminProfile?['institution_id'] as String?;
-      if (instId == null) return 'Error: No se pudo obtener la institución del administrador';
+      if (instId == null)
+        return 'Error: No se pudo obtener la institución del administrador';
 
       final result = await _signUpViaHttp(
         email: email,
         password: password,
-        metadata: {'full_name': fullName, 'role': 'client', 'institution_id': instId},
+        metadata: {
+          'full_name': fullName,
+          'role': 'client',
+          'institution_id': instId
+        },
       );
 
       if (result.startsWith('Error:')) return result.substring(6);
@@ -103,12 +108,17 @@ class SupaAuthClass {
           .maybeSingle();
 
       final instId = adminProfile?['institution_id'] as String?;
-      if (instId == null) return 'Error: No se pudo obtener la institución del administrador';
+      if (instId == null)
+        return 'Error: No se pudo obtener la institución del administrador';
 
       final result = await _signUpViaHttp(
         email: email,
         password: password,
-        metadata: {'full_name': fullName, 'role': 'admin', 'institution_id': instId},
+        metadata: {
+          'full_name': fullName,
+          'role': 'admin',
+          'institution_id': instId
+        },
       );
 
       if (result.startsWith('Error:')) return result.substring(6);
@@ -150,7 +160,7 @@ class SupaAuthClass {
             'is_active': false,
           });
         } catch (e) {
-          print('Error upserting profile: $e');
+          // print('Error upserting profile: $e');
         }
         await auth.signOut();
         return 'Pending';

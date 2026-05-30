@@ -26,7 +26,8 @@ class AlumnosStatCards extends StatelessWidget {
           final nextWeek = now.add(const Duration(days: 7));
           int thisMonthCount = 0;
           for (var s in state.students) {
-            if (s.createdAt.year == now.year && s.createdAt.month == now.month) {
+            if (s.createdAt.year == now.year &&
+                s.createdAt.month == now.month) {
               thisMonthCount++;
             }
             // Aprovechar el mismo bucle para contar por plan
@@ -38,7 +39,9 @@ class AlumnosStatCards extends StatelessWidget {
               // Si vence entre hoy (o antes pero sigue activo) y los próximos 7 días
               // o simplemente si el vencimiento cae en los próximos 7 días a partir de hoy.
               // Para ser seguros, si ya venció (y por alguna razón sigue en esta lista) o vence en la próxima semana:
-              if (s.planEndDate!.isBefore(nextWeek) && s.planEndDate!.isAfter(now.subtract(const Duration(days: 1)))) {
+              if (s.planEndDate!.isBefore(nextWeek) &&
+                  s.planEndDate!
+                      .isAfter(now.subtract(const Duration(days: 1)))) {
                 expiringCount++;
               }
             }
@@ -99,11 +102,12 @@ class AlumnosStatCards extends StatelessWidget {
               ),
               _buildWhiteCard(
                 title: 'PRÓXIMOS VENCIMIENTOS',
-                value: state is AlumnosLoading ? null : expiringCount.toString(),
+                value:
+                    state is AlumnosLoading ? null : expiringCount.toString(),
                 badge: Text(
                   'En los próximos 7 días',
-                  style: KaliText.body(
-                      KaliColors.espresso.withValues(alpha: 0.5)),
+                  style:
+                      KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ),
             ];
@@ -158,7 +162,8 @@ class AlumnosStatCards extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
+              style:
+                  KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
           value != null
               ? Text(
@@ -206,7 +211,7 @@ class _PlanCarouselState extends State<_PlanCarousel> {
     _pageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      curve: Curves.fastEaseInToSlowEaseOut,
     );
   }
 
@@ -235,7 +240,7 @@ class _PlanCarouselState extends State<_PlanCarousel> {
     return Stack(
       children: [
         SizedBox(
-          height: 185, // altura fija para no depender del contenido variable
+          height: 195, // altura fija para no depender del contenido variable
           child: PageView.builder(
             controller: _pageController,
             itemCount: entries.length,
@@ -317,7 +322,8 @@ class _ClayPlanCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   planName.toUpperCase(),
-                  style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.7)),
+                  style: KaliText.label(
+                      KaliColors.espresso.withValues(alpha: 0.7)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -385,12 +391,16 @@ class _NavArrowState extends State<_NavArrow> {
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: const Duration(milliseconds: 50),
           width: 28,
           height: 28,
           decoration: BoxDecoration(

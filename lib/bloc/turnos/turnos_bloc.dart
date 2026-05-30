@@ -14,7 +14,6 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   // Cached from the first profile fetch — avoids a round-trip on every week
   // change and every create/assign operation.
   String? _cachedInstId;
-  String? _cachedInstructorFilter;
   bool _profileCached = false;
 
   TurnosBloc({ActivityBloc? activityBloc})
@@ -42,7 +41,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
   static DateTime _getStartOfWeek(DateTime date) {
     // 1 is Monday
-    return DateTime(date.year, date.month, date.day).subtract(Duration(days: date.weekday - 1));
+    return DateTime(date.year, date.month, date.day)
+        .subtract(Duration(days: date.weekday - 1));
   }
 
   Future<void> _onLoadRequested(
@@ -52,7 +52,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
       final start = event.weekStart;
-      final end = start.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+      final end = start
+          .add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
 
       final startIso = DateFormat('yyyy-MM-dd').format(start);
       final endIso = DateFormat('yyyy-MM-dd').format(end);
@@ -72,7 +73,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       // instructorFilter is used by the UI filter dropdown now, not automatically for admins.
       final instructorFilter = state.selectedInstructor;
 
-      const sessionSelect = '*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
+      const sessionSelect =
+          '*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
 
       var query = client
           .from('class_sessions')
@@ -84,12 +86,15 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           ? await query.eq('instructor_name', instructorFilter)
           : await query;
 
-      final sessions = response.map<ClassSession>((data) => ClassSession.fromJson(data)).toList();
+      final sessions = response
+          .map<ClassSession>((data) => ClassSession.fromJson(data))
+          .toList();
 
       ClassSession? freshSelected;
       if (state.selectedTurno != null) {
         try {
-          freshSelected = sessions.firstWhere((s) => s.id == state.selectedTurno!.id);
+          freshSelected =
+              sessions.firstWhere((s) => s.id == state.selectedTurno!.id);
         } catch (_) {
           freshSelected = state.selectedTurno;
         }
@@ -127,12 +132,11 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final insertData = <Map<String, dynamic>>[];
 
       for (final template in event.templates) {
-        var baseDate = state.currentWeekStart.add(Duration(days: template.dayIndex));
+        var baseDate =
+            state.currentWeekStart.add(Duration(days: template.dayIndex));
         final parts = template.startTime.split(':');
-        var startDateTime = DateTime(
-          baseDate.year, baseDate.month, baseDate.day, 
-          int.parse(parts[0]), int.parse(parts[1])
-        );
+        var startDateTime = DateTime(baseDate.year, baseDate.month,
+            baseDate.day, int.parse(parts[0]), int.parse(parts[1]));
 
         // Si la hora en la semana actual ya pasó, agendar desde la próxima semana
         if (startDateTime.isBefore(DateTime.now())) {
@@ -158,14 +162,14 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         }
       }
 
-      await Supabase.instance.client
-          .from('class_sessions')
-          .upsert(insertData, onConflict: 'template_id,date', ignoreDuplicates: true);
-      
+      await Supabase.instance.client.from('class_sessions').upsert(insertData,
+          onConflict: 'template_id,date', ignoreDuplicates: true);
+
       final firstTemp = event.templates.first;
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Turnos creados en lote',
-        subtitle: '${firstTemp.name} agendado en ${event.templates.length} días para ${event.recurrenceWeeks} semanas.',
+        subtitle:
+            '${firstTemp.name} agendado en ${event.templates.length} días para ${event.recurrenceWeeks} semanas.',
         category: ActivityCategory.turno,
         timestamp: DateTime.now(),
       )));
@@ -198,7 +202,10 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      await Supabase.instance.client.from('class_sessions').delete().eq('id', event.sessionId);
+      await Supabase.instance.client
+          .from('class_sessions')
+          .delete()
+          .eq('id', event.sessionId);
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Turno cancelado',
         subtitle: 'Se eliminó la sesión del cronograma.',
@@ -233,7 +240,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       add(TurnosLoadRequested(state.currentWeekStart));
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Turno modificado',
-        subtitle: '${t.name} actualizado para el ${DateFormat('dd/MM', 'es_ES').format(t.date)}.',
+        subtitle:
+            '${t.name} actualizado para el ${DateFormat('dd/MM', 'es_ES').format(t.date)}.',
         category: ActivityCategory.turno,
         timestamp: DateTime.now(),
       )));
@@ -251,7 +259,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final instId = _cachedInstId;
 
       final inserts = <Map<String, dynamic>>[];
-      
+
       // 1. Inscripción actual focalizada
       inserts.add({
         'user_id': event.userId,
@@ -262,39 +270,45 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
       // 2. Si marcamos recurrencia, buscamos las 3 clases *futuras* con el mismo template
       if (event.enrollInFuture && event.session.templateId != null) {
-        final startIso = DateFormat('yyyy-MM-dd').format(event.session.date.add(const Duration(days: 1))); // From tomorrow onwards
-        
+        final startIso = DateFormat('yyyy-MM-dd').format(event.session.date
+            .add(const Duration(days: 1))); // From tomorrow onwards
+
         // Fetch max reservations limit for the user
-        final subRes = await db.from('subscriptions')
+        final subRes = await db
+            .from('subscriptions')
             .select('plans(max_reservations_per_week)')
             .eq('user_id', event.userId)
-            .inFilter('status', ['active', 'pending'])
-            .maybeSingle();
+            .inFilter('status', ['active', 'pending']).maybeSingle();
 
         int maxRes = 0;
-        if (subRes != null && subRes['plans'] != null && subRes['plans']['max_reservations_per_week'] != null) {
+        if (subRes != null &&
+            subRes['plans'] != null &&
+            subRes['plans']['max_reservations_per_week'] != null) {
           maxRes = subRes['plans']['max_reservations_per_week'] as int;
         }
 
         // Only project if maxRes > 0
         if (maxRes > 0) {
-          final futureSessionsResponse = await db.from('class_sessions')
-            .select('id, date')
-            .eq('template_id', event.session.templateId!)
-            .gte('date', startIso)
-            .order('date', ascending: true)
-            .limit(3);
+          final futureSessionsResponse = await db
+              .from('class_sessions')
+              .select('id, date')
+              .eq('template_id', event.session.templateId!)
+              .gte('date', startIso)
+              .order('date', ascending: true)
+              .limit(3);
 
           final futureSessions = futureSessionsResponse as List<dynamic>;
 
           if (futureSessions.isNotEmpty) {
             // Fetch user's existing future reservations to count per week
-            final futureRes = await db.from('reservations')
+            final futureRes = await db
+                .from('reservations')
                 .select('class_sessions!inner(date)')
                 .eq('user_id', event.userId)
                 .gte('class_sessions.date', startIso);
 
-            DateTime startOfWeek(DateTime d) => DateTime(d.year, d.month, d.day).subtract(Duration(days: d.weekday - 1));
+            DateTime startOfWeek(DateTime d) => DateTime(d.year, d.month, d.day)
+                .subtract(Duration(days: d.weekday - 1));
 
             final Map<DateTime, int> resCount = {};
             for (var r in futureRes as List<dynamic>) {
@@ -325,7 +339,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       await db.from('reservations').insert(inserts);
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Alumno inscripto a turno',
-        subtitle: 'Inscripción confirmada en ${event.session.name}${event.enrollInFuture ? ' (recurrente)' : ''}.',
+        subtitle:
+            'Inscripción confirmada en ${event.session.name}${event.enrollInFuture ? ' (recurrente)' : ''}.',
         category: ActivityCategory.alumno,
         timestamp: DateTime.now(),
       )));
@@ -340,7 +355,10 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      await Supabase.instance.client.from('reservations').delete().eq('id', event.reservationId);
+      await Supabase.instance.client
+          .from('reservations')
+          .delete()
+          .eq('id', event.reservationId);
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Alumno removido de turno',
         subtitle: 'Reserva cancelada y cupo liberado.',
@@ -359,12 +377,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      final nextStatus = event.currentStatus == 'attended' ? 'confirmed' : 'attended';
+      final nextStatus =
+          event.currentStatus == 'attended' ? 'confirmed' : 'attended';
       await Supabase.instance.client
           .from('reservations')
-          .update({'status': nextStatus})
-          .eq('id', event.reservationId);
-      
+          .update({'status': nextStatus}).eq('id', event.reservationId);
+
       // Refrescar para ver el cambio
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
