@@ -53,11 +53,12 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
 
       if (prevState is AlumnosLoaded) {
         final prevIds = {for (final s in prevState.students) s.id};
-        final newIds  = {for (final s in students) s.id};
+        final newIds = {for (final s in students) s.id};
 
         // Alumno añadido
         if (students.length > prevState.students.length) {
-          final newest = students.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
+          final newest = students
+              .reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
           _activityBloc?.add(ActivityLogged(ActivityEntry(
             title: 'Alumno registrado',
             subtitle: '${newest.name} fue añadido al directorio.',
@@ -83,8 +84,10 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
       emit(AlumnosLoaded(
         students: students,
         searchQuery: prevState is AlumnosLoaded ? prevState.searchQuery : '',
-        patologiaFilter: prevState is AlumnosLoaded ? prevState.patologiaFilter : null,
-        isActiveFilter: prevState is AlumnosLoaded ? prevState.isActiveFilter : null,
+        patologiaFilter:
+            prevState is AlumnosLoaded ? prevState.patologiaFilter : null,
+        isActiveFilter:
+            prevState is AlumnosLoaded ? prevState.isActiveFilter : null,
       ));
     } catch (e) {
       emit(AlumnosError('No se pudieron cargar los alumnos: $e'));
@@ -119,4 +122,3 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
     }
   }
 }
-
