@@ -88,14 +88,14 @@ class _PagosScreenState extends State<PagosScreen> {
                   const SizedBox(height: 24),
 
                   // TabViews
-                  Expanded(
+                  const Expanded(
                     child: TabBarView(
                       children: [
                         // Pestaña 1: Alumnos
                         SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               PagosStatCards(),
                               SizedBox(height: 32),
                               PagosFilters(),
@@ -108,7 +108,7 @@ class _PagosScreenState extends State<PagosScreen> {
                           ),
                         ),
                         // Pestaña 2: Software
-                        const SingleChildScrollView(
+                        SingleChildScrollView(
                           child: Padding(
                             padding: EdgeInsets.only(bottom: 40.0),
                             child: SaasSubscriptionView(),

@@ -140,7 +140,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
     _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       if (!mounted) return;
 
-      // Usar currentUser es más seguro que event.session para evitar 
+      // Usar currentUser es más seguro que event.session para evitar
       // race conditions si initialSession llega tarde después de un login rápido.
       final hasSession = Supabase.instance.client.auth.currentUser != null;
 
@@ -157,7 +157,8 @@ class _KaliAppViewState extends State<_KaliAppView> {
       } else {
         // Forzamos la navegación a la raíz si hubo un evento importante,
         // garantizando que no se dupliquen pantallas en el stack.
-        if (event.event == AuthChangeEvent.signedIn || event.event == AuthChangeEvent.initialSession) {
+        if (event.event == AuthChangeEvent.signedIn ||
+            event.event == AuthChangeEvent.initialSession) {
           if (hasSession) {
             _navigatorKey.currentState?.pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const AuthWrapper()),
@@ -182,7 +183,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold neutro (fondo liso) como estado inicial, 
+    // Scaffold neutro (fondo liso) como estado inicial,
     // toda la navegación la maneja _navigatorKey dinámicamente.
     Widget home = const Scaffold(backgroundColor: KaliColors.warmWhite);
 

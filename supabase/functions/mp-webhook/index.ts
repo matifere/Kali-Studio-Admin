@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       console.log(`[GET] status=${status} institution=${institutionId} preapproval=${preapprovalId}`);
 
       if (institutionId && (status === "authorized" || status === "approved")) {
-        await activateInstitution(supabase, institutionId, preapprovalId ?? "redirect");
+        await activateInstitution(supabase, MP_ACCESS_TOKEN, institutionId, preapprovalId ?? "redirect");
       }
 
       return new Response(
@@ -107,7 +107,7 @@ async function manualVerify(
     .maybeSingle();
 
   if (sub?.status === "active") {
-    await activateInstitution(supabase, institutionId, "already_active");
+    await activateInstitution(supabase, token, institutionId, "already_active");
     return;
   }
 
@@ -124,7 +124,7 @@ async function manualVerify(
       const subs = data.results ?? [];
       console.log(`[manualVerify] suscripciones autorizadas encontradas: ${subs.length}`);
       if (subs.length > 0) {
-        await activateInstitution(supabase, institutionId, subs[0].id);
+        await activateInstitution(supabase, token, institutionId, subs[0].id);
         return;
       }
     }
@@ -155,12 +155,20 @@ async function processPreapproval(
   const status: string = data.status; // "authorized", "pending", "cancelled", "paused"
   const institutionId: string = data.external_reference;
 
-  console.log(`[processPreapproval] status=${status} institution=${institutionId}`);
+  // Extraer saas_plan_id de back_url si es posible
+  let saasPlanId: string | undefined;
+  if (data.back_url) {
+    const match = data.back_url.match(/saas_plan_id=([^&]+)/);
+    if (match) saasPlanId = decodeURIComponent(match[1]);
+  }
+
+  console.log(`[processPreapproval] status=${status} institution=${institutionId} saasPlanId=${saasPlanId}`);
 
   if (!institutionId) return;
 
   if (status === "authorized") {
-    await activateInstitution(supabase, institutionId, preapprovalId);
+    const nextPaymentDate = data.next_payment_date;
+    await activateInstitution(supabase, token, institutionId, preapprovalId, saasPlanId, nextPaymentDate);
   } else if (status === "cancelled" || status === "expired") {
     // 'expired' ocurre cuando MP no puede cobrar en reiterados intentos
     await deactivateInstitution(supabase, institutionId);
@@ -208,7 +216,7 @@ async function processPayment(
 
   const payment = await res.json();
   if (payment.status === "approved" && payment.external_reference) {
-    await activateInstitution(supabase, payment.external_reference, paymentId);
+    await activateInstitution(supabase, token, payment.external_reference, paymentId);
   }
 }
 
@@ -234,7 +242,7 @@ async function searchAndActivate(
       const payData = await payRes.json();
       const approved = (payData.results ?? []).find((p: { status: string }) => p.status === "approved");
       if (approved) {
-        await activateInstitution(supabase, institutionId, String(approved.id));
+        await activateInstitution(supabase, token, institutionId, String(approved.id));
       }
     }
     return;
@@ -245,15 +253,18 @@ async function searchAndActivate(
   console.log(`[searchAndActivate] preapprovals encontrados: ${preapprovals.length}`);
 
   if (preapprovals.length > 0) {
-    await activateInstitution(supabase, institutionId, preapprovals[0].id);
+    await activateInstitution(supabase, token, institutionId, preapprovals[0].id);
   }
 }
 
 // ── Activa la institución ─────────────────────────────────────────────────────
 async function activateInstitution(
   supabase: ReturnType<typeof createClient>,
+  token: string,
   institutionId: string,
   ref: string,
+  saasPlanId?: string,
+  nextPaymentDate?: string,
 ) {
   console.log(`[activateInstitution] institution=${institutionId} ref=${ref}`);
 
@@ -261,8 +272,44 @@ async function activateInstitution(
   const SENTINEL_VALUES = ["already_active", "redirect", "manual"];
   const isRealId = ref && !SENTINEL_VALUES.includes(ref);
 
+  if (isRealId) {
+    // Lógica de upgrade: Verificar si existe una suscripción anterior diferente y cancelarla en MP
+    const { data: oldSub } = await supabase
+      .from("tenant_subscriptions")
+      .select("status, mp_preapproval_id")
+      .eq("institution_id", institutionId)
+      .maybeSingle();
+
+    if (
+      oldSub?.status === "active" &&
+      oldSub.mp_preapproval_id &&
+      oldSub.mp_preapproval_id !== ref
+    ) {
+      console.log(`[activateInstitution] UPGRADE DETECTADO! Cancelando sub vieja: ${oldSub.mp_preapproval_id}`);
+      try {
+        const cancelRes = await fetch(`https://api.mercadopago.com/preapproval/${oldSub.mp_preapproval_id}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ status: "cancelled" })
+        });
+        if (!cancelRes.ok) {
+          console.error(`Error de MP al cancelar sub vieja: ${cancelRes.status}`);
+        } else {
+          console.log(`[activateInstitution] Sub vieja ${oldSub.mp_preapproval_id} cancelada con éxito.`);
+        }
+      } catch (err) {
+        console.error("Error ejecutando fetch de cancelación:", err);
+      }
+    }
+  }
+
   const updatePayload: Record<string, unknown> = { status: "active" };
   if (isRealId) updatePayload.mp_preapproval_id = ref;
+  if (saasPlanId) updatePayload.saas_plan_id = saasPlanId;
+  if (nextPaymentDate) updatePayload.current_period_end = nextPaymentDate;
 
   await supabase
     .from("tenant_subscriptions")
@@ -283,7 +330,6 @@ async function activateInstitution(
     .eq("id", institutionId);
 }
 
-
 // ── Desactiva la institución (suscripción cancelada) ─────────────────────────
 async function deactivateInstitution(
   supabase: ReturnType<typeof createClient>,
@@ -291,18 +337,34 @@ async function deactivateInstitution(
 ) {
   console.log(`[deactivateInstitution] institution=${institutionId}`);
 
+  // Buscamos si la suscripción tiene tiempo restante
+  const { data: sub } = await supabase
+    .from("tenant_subscriptions")
+    .select("current_period_end")
+    .eq("institution_id", institutionId)
+    .maybeSingle();
+
   await supabase
     .from("tenant_subscriptions")
     .update({ status: "cancelled" })
     .eq("institution_id", institutionId);
 
-  await supabase
+  if (sub?.current_period_end) {
+    const end = new Date(sub.current_period_end);
+    if (end > new Date()) {
+      console.log(`[deactivateInstitution] Periodo vence el ${end.toISOString()}. No desactivamos profiles hoy.`);
+      return;
+    }
+  }
+
+  const { error } = await supabase
     .from("profiles")
     .update({ is_active: false })
     .eq("institution_id", institutionId)
     .eq("role", "sudo");
 
-  // Espejo de activateInstitution: también desactivar la institución
+  if (error) console.error("[deactivateInstitution] Error profiles:", error);
+
   await supabase
     .from("institutions")
     .update({ is_active: false })

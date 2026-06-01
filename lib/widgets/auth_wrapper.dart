@@ -79,9 +79,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
         );
       }
 
+      bool isSubValid = true;
+      if (data != null && data['institution_id'] != null) {
+        final subData = await Supabase.instance.client
+            .from('tenant_subscriptions')
+            .select('status, current_period_end')
+            .eq('institution_id', data['institution_id'])
+            .maybeSingle();
+            
+        if (subData != null && subData['status'] == 'cancelled' && subData['current_period_end'] != null) {
+          final end = DateTime.tryParse(subData['current_period_end'].toString());
+          if (end != null && DateTime.now().isAfter(end)) {
+            isSubValid = false;
+          }
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _isActive = data != null ? (data['is_active'] as bool? ?? true) : true;
+          _isActive = data != null ? ((data['is_active'] as bool? ?? true) && isSubValid) : true;
           _hasInstitution = data != null && data['institution_id'] != null;
           _profileChecked = true;
         });

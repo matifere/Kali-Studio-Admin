@@ -60,8 +60,9 @@ class SupaAuthClass {
           .maybeSingle();
 
       final instId = adminProfile?['institution_id'] as String?;
-      if (instId == null)
+      if (instId == null) {
         return 'Error: No se pudo obtener la institución del administrador';
+      }
 
       final result = await _signUpViaHttp(
         email: email,
@@ -108,8 +109,9 @@ class SupaAuthClass {
           .maybeSingle();
 
       final instId = adminProfile?['institution_id'] as String?;
-      if (instId == null)
+      if (instId == null) {
         return 'Error: No se pudo obtener la institución del administrador';
+      }
 
       final result = await _signUpViaHttp(
         email: email,

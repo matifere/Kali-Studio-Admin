@@ -16,11 +16,41 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
   bool _isProcessing = false;
   List<Map<String, dynamic>> _plans = [];
   Map<String, dynamic>? _currentSubscription;
+  RealtimeChannel? _subscriptionChannel;
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _fetchData().then((_) {
+      _setupRealtime();
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscriptionChannel?.unsubscribe();
+    super.dispose();
+  }
+
+  void _setupRealtime() {
+    final institutionId = ProfileCache.institutionId;
+    if (institutionId == null) return;
+
+    _subscriptionChannel = Supabase.instance.client
+        .channel('public:tenant_subscriptions')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'tenant_subscriptions',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'institution_id',
+              value: institutionId,
+            ),
+            callback: (payload) {
+              _fetchData(); // Volvemos a hacer fetch para traer los joins de saas_plans actualizados
+            })
+        .subscribe();
   }
 
   Future<void> _fetchData() async {
@@ -96,6 +126,65 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     }
   }
 
+  Future<void> _cancelSubscription() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('¿Cancelar suscripción?'),
+        content: const Text(
+            'Tu suscripción no se renovará el próximo mes. Podrás seguir usando la aplicación hasta que finalice el ciclo de facturación actual.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cerrar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final institutionId = ProfileCache.institutionId;
+      if (institutionId == null) throw Exception('No hay institución');
+
+      final response = await Supabase.instance.client.functions.invoke(
+        'cancel-saas-subscription',
+        body: {'institution_id': institutionId},
+      );
+
+      if (response.status != 200) {
+        throw Exception(response.data['error'] ?? 'Error desconocido al cancelar.');
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Suscripción cancelada exitosamente.')),
+        );
+        // Volvemos a cargar las suscripciones para reflejar el estado 'cancelled'
+        await _fetchData();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -137,10 +226,25 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
               ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildInfoBadge('Plan', currentPlanName),
-                  const SizedBox(width: 16),
-                  _buildInfoBadge('Estado', _translateStatus(currentStatus)),
+                  Row(
+                    children: [
+                      _buildInfoBadge('Plan', currentPlanName),
+                      const SizedBox(width: 16),
+                      _buildInfoBadge('Estado', _translateStatus(currentStatus)),
+                    ],
+                  ),
+                  if (currentStatus == 'active' || currentStatus == 'authorized')
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                      ),
+                      onPressed: _cancelSubscription,
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('Cancelar Suscripción'),
+                    ),
                 ],
               ),
             ],
@@ -166,8 +270,15 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             spacing: 24,
             runSpacing: 24,
             children: _plans.map((plan) {
-              final isCurrent = _currentSubscription?['saas_plan_id'] == plan['id'];
-              return _buildPlanCard(plan, isCurrent);
+              final matchesPlanId = _currentSubscription?['saas_plan_id'] == plan['id'];
+              final status = _currentSubscription?['status'];
+              final isActive = status == 'active' || status == 'authorized';
+              final isPending = status == 'pending';
+              
+              final isCurrent = matchesPlanId && isActive;
+              final isThisPlanPending = matchesPlanId && isPending;
+
+              return _buildPlanCard(plan, isCurrent, isThisPlanPending);
             }).toList(),
           ),
       ],
@@ -192,20 +303,21 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     );
   }
 
-  Widget _buildPlanCard(Map<String, dynamic> plan, bool isCurrent) {
+  Widget _buildPlanCard(Map<String, dynamic> plan, bool isCurrent, bool isThisPlanPending) {
+    final highlight = isCurrent || isThisPlanPending;
     return Container(
       width: 300,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: isCurrent ? KaliColors.espresso : KaliColors.warmWhite,
+        color: highlight ? KaliColors.espresso : KaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCurrent ? KaliColors.espresso : KaliColors.clayDark,
+          color: highlight ? KaliColors.espresso : KaliColors.clayDark,
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isCurrent ? 0.1 : 0.02),
+            color: Colors.black.withValues(alpha: highlight ? 0.1 : 0.02),
             blurRadius: 16,
             offset: const Offset(0, 8),
           )
@@ -215,27 +327,27 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isCurrent)
+          if (highlight)
             Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: KaliColors.clay,
+                color: isCurrent ? KaliColors.clay : Colors.orange.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'PLAN ACTUAL',
+                isCurrent ? 'PLAN ACTUAL' : 'PAGO PENDIENTE',
                 style: KaliText.caption(KaliColors.espresso).copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           Text(
             plan['name'] ?? '',
-            style: KaliText.heading(isCurrent ? KaliColors.warmWhite : KaliColors.espresso, size: 28),
+            style: KaliText.heading(highlight ? KaliColors.warmWhite : KaliColors.espresso, size: 28),
           ),
           const SizedBox(height: 8),
           Text(
             plan['description'] ?? '',
-            style: KaliText.body(isCurrent ? KaliColors.sand : KaliColors.clayDark, size: 14),
+            style: KaliText.body(highlight ? KaliColors.sand : KaliColors.clayDark, size: 14),
           ),
           const SizedBox(height: 24),
           Row(
@@ -243,13 +355,13 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             children: [
               Text(
                 '\$${plan['price']}',
-                style: KaliText.heading(isCurrent ? KaliColors.warmWhite : KaliColors.espresso, size: 40),
+                style: KaliText.heading(highlight ? KaliColors.warmWhite : KaliColors.espresso, size: 40),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, left: 4),
                 child: Text(
                   '${plan['currency']}/mes',
-                  style: KaliText.body(isCurrent ? KaliColors.sand : KaliColors.clayDark, size: 14),
+                  style: KaliText.body(highlight ? KaliColors.sand : KaliColors.clayDark, size: 14),
                 ),
               ),
             ],
@@ -261,9 +373,9 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             child: ElevatedButton(
               onPressed: (_isProcessing || isCurrent) ? null : () => _subscribe(plan),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isCurrent ? KaliColors.warmWhite : KaliColors.espresso,
-                foregroundColor: isCurrent ? KaliColors.espresso : KaliColors.warmWhite,
-                disabledBackgroundColor: isCurrent ? KaliColors.warmWhite.withValues(alpha: 0.5) : null,
+                backgroundColor: highlight ? KaliColors.warmWhite : KaliColors.espresso,
+                foregroundColor: highlight ? KaliColors.espresso : KaliColors.warmWhite,
+                disabledBackgroundColor: highlight ? KaliColors.warmWhite.withValues(alpha: 0.5) : null,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -274,14 +386,16 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        color: isCurrent ? KaliColors.espresso : KaliColors.warmWhite,
+                        color: highlight ? KaliColors.espresso : KaliColors.warmWhite,
                         strokeWidth: 2,
                       ),
                     )
                   : Text(
-                      isCurrent ? 'ACTIVO' : 'SUSCRIBIRSE',
+                      isCurrent 
+                        ? 'ACTIVO' 
+                        : (isThisPlanPending ? 'REINTENTAR PAGO' : 'SUSCRIBIRSE'),
                       style: KaliText.label(
-                        isCurrent ? KaliColors.espresso : KaliColors.warmWhite,
+                        highlight ? KaliColors.espresso : KaliColors.warmWhite,
                       ).copyWith(letterSpacing: 1.5),
                     ),
             ),

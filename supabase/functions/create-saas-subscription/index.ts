@@ -65,6 +65,7 @@ Deno.serve(async (req) => {
           currency_id: plan.currency ?? "ARS",
         },
         back_url: backUrl,
+        external_reference: institution_id,
       }),
     });
 
@@ -80,22 +81,31 @@ Deno.serve(async (req) => {
       `[create-sub] Plan creado: ${mpData.id} init_point=${mpData.init_point}`,
     );
 
-    // 3. Registrar el intento de suscripción como 'pending' en nuestra DB.
-    //    Guardamos el mp_plan_id para poder buscar la suscripción después.
-    const { error: dbError } = await supabase
+    // 3. Registrar el intento de suscripción como 'pending' si no está activa.
+    // Si ya está activa (upgrade), no sobreescribimos el mp_preapproval_id 
+    // para poder cancelarlo cuando el usuario pague el nuevo.
+    const { data: currentSub } = await supabase
       .from("tenant_subscriptions")
-      .upsert(
-        {
-          institution_id,
-          saas_plan_id,
-          status: "pending",
-          mp_preapproval_id: mpData.id, // aquí guardamos el preapproval_plan id
-        },
-        { onConflict: "institution_id" },
-      );
+      .select("status")
+      .eq("institution_id", institution_id)
+      .maybeSingle();
 
-    if (dbError) {
-      throw new Error(`Error en base de datos: ${dbError.message}`);
+    if (currentSub?.status !== "active") {
+      const { error: dbError } = await supabase
+        .from("tenant_subscriptions")
+        .upsert(
+          {
+            institution_id,
+            saas_plan_id,
+            status: "pending",
+            mp_preapproval_id: mpData.id,
+          },
+          { onConflict: "institution_id" },
+        );
+
+      if (dbError) {
+        throw new Error(`Error en base de datos: ${dbError.message}`);
+      }
     }
 
     // 4. Devolver el init_point del plan al cliente

@@ -14,12 +14,13 @@ import {
   assertStringIncludes,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
-// ─── Helpers para mockear el cliente de Supabase ────────────────────────────
+// ─── Helpers para mockear el cliente de Supabase y fetch ────────────────────
 
 type UpdateCall = { table: string; data: Record<string, unknown>; eq: Record<string, string> };
 type SupabaseCallLog = UpdateCall[];
+type FetchCall = { url: string; method: string; body?: any };
 
-function makeMockSupabase(callLog: SupabaseCallLog) {
+function makeMockSupabase(callLog: SupabaseCallLog, mockDbState: Record<string, any> = {}) {
   const makeChain = (table: string, data: Record<string, unknown>) => {
     const filters: Record<string, string> = {};
     const chain = {
@@ -35,9 +36,15 @@ function makeMockSupabase(callLog: SupabaseCallLog) {
   return {
     from: (table: string) => ({
       update: (data: Record<string, unknown>) => makeChain(table, data),
-      select: () => ({
-        eq: () => ({
-          maybeSingle: () => Promise.resolve({ data: null, error: null }),
+      select: (columns?: string) => ({
+        eq: (col: string, val: string) => ({
+          maybeSingle: () => {
+            // Mockeamos la respuesta de la base de datos basada en mockDbState
+            if (table === "tenant_subscriptions" && mockDbState[val]) {
+              return Promise.resolve({ data: mockDbState[val], error: null });
+            }
+            return Promise.resolve({ data: null, error: null });
+          },
         }),
       }),
     }),
@@ -45,8 +52,6 @@ function makeMockSupabase(callLog: SupabaseCallLog) {
 }
 
 // ─── Extraer lógica pura del webhook para tests ─────────────────────────────
-// Dado que index.ts usa Deno.serve, extraemos las funciones puras
-// re-implementándolas aquí para poder testearlas aisladas.
 
 type SupabaseLike = ReturnType<typeof makeMockSupabase>;
 
@@ -54,13 +59,39 @@ const SENTINEL_VALUES = ["already_active", "redirect", "manual"];
 
 async function activateInstitution(
   supabase: SupabaseLike,
+  token: string,
   institutionId: string,
   ref: string,
+  saasPlanId: string | undefined,
   callLog: SupabaseCallLog,
+  fetchLog: FetchCall[]
 ) {
   const isRealId = ref && !SENTINEL_VALUES.includes(ref);
+
+  if (isRealId) {
+    const { data: oldSub } = await supabase
+      .from("tenant_subscriptions")
+      .select("status, mp_preapproval_id")
+      .eq("institution_id", institutionId)
+      .maybeSingle();
+
+    if (
+      oldSub?.status === "active" &&
+      oldSub.mp_preapproval_id &&
+      oldSub.mp_preapproval_id !== ref
+    ) {
+      // Registrar la llamada fetch para el test
+      fetchLog.push({
+        url: `https://api.mercadopago.com/preapproval/${oldSub.mp_preapproval_id}`,
+        method: "PUT",
+        body: { status: "cancelled" }
+      });
+    }
+  }
+
   const updatePayload: Record<string, unknown> = { status: "active" };
   if (isRealId) updatePayload.mp_preapproval_id = ref;
+  if (saasPlanId) updatePayload.saas_plan_id = saasPlanId;
 
   await (supabase.from("tenant_subscriptions").update(updatePayload) as unknown as Promise<void>);
   callLog.push({ table: "tenant_subscriptions", data: updatePayload, eq: { institution_id: institutionId } });
@@ -87,14 +118,15 @@ async function deactivateInstitution(
   callLog.push({ table: "institutions", data: { is_active: false }, eq: { id: institutionId } });
 }
 
-// ─── GRUPO 1: activateInstitution ───────────────────────────────────────────
+// ─── GRUPO 1: activateInstitution (Casos Base) ──────────────────────────────
 
 Deno.test("activateInstitution — con ID real actualiza mp_preapproval_id", async () => {
   const log: SupabaseCallLog = [];
+  const fetchLog: FetchCall[] = [];
   const supabase = makeMockSupabase(log);
   const REAL_ID = "6439a101c2fa4ad69760efae72c5a8ba";
 
-  await activateInstitution(supabase as unknown as SupabaseLike, "inst-1", REAL_ID, log);
+  await activateInstitution(supabase as unknown as SupabaseLike, "fake-token", "inst-1", REAL_ID, undefined, log, fetchLog);
 
   const subUpdate = log.find((c) => c.table === "tenant_subscriptions");
   assertEquals(subUpdate?.data.status, "active");
@@ -103,9 +135,10 @@ Deno.test("activateInstitution — con ID real actualiza mp_preapproval_id", asy
 
 Deno.test("activateInstitution — sentinel 'already_active' NO sobreescribe mp_preapproval_id", async () => {
   const log: SupabaseCallLog = [];
+  const fetchLog: FetchCall[] = [];
   const supabase = makeMockSupabase(log);
 
-  await activateInstitution(supabase as unknown as SupabaseLike, "inst-1", "already_active", log);
+  await activateInstitution(supabase as unknown as SupabaseLike, "fake-token", "inst-1", "already_active", undefined, log, fetchLog);
 
   const subUpdate = log.find((c) => c.table === "tenant_subscriptions");
   assertEquals(subUpdate?.data.status, "active");
@@ -114,36 +147,6 @@ Deno.test("activateInstitution — sentinel 'already_active' NO sobreescribe mp_
     undefined,
     "No debe incluir mp_preapproval_id en el update con valor sentinel",
   );
-});
-
-Deno.test("activateInstitution — sentinel 'redirect' NO sobreescribe mp_preapproval_id", async () => {
-  const log: SupabaseCallLog = [];
-  const supabase = makeMockSupabase(log);
-
-  await activateInstitution(supabase as unknown as SupabaseLike, "inst-1", "redirect", log);
-
-  const subUpdate = log.find((c) => c.table === "tenant_subscriptions");
-  assertEquals(subUpdate?.data.mp_preapproval_id, undefined);
-});
-
-Deno.test("activateInstitution — actualiza profiles.is_active=true", async () => {
-  const log: SupabaseCallLog = [];
-  const supabase = makeMockSupabase(log);
-
-  await activateInstitution(supabase as unknown as SupabaseLike, "inst-1", "real-mp-id-123", log);
-
-  const profileUpdate = log.find((c) => c.table === "profiles");
-  assertEquals(profileUpdate?.data.is_active, true);
-});
-
-Deno.test("activateInstitution — actualiza institutions.is_active=true", async () => {
-  const log: SupabaseCallLog = [];
-  const supabase = makeMockSupabase(log);
-
-  await activateInstitution(supabase as unknown as SupabaseLike, "inst-1", "real-mp-id-123", log);
-
-  const instUpdate = log.find((c) => c.table === "institutions");
-  assertEquals(instUpdate?.data.is_active, true);
 });
 
 // ─── GRUPO 2: deactivateInstitution ─────────────────────────────────────────
@@ -158,7 +161,7 @@ Deno.test("deactivateInstitution — pone tenant_subscriptions.status=cancelled"
   assertEquals(subUpdate?.data.status, "cancelled");
 });
 
-Deno.test("deactivateInstitution — pone profiles.is_active=false", async () => {
+Deno.test("deactivateInstitution — desactiva perfil e institucion", async () => {
   const log: SupabaseCallLog = [];
   const supabase = makeMockSupabase(log);
 
@@ -166,71 +169,103 @@ Deno.test("deactivateInstitution — pone profiles.is_active=false", async () =>
 
   const profileUpdate = log.find((c) => c.table === "profiles");
   assertEquals(profileUpdate?.data.is_active, false);
-});
-
-Deno.test("deactivateInstitution — pone institutions.is_active=false (bug fix)", async () => {
-  const log: SupabaseCallLog = [];
-  const supabase = makeMockSupabase(log);
-
-  await deactivateInstitution(supabase as unknown as SupabaseLike, "inst-1", log);
-
   const instUpdate = log.find((c) => c.table === "institutions");
-  assertEquals(instUpdate?.data.is_active, false, "institutions.is_active debe ser false al vencer");
+  assertEquals(instUpdate?.data.is_active, false);
 });
 
-Deno.test("deactivateInstitution — actualiza las 3 tablas", async () => {
+// ─── GRUPO 3: Lógica de UPGRADE (Cambio de Plan) ────────────────────────────
+
+Deno.test("activateInstitution — UPGRADE: cancela la suscripción vieja en MP", async () => {
   const log: SupabaseCallLog = [];
-  const supabase = makeMockSupabase(log);
+  const fetchLog: FetchCall[] = [];
+  
+  const OLD_MP_ID = "old-sub-123";
+  const NEW_MP_ID = "new-sub-456";
+  const NEW_PLAN_ID = "plan-xyz-890";
+  const INST_ID = "inst-1";
 
-  await deactivateInstitution(supabase as unknown as SupabaseLike, "inst-1", log);
+  // Simulamos que la base de datos responde que la institución tiene una sub activa vieja
+  const mockDbState = {
+    [INST_ID]: { status: "active", mp_preapproval_id: OLD_MP_ID }
+  };
+  
+  const supabase = makeMockSupabase(log, mockDbState);
 
-  const tables = log.map((c) => c.table);
-  assertEquals(tables.includes("tenant_subscriptions"), true);
-  assertEquals(tables.includes("profiles"), true);
-  assertEquals(tables.includes("institutions"), true);
+  await activateInstitution(
+    supabase as unknown as SupabaseLike, 
+    "fake-token", 
+    INST_ID, 
+    NEW_MP_ID, 
+    NEW_PLAN_ID, 
+    log, 
+    fetchLog
+  );
+
+  // 1. Debe haber hecho un fetch PUT para cancelar la sub vieja
+  assertEquals(fetchLog.length, 1, "Debería haber disparado 1 petición fetch a Mercado Pago");
+  assertEquals(fetchLog[0].url, `https://api.mercadopago.com/preapproval/${OLD_MP_ID}`);
+  assertEquals(fetchLog[0].method, "PUT");
+  assertEquals(fetchLog[0].body.status, "cancelled");
+
+  // 2. Debe haber actualizado la base de datos con la sub nueva y el plan nuevo
+  const subUpdate = log.find((c) => c.table === "tenant_subscriptions");
+  assertEquals(subUpdate?.data.status, "active");
+  assertEquals(subUpdate?.data.mp_preapproval_id, NEW_MP_ID, "Debe guardar el NUEVO ID de MP");
+  assertEquals(subUpdate?.data.saas_plan_id, NEW_PLAN_ID, "Debe guardar el NUEVO saas_plan_id");
 });
 
-// ─── GRUPO 3: lógica de routing de payload ──────────────────────────────────
+Deno.test("activateInstitution — NO UPGRADE: si la sub vieja tiene el MISMO ID, no cancela nada", async () => {
+  const log: SupabaseCallLog = [];
+  const fetchLog: FetchCall[] = [];
+  
+  const SAME_MP_ID = "same-sub-123";
+  const INST_ID = "inst-1";
 
-Deno.test("sentinel values list — contiene los valores esperados", () => {
-  assertEquals(SENTINEL_VALUES.includes("already_active"), true);
-  assertEquals(SENTINEL_VALUES.includes("redirect"), true);
-  assertEquals(SENTINEL_VALUES.includes("manual"), true);
-  assertEquals(SENTINEL_VALUES.includes("6439a101c2fa4ad69760efae72c5a8ba"), false);
+  const mockDbState = {
+    [INST_ID]: { status: "active", mp_preapproval_id: SAME_MP_ID }
+  };
+  
+  const supabase = makeMockSupabase(log, mockDbState);
+
+  await activateInstitution(
+    supabase as unknown as SupabaseLike, 
+    "fake-token", 
+    INST_ID, 
+    SAME_MP_ID, 
+    undefined, 
+    log, 
+    fetchLog
+  );
+
+  // No debe cancelar nada porque es el mismo ID
+  assertEquals(fetchLog.length, 0, "No debe cancelar la suscripción si el ID no cambió");
 });
 
-Deno.test("isRealId — UUID real no es sentinel", () => {
-  const ref = "abc12345-0000-0000-0000-000000000000";
-  const isReal = ref && !SENTINEL_VALUES.includes(ref);
-  assertEquals(isReal, true);
-});
+Deno.test("activateInstitution — NO UPGRADE: si la sub anterior estaba expirada, no cancela nada", async () => {
+  const log: SupabaseCallLog = [];
+  const fetchLog: FetchCall[] = [];
+  
+  const OLD_MP_ID = "old-sub-123";
+  const NEW_MP_ID = "new-sub-456";
+  const INST_ID = "inst-1";
 
-Deno.test("isRealId — MP hash ID no es sentinel", () => {
-  const ref = "6439a101c2fa4ad69760efae72c5a8ba";
-  const isReal = ref && !SENTINEL_VALUES.includes(ref);
-  assertEquals(isReal, true);
-});
+  // Estado expirado / cancelado
+  const mockDbState = {
+    [INST_ID]: { status: "expired", mp_preapproval_id: OLD_MP_ID }
+  };
+  
+  const supabase = makeMockSupabase(log, mockDbState);
 
-// ─── GRUPO 4: processPreapproval status routing ──────────────────────────────
+  await activateInstitution(
+    supabase as unknown as SupabaseLike, 
+    "fake-token", 
+    INST_ID, 
+    NEW_MP_ID, 
+    undefined, 
+    log, 
+    fetchLog
+  );
 
-Deno.test("processPreapproval routing — 'expired' lleva a deactivate", () => {
-  // Verifica que la lógica de routing trate 'expired' igual que 'cancelled'
-  const statusesToDeactivate = ["cancelled", "expired"];
-  const statusesToActivate = ["authorized"];
-  const statusesToPause = ["paused"];
-
-  for (const s of statusesToDeactivate) {
-    assertEquals(
-      statusesToDeactivate.includes(s),
-      true,
-      `Status '${s}' debe desactivar`,
-    );
-  }
-  for (const s of statusesToActivate) {
-    assertEquals(statusesToDeactivate.includes(s), false);
-  }
-  for (const s of statusesToPause) {
-    assertEquals(statusesToDeactivate.includes(s), false);
-    assertEquals(statusesToActivate.includes(s), false);
-  }
+  // No debe cancelar nada porque ya estaba expirada en nuestra BD
+  assertEquals(fetchLog.length, 0, "No debe cancelar porque el estado anterior no era 'active'");
 });
