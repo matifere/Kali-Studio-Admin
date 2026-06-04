@@ -39,21 +39,15 @@ Future<void> main() async {
     });
   }
 
-  final String url;
-  final String anon;
+  // Cargamos .env en todas las plataformas (está en flutter assets, funciona en web también).
+  // En producción web, --dart-define sobreescribe los valores del .env.
+  await dotenv.load(fileName: ".env");
 
-  if (kIsWeb) {
-    // Credenciales inyectadas en build-time via --dart-define.
-    // Para construir: flutter build web
-    //   --dart-define=SUPABASE_URL=https://xxx.supabase.co
-    //   --dart-define=SUPABASE_ANON=sb_publishable_xxx
-    url = const String.fromEnvironment('SUPABASE_URL');
-    anon = const String.fromEnvironment('SUPABASE_ANON');
-  } else {
-    await dotenv.load(fileName: ".env");
-    url = dotenv.env['URL'] ?? '';
-    anon = dotenv.env['ANON'] ?? '';
-  }
+  const buildUrl = String.fromEnvironment('SUPABASE_URL');
+  const buildAnon = String.fromEnvironment('SUPABASE_ANON');
+
+  final String url = buildUrl.isNotEmpty ? buildUrl : (dotenv.env['URL'] ?? '');
+  final String anon = buildAnon.isNotEmpty ? buildAnon : (dotenv.env['ANON'] ?? '');
 
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(url: url, anonKey: anon);
