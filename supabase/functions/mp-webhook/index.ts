@@ -33,14 +33,20 @@ Deno.serve(async (req) => {
       console.log(`[GET] institution=${institutionId} preapproval=${preapprovalId}`);
 
       // SEGURIDAD: NUNCA confiar en query params del browser (status, collection_status).
-      // Un usuario podría fabricar la URL con ?status=authorized.
-      // Solo activamos si el preapproval_id existe y está realmente autorizado en MP.
-      if (institutionId && preapprovalId) {
-        const verified = await verifyPreapprovalWithMP(MP_ACCESS_TOKEN, preapprovalId, institutionId);
-        if (verified) {
-          await activateInstitution(supabase, MP_ACCESS_TOKEN, institutionId, preapprovalId);
+      // En cambio, validamos contra la API real de Mercado Pago.
+      if (institutionId) {
+        if (preapprovalId) {
+          // Caso ideal: MP envió el preapproval_id → verificamos directamente
+          const verified = await verifyPreapprovalWithMP(MP_ACCESS_TOKEN, preapprovalId, institutionId);
+          if (verified) {
+            await activateInstitution(supabase, MP_ACCESS_TOKEN, institutionId, preapprovalId);
+          } else {
+            console.log(`[GET] Preapproval ${preapprovalId} NO verificado para institution ${institutionId}. No se activa.`);
+          }
         } else {
-          console.log(`[GET] Preapproval ${preapprovalId} NO verificado para institution ${institutionId}. No se activa.`);
+          // Fallback: MP no envió preapproval_id en la URL (común con preapproval_plan).
+          // Buscamos en la API de MP por external_reference para verificar si hay un pago real.
+          await searchAndActivate(supabase, MP_ACCESS_TOKEN, institutionId);
         }
       }
 
@@ -54,6 +60,61 @@ Deno.serve(async (req) => {
     if (req.method === "POST") {
       const payload = await req.json().catch(() => ({}));
       console.log(`[POST] type=${payload.type} action=${payload.action}`);
+
+      // Las verificaciones internas (desde Flutter/Edge Functions) no llevan firma de MP
+      const isInternalRequest = payload.type === "manual_verify" || payload.type === "manual_deactivate";
+
+      // Validar firma de MP para eventos IPN reales (no internos)
+      if (!isInternalRequest) {
+        const MP_WEBHOOK_SECRET = Deno.env.get("MP_WEBHOOK_SECRET");
+        if (MP_WEBHOOK_SECRET) {
+          const xSignature = req.headers.get("x-signature");
+          const xRequestId = req.headers.get("x-request-id");
+
+          if (!xSignature || !xRequestId) {
+            console.error("[POST] Evento IPN sin headers de firma. Rechazado.");
+            return new Response("Unauthorized", { status: 401 });
+          }
+
+          // Parsear x-signature: "ts=TIMESTAMP,v1=HASH"
+          const parts: Record<string, string> = {};
+          for (const part of xSignature.split(",")) {
+            const [key, ...rest] = part.split("=");
+            parts[key.trim()] = rest.join("=").trim();
+          }
+
+          const ts = parts["ts"];
+          const v1 = parts["v1"];
+          if (!ts || !v1) {
+            console.error("[POST] Formato de x-signature inválido. Rechazado.");
+            return new Response("Unauthorized", { status: 401 });
+          }
+
+          // Construir el string a firmar según docs de MP
+          const dataId = payload.data?.id ?? "";
+          const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+          // Calcular HMAC-SHA256
+          const key = await crypto.subtle.importKey(
+            "raw",
+            new TextEncoder().encode(MP_WEBHOOK_SECRET),
+            { name: "HMAC", hash: "SHA-256" },
+            false,
+            ["sign"],
+          );
+          const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+          const computed = Array.from(new Uint8Array(signature))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+
+          if (computed !== v1) {
+            console.error(`[POST] Firma inválida. Esperada: ${computed}, Recibida: ${v1}. Rechazado.`);
+            return new Response("Unauthorized", { status: 401 });
+          }
+
+          console.log("[POST] Firma de MP verificada ✓");
+        }
+      }
 
       // Verificación manual desde Flutter (botón "Verificar Estado del Pago")
       if (payload.type === "manual_verify" && payload.institution_id) {
