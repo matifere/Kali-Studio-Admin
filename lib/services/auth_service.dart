@@ -155,29 +155,59 @@ class SupaAuthClass {
   Future<String> registrarUsuario(
       String email, String password, String fullName) async {
     try {
-      // Usamos HTTP directo para NO crear una sesión local. Si usáramos
-      // auth.signUp(), Supabase dispara signedIn → el listener de main.dart
-      // navega a AuthWrapper y destruye el RegisterScreen antes de que pueda
-      // mostrar el feedback de éxito.
-      final result = await _signUpViaHttp(
-        email: email,
-        password: password,
-        metadata: {'full_name': fullName, 'role': 'sudo'},
+      // Step 1 — crear usuario vía HTTP para NO abrir sesión local.
+      // Si usáramos auth.signUp() dispararía signedIn → el listener de main.dart
+      // destruiría el RegisterScreen antes de mostrar feedback.
+      final signupResp = await http.post(
+        Uri.parse('$_supabaseUrl/auth/v1/signup'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _supabaseAnon,
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'data': {'full_name': fullName, 'role': 'sudo'},
+        }),
       );
 
-      if (result.startsWith('Error:')) return result.substring(6);
+      if (signupResp.body.isEmpty) return 'Error de conexión con el servidor.';
 
-      // El trigger de Supabase crea el perfil; el upsert garantiza is_active:false.
-      // Si falla por RLS (sin sesión activa), el trigger ya cubrió la creación base.
-      try {
-        await Supabase.instance.client.from('profiles').upsert({
-          'id': result,
+      final signupBody = jsonDecode(signupResp.body) as Map<String, dynamic>;
+
+      if (signupResp.statusCode != 200 && signupResp.statusCode != 201) {
+        return signupBody['message'] ?? signupBody['msg'] ?? 'Error al registrar usuario';
+      }
+
+      // Supabase devuelve { "user": { "id": ... } } sin confirmación de email,
+      // o { "id": ..., "email": ... } con confirmación habilitada.
+      final userId = (signupBody['user']?['id'] ?? signupBody['id']) as String?;
+      if (userId == null) return 'No se recibió ID del nuevo usuario';
+
+      // Step 2 — crear perfil via HTTP usando el token del nuevo usuario.
+      // Sin confirmación de email Supabase incluye access_token en la respuesta;
+      // con confirmación habilitada no hay token y usamos la anon key (el trigger
+      // de Supabase debe crear el perfil en ese caso).
+      final accessToken = signupBody['access_token'] as String?;
+      final authHeader =
+          accessToken != null ? 'Bearer $accessToken' : 'Bearer $_supabaseAnon';
+
+      await http.post(
+        Uri.parse('$_supabaseUrl/rest/v1/profiles'),
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': _supabaseAnon,
+          'Authorization': authHeader,
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        body: jsonEncode({
+          'id': userId,
           'email': email,
           'full_name': fullName,
           'role': 'sudo',
           'is_active': false,
-        });
-      } catch (_) {}
+        }),
+      );
 
       return 'Pending';
     } catch (e) {
