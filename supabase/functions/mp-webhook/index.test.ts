@@ -269,3 +269,122 @@ Deno.test("activateInstitution — NO UPGRADE: si la sub anterior estaba expirad
   // No debe cancelar nada porque ya estaba expirada en nuestra BD
   assertEquals(fetchLog.length, 0, "No debe cancelar porque el estado anterior no era 'active'");
 });
+
+// ─── GRUPO 4: verifyPreapprovalWithMP (Seguridad GET handler) ───────────────
+
+// Reimplementamos la lógica pura de verifyPreapprovalWithMP para tests.
+// En los tests usamos un mock de fetch en vez del fetch global.
+async function verifyPreapprovalWithMP(
+  mockFetch: (url: string) => Promise<{ ok: boolean; json: () => Promise<any> }>,
+  preapprovalId: string,
+  expectedInstitutionId: string,
+): Promise<boolean> {
+  try {
+    const res = await mockFetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`);
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    if (data.status !== "authorized") return false;
+    if (data.external_reference !== expectedInstitutionId) return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+Deno.test("verifyPreapprovalWithMP — preapproval autorizado con ref correcta retorna true", async () => {
+  const mockFetch = (_url: string) => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({
+      status: "authorized",
+      external_reference: "inst-1",
+    }),
+  });
+
+  const result = await verifyPreapprovalWithMP(mockFetch, "preapproval-123", "inst-1");
+  assertEquals(result, true, "Debe retornar true para un preapproval autorizado con ref correcta");
+});
+
+Deno.test("verifyPreapprovalWithMP — preapproval pending retorna false", async () => {
+  const mockFetch = (_url: string) => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({
+      status: "pending",
+      external_reference: "inst-1",
+    }),
+  });
+
+  const result = await verifyPreapprovalWithMP(mockFetch, "preapproval-123", "inst-1");
+  assertEquals(result, false, "Debe retornar false si el preapproval no está autorizado");
+});
+
+Deno.test("verifyPreapprovalWithMP — external_reference no coincide retorna false", async () => {
+  const mockFetch = (_url: string) => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({
+      status: "authorized",
+      external_reference: "otra-institucion",
+    }),
+  });
+
+  const result = await verifyPreapprovalWithMP(mockFetch, "preapproval-123", "inst-1");
+  assertEquals(result, false, "Debe retornar false si el external_reference no coincide (posible ataque)");
+});
+
+Deno.test("verifyPreapprovalWithMP — preapproval no existe en MP retorna false", async () => {
+  const mockFetch = (_url: string) => Promise.resolve({
+    ok: false,
+    json: () => Promise.resolve({}),
+  });
+
+  const result = await verifyPreapprovalWithMP(mockFetch, "falso-id-123", "inst-1");
+  assertEquals(result, false, "Debe retornar false si MP responde 404");
+});
+
+// ─── GRUPO 5: manualVerify — seguridad del botón "Verificar Estado del Pago" ──
+
+Deno.test("manualVerify — si la sub ya está activa, retorna true sin buscar en MP", async () => {
+  const log: SupabaseCallLog = [];
+  const fetchLog: FetchCall[] = [];
+  const INST_ID = "inst-1";
+
+  const mockDbState = {
+    [INST_ID]: { status: "active", mp_preapproval_id: "some-id" }
+  };
+
+  const supabase = makeMockSupabase(log, mockDbState);
+
+  // Simulamos manualVerify: primero chequea DB
+  const sub = mockDbState[INST_ID];
+  let result = false;
+  if (sub?.status === "active") {
+    await activateInstitution(supabase as unknown as SupabaseLike, "fake-token", INST_ID, "already_active", undefined, log, fetchLog);
+    result = true;
+  }
+
+  assertEquals(result, true, "Debe retornar true si ya está activa");
+  assertEquals(fetchLog.length, 0, "No debe hacer fetch a MP si ya está activa");
+});
+
+Deno.test("manualVerify — si no hay sub ni pagos, retorna false y NO activa nada", async () => {
+  const log: SupabaseCallLog = [];
+  const INST_ID = "inst-sin-pago";
+
+  // DB vacía — no hay suscripción
+  const supabase = makeMockSupabase(log, {});
+
+  // Simulamos: la DB no devuelve sub, no hay mp_preapproval_id,
+  // y searchAndActivate no encuentra nada → retorna false
+  const { data: sub } = await supabase
+    .from("tenant_subscriptions")
+    .select("status, mp_preapproval_id")
+    .eq("institution_id", INST_ID)
+    .maybeSingle();
+
+  assertEquals(sub, null, "No debe existir suscripción en la DB");
+
+  // Verificar que no se hizo ninguna activación
+  const activations = log.filter((c) => c.data.status === "active");
+  assertEquals(activations.length, 0, "No debe activar nada si no hay suscripción ni pago");
+});

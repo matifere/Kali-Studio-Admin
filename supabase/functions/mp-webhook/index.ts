@@ -29,12 +29,19 @@ Deno.serve(async (req) => {
       // institution_id viene en el back_url que seteamos al crear el plan
       const institutionId = url.searchParams.get("institution_id");
       const preapprovalId = url.searchParams.get("preapproval_id");
-      const status = url.searchParams.get("status") ?? url.searchParams.get("collection_status");
 
-      console.log(`[GET] status=${status} institution=${institutionId} preapproval=${preapprovalId}`);
+      console.log(`[GET] institution=${institutionId} preapproval=${preapprovalId}`);
 
-      if (institutionId && (status === "authorized" || status === "approved")) {
-        await activateInstitution(supabase, MP_ACCESS_TOKEN, institutionId, preapprovalId ?? "redirect");
+      // SEGURIDAD: NUNCA confiar en query params del browser (status, collection_status).
+      // Un usuario podría fabricar la URL con ?status=authorized.
+      // Solo activamos si el preapproval_id existe y está realmente autorizado en MP.
+      if (institutionId && preapprovalId) {
+        const verified = await verifyPreapprovalWithMP(MP_ACCESS_TOKEN, preapprovalId, institutionId);
+        if (verified) {
+          await activateInstitution(supabase, MP_ACCESS_TOKEN, institutionId, preapprovalId);
+        } else {
+          console.log(`[GET] Preapproval ${preapprovalId} NO verificado para institution ${institutionId}. No se activa.`);
+        }
       }
 
       return new Response(
@@ -48,10 +55,10 @@ Deno.serve(async (req) => {
       const payload = await req.json().catch(() => ({}));
       console.log(`[POST] type=${payload.type} action=${payload.action}`);
 
-      // Verificación manual desde Flutter (botón "Ya Pagué")
+      // Verificación manual desde Flutter (botón "Verificar Estado del Pago")
       if (payload.type === "manual_verify" && payload.institution_id) {
-        await manualVerify(supabase, MP_ACCESS_TOKEN, String(payload.institution_id));
-        return new Response(JSON.stringify({ ok: true }), {
+        const paymentFound = await manualVerify(supabase, MP_ACCESS_TOKEN, String(payload.institution_id));
+        return new Response(JSON.stringify({ ok: true, payment_found: paymentFound }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -91,12 +98,50 @@ Deno.serve(async (req) => {
   }
 });
 
+// ── Verifica un preapproval_id contra la API de Mercado Pago ─────────────────
+// Retorna true solo si el preapproval existe, está autorizado, y pertenece a la institución.
+async function verifyPreapprovalWithMP(
+  token: string,
+  preapprovalId: string,
+  expectedInstitutionId: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`, {
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      console.log(`[verifyPreapprovalWithMP] MP respondió ${res.status} para preapproval ${preapprovalId}`);
+      return false;
+    }
+
+    const data = await res.json();
+    const status: string = data.status;
+    const externalRef: string = data.external_reference;
+
+    console.log(`[verifyPreapprovalWithMP] id=${preapprovalId} status=${status} ref=${externalRef} expected=${expectedInstitutionId}`);
+
+    // Solo es válido si está autorizado Y pertenece a la institución correcta
+    if (status !== "authorized") return false;
+    if (externalRef !== expectedInstitutionId) {
+      console.error(`[verifyPreapprovalWithMP] ALERTA: external_reference (${externalRef}) no coincide con institution_id (${expectedInstitutionId})`);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("[verifyPreapprovalWithMP] Error:", err);
+    return false;
+  }
+}
+
 // ── Verificación manual: busca suscripción activa por preapproval_plan_id ────────────
+// Retorna true si se encontró un pago válido y se activó, false si no.
 async function manualVerify(
   supabase: ReturnType<typeof createClient>,
   token: string,
   institutionId: string,
-) {
+): Promise<boolean> {
   console.log(`[manualVerify] institution=${institutionId}`);
 
   // Ver si ya está activa en DB
@@ -107,8 +152,9 @@ async function manualVerify(
     .maybeSingle();
 
   if (sub?.status === "active") {
+    // Ya está activa, asegurar que profiles/institutions estén sincronizados
     await activateInstitution(supabase, token, institutionId, "already_active");
-    return;
+    return true;
   }
 
   // mp_preapproval_id almacena el preapproval_plan_id — buscar suscripciones activas de ese plan
@@ -124,14 +170,19 @@ async function manualVerify(
       const subs = data.results ?? [];
       console.log(`[manualVerify] suscripciones autorizadas encontradas: ${subs.length}`);
       if (subs.length > 0) {
-        await activateInstitution(supabase, token, institutionId, subs[0].id);
-        return;
+        // Verificar que el external_reference coincida con nuestra institución
+        const matchingSub = subs.find((s: { external_reference: string }) => s.external_reference === institutionId);
+        if (matchingSub) {
+          await activateInstitution(supabase, token, institutionId, matchingSub.id);
+          return true;
+        }
+        console.log(`[manualVerify] Suscripciones encontradas pero ninguna con external_reference=${institutionId}`);
       }
     }
   }
 
   // Fallback: buscar pagos por external_reference
-  await searchAndActivate(supabase, token, institutionId);
+  return await searchAndActivate(supabase, token, institutionId);
 }
 
 // ── Consulta estado de una suscripción preapproval en MP ─────────────────────
@@ -221,11 +272,12 @@ async function processPayment(
 }
 
 // ── Busca suscripciones activas por external_reference (fallback) ─────────────
+// Retorna true si encontró un pago válido y activó, false si no.
 async function searchAndActivate(
   supabase: ReturnType<typeof createClient>,
   token: string,
   institutionId: string,
-) {
+): Promise<boolean> {
   // Buscar preapprovals por external_reference
   const res = await fetch(
     `https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(institutionId)}&status=authorized`,
@@ -243,9 +295,10 @@ async function searchAndActivate(
       const approved = (payData.results ?? []).find((p: { status: string }) => p.status === "approved");
       if (approved) {
         await activateInstitution(supabase, token, institutionId, String(approved.id));
+        return true;
       }
     }
-    return;
+    return false;
   }
 
   const data = await res.json();
@@ -254,7 +307,10 @@ async function searchAndActivate(
 
   if (preapprovals.length > 0) {
     await activateInstitution(supabase, token, institutionId, preapprovals[0].id);
+    return true;
   }
+
+  return false;
 }
 
 // ── Activa la institución ─────────────────────────────────────────────────────

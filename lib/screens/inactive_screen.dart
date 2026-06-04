@@ -12,8 +12,6 @@ class InactiveScreen extends StatefulWidget {
 }
 
 class _InactiveScreenState extends State<InactiveScreen> {
-  bool _isVerifying = false;
-
   @override
   Widget build(BuildContext context) {
     final isSudo = ProfileCache.role == 'sudo';
@@ -66,25 +64,11 @@ class _InactiveScreenState extends State<InactiveScreen> {
         ),
         const SizedBox(height: 24),
         
-        // Reutilizamos el componente completo de suscripciones
+        // Reutilizamos el componente completo de suscripciones.
+        // La activación ocurre automáticamente vía webhook IPN de Mercado Pago
+        // + Supabase Realtime (AuthWrapper detecta el cambio en profiles).
         const SaasSubscriptionView(),
 
-        const SizedBox(height: 16),
-        
-        // Botón de verificación manual por si acaso
-        OutlinedButton.icon(
-          onPressed: _isVerifying ? null : _verifyAndActivate,
-          icon: _isVerifying
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.refresh_rounded, size: 18),
-          label: Text(_isVerifying ? 'Verificando...' : 'Forzar Verificación de Pago'),
-          style: OutlinedButton.styleFrom(foregroundColor: KaliColors.espresso),
-        ),
-        
         const SizedBox(height: 16),
         TextButton(
           onPressed: () => Supabase.instance.client.auth.signOut(),
@@ -93,44 +77,5 @@ class _InactiveScreenState extends State<InactiveScreen> {
       ],
     );
   }
-
-  Future<void> _verifyAndActivate() async {
-    if (_isVerifying) return;
-    setState(() => _isVerifying = true);
-
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      final institutionId = ProfileCache.institutionId;
-      if (user == null || institutionId == null) return;
-
-      await Supabase.instance.client.functions.invoke(
-        'mp-webhook',
-        body: {
-          'type': 'manual_verify',
-          'institution_id': institutionId,
-        },
-      );
-
-      // No necesitamos re-verificar y hacer push a Dashboard aquí,
-      // porque AuthWrapper está escuchando cambios en realtime en 'profiles'.
-      // Si el webhook activó la cuenta, AuthWrapper lo detectará instantáneamente
-      // y cambiará la pantalla por sí mismo.
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Comprobación enviada. Si el pago ingresó, serás redirigido en breve.'),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo verificar el pago. Intentá nuevamente.')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isVerifying = false);
-    }
-  }
 }
+
