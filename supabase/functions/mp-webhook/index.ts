@@ -64,6 +64,15 @@ Deno.serve(async (req) => {
       // Las verificaciones internas (desde Flutter/Edge Functions) no llevan firma de MP
       const isInternalRequest = payload.type === "manual_verify" || payload.type === "manual_deactivate";
 
+      // El botón de "Probar" en el dashboard de Mercado Pago envía un payload de prueba
+      // que suele fallar la validación de firma (faltan headers o el hash no coincide).
+      // Lo dejamos pasar con un 200 OK para que la URL quede validada en el panel.
+      const isMpDashboardTest = payload.type === "subscription_preapproval" && payload.data?.id === "123456";
+      if (isMpDashboardTest) {
+        console.log("[POST] Evento de prueba del dashboard de MP recibido. OK.");
+        return new Response("Test OK", { status: 200 });
+      }
+
       // Validar firma de MP para eventos IPN reales (no internos)
       if (!isInternalRequest) {
         const MP_WEBHOOK_SECRET = Deno.env.get("MP_WEBHOOK_SECRET");
