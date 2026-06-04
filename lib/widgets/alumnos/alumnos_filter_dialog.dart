@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 class AlumnosFilterDialog extends StatefulWidget {
   final AlumnosLoaded state;

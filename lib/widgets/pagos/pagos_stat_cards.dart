@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 /// Tarjetas de estadísticas de la sección de pagos.
 class PagosStatCards extends StatelessWidget {

@@ -1,4 +1,4 @@
-package com.example.kali_studio
+package com.example.argrity
 
 import io.flutter.embedding.android.FlutterActivity
 

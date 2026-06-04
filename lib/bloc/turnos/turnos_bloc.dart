@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/activity/activity_bloc.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/models/schedule_template.dart';
+import 'package:argrity/bloc/activity/activity_bloc.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/models/schedule_template.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -81,6 +81,10 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           .select(sessionSelect)
           .gte('date', startIso)
           .lte('date', endIso);
+
+      if (_cachedInstId != null) {
+        query = query.eq('institution_id', _cachedInstId!);
+      }
 
       final response = instructorFilter != null
           ? await query.eq('instructor_name', instructorFilter)

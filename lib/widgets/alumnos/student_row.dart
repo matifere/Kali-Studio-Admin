@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
-import 'package:kali_studio/models/student.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/alumnos/student_avatar.dart';
-import 'package:kali_studio/widgets/common/kali_icon_button.dart';
-import 'package:kali_studio/widgets/alumnos/student_profile_dialog.dart';
-import 'package:kali_studio/widgets/alumnos/edit_student_dialog.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/alumnos/student_avatar.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/alumnos/student_profile_dialog.dart';
+import 'package:argrity/widgets/alumnos/edit_student_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Fila de la tabla que representa a un alumno.
@@ -54,7 +54,7 @@ class _StudentRowState extends State<StudentRow> {
             .select('id');
 
         if (deleted.isEmpty) {
-          throw Exception('No se eliminó ningún registro. Agregá esta política en Supabase SQL Editor:\n\nCREATE POLICY "Sudo elimina perfiles" ON profiles FOR DELETE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = \'sudo\'));');
+          throw Exception('No se pudo eliminar el alumno. Verificá los permisos en Supabase.');
         }
 
         if (context.mounted) {
@@ -66,9 +66,9 @@ class _StudentRowState extends State<StudentRow> {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al eliminar alumno: $e'),
-              duration: const Duration(seconds: 6),
+            const SnackBar(
+              content: Text('No se pudo eliminar el alumno. Intentá nuevamente.'),
+              duration: Duration(seconds: 6),
             ),
           );
         }

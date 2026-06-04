@@ -5,6 +5,7 @@
 *.pyc
 *.swp
 *.env
+!.env.example
 .buildlog/
 .history
 

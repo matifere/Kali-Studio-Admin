@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/services/profile_cache.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DashboardSidebar extends StatefulWidget {
@@ -46,12 +46,18 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
+                Image.asset(
+                  'assets/images/argity_logo.png',
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  'MINERVA ADMIN',
-                  style: KaliText.label(KaliColors.clayDark),
+                  'argity',
+                  style: KaliText.heading(KaliColors.espresso, size: 18),
                 ),
               ],
             ),

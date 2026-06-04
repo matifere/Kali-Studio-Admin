@@ -3,10 +3,10 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
-import 'package:kali_studio/bloc/auth/auth_bloc.dart';
-import 'package:kali_studio/bloc/notifications/notifications_cubit.dart';
-import 'package:kali_studio/services/profile_cache.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/auth/auth_bloc.dart';
+import 'package:argrity/bloc/notifications/notifications_cubit.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 
 // ── Barra de navegación superior ──────────────────────────────────────────────
@@ -107,6 +107,20 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
                     Scaffold.of(ctx).openDrawer();
                   },
                 ),
+              // ── Logo + nombre en desktop ───────────────────────────────────
+              if (!isMobile) ...[
+                Image.asset(
+                  'assets/images/argity_logo.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'argity',
+                  style: KaliText.heading(KaliColors.espresso, size: 20),
+                ),
+              ],
               const Spacer(),
 
               // ── Iconos ─────────────────────────────────────────────────────

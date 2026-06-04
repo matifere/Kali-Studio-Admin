@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
-import 'package:kali_studio/widgets/turnos/schedule_header.dart';
-import 'package:kali_studio/widgets/turnos/weekly_schedule.dart';
-import 'package:kali_studio/widgets/turnos/schedule_bottom_bar.dart';
-import 'package:kali_studio/widgets/turnos/turno_detail_panel.dart';
-import 'package:kali_studio/widgets/turnos/create_turno_dialog.dart';
-import 'package:kali_studio/widgets/turnos/manage_templates_dialog.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/services/profile_cache.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/widgets/dashboard/top_navbar.dart';
+import 'package:argrity/widgets/turnos/schedule_header.dart';
+import 'package:argrity/widgets/turnos/weekly_schedule.dart';
+import 'package:argrity/widgets/turnos/schedule_bottom_bar.dart';
+import 'package:argrity/widgets/turnos/turno_detail_panel.dart';
+import 'package:argrity/widgets/turnos/create_turno_dialog.dart';
+import 'package:argrity/widgets/turnos/manage_templates_dialog.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 /// Pantalla principal de Turnos (calendario semanal).
 class TurnosScreen extends StatefulWidget {

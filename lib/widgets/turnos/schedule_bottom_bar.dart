@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 /// Barra inferior del calendario con leyenda de tipos y estadísticas.
 class ScheduleBottomBar extends StatelessWidget {

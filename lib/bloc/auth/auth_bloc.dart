@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/services/auth_service.dart';
-import 'package:kali_studio/services/profile_cache.dart';
+import 'package:argrity/services/auth_service.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_event.dart';
@@ -100,7 +100,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       emit(AuthProfileUpdated());
     } catch (e) {
-      emit(AuthFailure('No se pudo actualizar el perfil: $e'));
+      emit(AuthFailure('No se pudo actualizar el perfil. Intentá nuevamente.'));
     }
   }
 }

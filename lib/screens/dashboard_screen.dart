@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kali_studio/bloc/navigation/navigation_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/dashboard/sidebar.dart';
-import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
-import 'package:kali_studio/widgets/dashboard/stat_cards.dart';
-import 'package:kali_studio/widgets/dashboard/schedule_list.dart';
-import 'package:kali_studio/screens/alumnos_screen.dart';
-import 'package:kali_studio/screens/entrenadores_screen.dart';
-import 'package:kali_studio/screens/turnos_screen.dart';
-import 'package:kali_studio/screens/pagos_screen.dart';
-import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/dashboard/sidebar.dart';
+import 'package:argrity/widgets/dashboard/top_navbar.dart';
+import 'package:argrity/widgets/dashboard/stat_cards.dart';
+import 'package:argrity/widgets/dashboard/schedule_list.dart';
+import 'package:argrity/screens/alumnos_screen.dart';
+import 'package:argrity/screens/entrenadores_screen.dart';
+import 'package:argrity/screens/turnos_screen.dart';
+import 'package:argrity/screens/pagos_screen.dart';
+import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

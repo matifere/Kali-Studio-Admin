@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/student.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/alumnos/student_avatar.dart';
-import 'package:kali_studio/widgets/common/kali_plan_badge.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/alumnos/student_avatar.dart';
+import 'package:argrity/widgets/common/kali_plan_badge.dart';
 
 class StudentProfileDialog extends StatelessWidget {
   final Student student;

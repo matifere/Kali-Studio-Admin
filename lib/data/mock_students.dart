@@ -1,4 +1,4 @@
-import 'package:kali_studio/models/student.dart';
+import 'package:argrity/models/student.dart';
 
 /// Datos de ejemplo para desarrollo y testing.
 ///

@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
-import 'package:kali_studio/models/student.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/alumnos/student_row.dart';
-import 'package:kali_studio/widgets/common/kali_empty_state.dart';
-import 'package:kali_studio/widgets/common/kali_icon_button.dart';
-import 'package:kali_studio/widgets/common/kali_pagination.dart';
-import 'package:kali_studio/widgets/alumnos/alumnos_filter_dialog.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/alumnos/student_row.dart';
+import 'package:argrity/widgets/common/kali_empty_state.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/common/kali_pagination.dart';
+import 'package:argrity/widgets/alumnos/alumnos_filter_dialog.dart';
 
 /// Directorio paginado de alumnos.
 ///

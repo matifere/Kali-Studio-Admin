@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/student.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/avatar_provider.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/avatar_provider.dart';
 
 /// Avatar circular de un alumno.
 ///

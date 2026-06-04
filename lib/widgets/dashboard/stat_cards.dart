@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
+import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 class DashboardStatCards extends StatelessWidget {
   const DashboardStatCards({super.key});

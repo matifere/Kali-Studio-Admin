@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/models/subscription.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/avatar_provider.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/models/subscription.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/avatar_provider.dart';
 
 /// Fila de la tabla de suscripciones.
 class SubscriptionRow extends StatefulWidget {

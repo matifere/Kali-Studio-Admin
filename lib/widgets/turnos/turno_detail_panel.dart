@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/kali_icon_button.dart';
-import 'package:kali_studio/widgets/turnos/edit_turno_dialog.dart';
-import 'package:kali_studio/widgets/turnos/assign_student_dialog.dart';
-import 'package:kali_studio/services/profile_cache.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/turnos/edit_turno_dialog.dart';
+import 'package:argrity/widgets/turnos/assign_student_dialog.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 /// Panel lateral con los detalles de un turno seleccionado.
 class TurnoDetailPanel extends StatelessWidget {

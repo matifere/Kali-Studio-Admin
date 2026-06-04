@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/turnos/turno_card.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/turnos/turno_card.dart';
 import 'package:intl/intl.dart';
 
 /// Grilla del calendario semanal 7 columnas (Lun–Dom).

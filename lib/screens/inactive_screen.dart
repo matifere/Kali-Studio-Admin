@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/services/profile_cache.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/pagos/saas_subscription_view.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/pagos/saas_subscription_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class InactiveScreen extends StatefulWidget {
@@ -126,7 +126,7 @@ class _InactiveScreenState extends State<InactiveScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al verificar: $e')),
+          const SnackBar(content: Text('No se pudo verificar el pago. Intentá nuevamente.')),
         );
       }
     } finally {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/kali_empty_state.dart';
-import 'package:kali_studio/widgets/common/kali_pagination.dart';
-import 'package:kali_studio/widgets/pagos/subscription_row.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/kali_empty_state.dart';
+import 'package:argrity/widgets/common/kali_pagination.dart';
+import 'package:argrity/widgets/pagos/subscription_row.dart';
 
 /// Tabla paginada de transacciones.
 ///

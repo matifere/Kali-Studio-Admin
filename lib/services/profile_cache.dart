@@ -5,7 +5,7 @@
 class ProfileCache {
   ProfileCache._();
 
-  static String _role = 'sudo';
+  static String _role = 'client';
   static String? _institutionId;
   static String? _fullName;
   static bool _loaded = false;
@@ -26,7 +26,7 @@ class ProfileCache {
   }
 
   static void clear() {
-    _role = 'sudo';
+    _role = 'client';
     _institutionId = null;
     _fullName = null;
     _loaded = false;

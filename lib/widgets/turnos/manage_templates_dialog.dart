@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/schedule_template.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/turnos/create_template_dialog.dart';
+import 'package:argrity/models/schedule_template.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/turnos/create_template_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ManageTemplatesDialog extends StatefulWidget {
@@ -117,7 +117,7 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
       _loadTemplates();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')));
       }
     }
   }

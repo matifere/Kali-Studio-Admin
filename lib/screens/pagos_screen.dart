@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
-import 'package:kali_studio/widgets/pagos/pagos_stat_cards.dart';
-import 'package:kali_studio/widgets/pagos/pagos_filters.dart';
-import 'package:kali_studio/widgets/pagos/pagos_table.dart';
-import 'package:kali_studio/widgets/pagos/plans_table.dart';
-import 'package:kali_studio/widgets/pagos/saas_subscription_view.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/dashboard/top_navbar.dart';
+import 'package:argrity/widgets/pagos/pagos_stat_cards.dart';
+import 'package:argrity/widgets/pagos/pagos_filters.dart';
+import 'package:argrity/widgets/pagos/pagos_table.dart';
+import 'package:argrity/widgets/pagos/plans_table.dart';
+import 'package:argrity/widgets/pagos/saas_subscription_view.dart';
 
 /// Pantalla principal de Pagos.
 class PagosScreen extends StatefulWidget {

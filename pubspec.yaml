@@ -1,5 +1,5 @@
-name: kali_studio
-description: Kali Studio - Pilates Class Booking App
+name: argrity
+description: Argity - Pilates Class Booking App
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -32,4 +32,5 @@ dev_dependencies:
 flutter:
   assets:
     - .env
+    - assets/images/
   uses-material-design: true

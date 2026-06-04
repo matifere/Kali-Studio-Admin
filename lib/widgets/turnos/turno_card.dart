@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/models/turno.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/models/turno.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 /// Tarjeta visual de un turno dentro del calendario semanal.
 ///

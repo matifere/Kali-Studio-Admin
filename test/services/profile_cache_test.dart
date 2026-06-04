@@ -1,21 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kali_studio/services/profile_cache.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 void main() {
   setUp(() => ProfileCache.clear());
   tearDown(() => ProfileCache.clear());
 
   group('ProfileCache initial state', () {
-    test('role defaults to "sudo"', () {
-      expect(ProfileCache.role, 'sudo');
+    test('role defaults to "client" (mínimo privilegio)', () {
+      expect(ProfileCache.role, 'client');
     });
 
     test('institutionId defaults to null', () {
       expect(ProfileCache.institutionId, isNull);
     });
 
-    test('isSudo is true initially', () {
-      expect(ProfileCache.isSudo, isTrue);
+    test('isSudo is false initially (seguro por defecto)', () {
+      expect(ProfileCache.isSudo, isFalse);
     });
 
     test('isAdmin is false initially', () {
@@ -62,10 +62,10 @@ void main() {
   });
 
   group('ProfileCache.clear', () {
-    test('resets role to sudo', () {
-      ProfileCache.set(role: 'admin');
+    test('resets role a "client" (mínimo privilegio, no sudo)', () {
+      ProfileCache.set(role: 'sudo');
       ProfileCache.clear();
-      expect(ProfileCache.role, 'sudo');
+      expect(ProfileCache.role, 'client');
     });
 
     test('resets institutionId to null', () {
@@ -74,16 +74,22 @@ void main() {
       expect(ProfileCache.institutionId, isNull);
     });
 
-    test('isSudo is true after clear', () {
-      ProfileCache.set(role: 'client');
+    test('isSudo is false after clear (fail-safe)', () {
+      ProfileCache.set(role: 'sudo');
       ProfileCache.clear();
-      expect(ProfileCache.isSudo, isTrue);
+      expect(ProfileCache.isSudo, isFalse);
     });
 
     test('isAdmin is false after clear', () {
       ProfileCache.set(role: 'admin');
       ProfileCache.clear();
       expect(ProfileCache.isAdmin, isFalse);
+    });
+
+    test('isLoaded is false after clear', () {
+      ProfileCache.set(role: 'admin');
+      ProfileCache.clear();
+      expect(ProfileCache.isLoaded, isFalse);
     });
   });
 
@@ -93,9 +99,9 @@ void main() {
       expect(ProfileCache.isAdmin, isTrue);
     });
 
-    test('setUp clears state so second test starts fresh', () {
-      // setUp runs before each test — role should be back to sudo here
-      expect(ProfileCache.role, 'sudo');
+    test('setUp clears state — segundo test arranca con mínimo privilegio', () {
+      // setUp corre antes de cada test — rol debe ser 'client' (no 'sudo')
+      expect(ProfileCache.role, 'client');
       expect(ProfileCache.institutionId, isNull);
     });
   });

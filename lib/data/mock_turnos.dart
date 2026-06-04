@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/turno.dart';
+import 'package:argrity/models/turno.dart';
 
 /// Semana de ejemplo: 23–27 de Octubre 2023.
 const List<Turno> kMockTurnos = [

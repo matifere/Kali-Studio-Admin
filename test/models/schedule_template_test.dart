@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kali_studio/models/schedule_template.dart';
+import 'package:argrity/models/schedule_template.dart';
 
 void main() {
   group('ScheduleTemplate.fromJson', () {

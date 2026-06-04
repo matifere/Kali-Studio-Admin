@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 /// Card del cronograma del día de hoy en el panel principal.
 ///

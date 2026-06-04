@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/auth/auth_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
+import 'package:argrity/bloc/auth/auth_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -174,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       const SizedBox(height: 20),
                                       KaliTextField(
                                         label: "EMAIL DE TRABAJO",
-                                        hint: "admin@chimpance-admin.com",
+                                        hint: "admin@argrity.com",
                                         controller: emailControl,
                                       ),
                                       const SizedBox(height: 20),

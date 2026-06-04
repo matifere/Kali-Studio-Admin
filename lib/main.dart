@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:kali_studio/bloc/activity/activity_bloc.dart';
-import 'package:kali_studio/bloc/auth/auth_bloc.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
-import 'package:kali_studio/bloc/navigation/navigation_bloc.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/bloc/dashboard/dashboard_bloc.dart';
-import 'package:kali_studio/bloc/notifications/notifications_cubit.dart';
-import 'package:kali_studio/screens/login_screen.dart';
-import 'package:kali_studio/screens/new_password_screen.dart';
-import 'package:kali_studio/widgets/auth_wrapper.dart';
+import 'package:argrity/bloc/activity/activity_bloc.dart';
+import 'package:argrity/bloc/auth/auth_bloc.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
+import 'package:argrity/bloc/notifications/notifications_cubit.dart';
+import 'package:argrity/screens/login_screen.dart';
+import 'package:argrity/screens/new_password_screen.dart';
+import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -42,8 +42,12 @@ Future<void> main() async {
   final String anon;
 
   if (kIsWeb) {
-    url = 'https://tmfcnvtjzmtpqhzvfxos.supabase.co';
-    anon = 'sb_publishable_TkebjBTlimQS7Uu4HWE-tQ_v3ylhC_b';
+    // Credenciales inyectadas en build-time via --dart-define.
+    // Para construir: flutter build web
+    //   --dart-define=SUPABASE_URL=https://xxx.supabase.co
+    //   --dart-define=SUPABASE_ANON=sb_publishable_xxx
+    url = const String.fromEnvironment('SUPABASE_URL');
+    anon = const String.fromEnvironment('SUPABASE_ANON');
   } else {
     await dotenv.load(fileName: ".env");
     url = dotenv.env['URL'] ?? '';
@@ -189,7 +193,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
 
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'Turnos App',
+      title: 'Argity',
       theme: KaliTheme.theme,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [

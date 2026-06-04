@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/models/class_session.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/models/class_session.dart';
 
 // Helper to build a minimal ClassSession for state tests.
 ClassSession makeSession({

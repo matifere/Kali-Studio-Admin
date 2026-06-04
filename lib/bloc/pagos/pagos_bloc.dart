@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/models/subscription.dart';
+import 'package:argrity/models/subscription.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'pagos_event.dart';
@@ -29,16 +30,33 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     }
     emit(PagosLoading());
     try {
-      // Un solo query con joins en lugar de 3 round trips secuenciales.
+      final instId = ProfileCache.institutionId;
+
+      // Incluimos institution_id en el join de profiles para poder filtrar
+      // por tenant después de recibir la respuesta (las suscripciones no tienen
+      // institution_id propio; la pertenencia se determina vía el perfil del alumno).
       final response = await Supabase.instance.client
           .from('subscriptions')
           .select(
             'id, user_id, status, start_date, end_date, plan_id, '
-            'profiles:profiles!subscriptions_user_id_fkey(id, full_name, avatar_url), '
+            'profiles:profiles!subscriptions_user_id_fkey(id, full_name, avatar_url, institution_id), '
             'plans(id, name, price, currency)',
           );
 
-      final subscriptions = response
+      // Filtro client-side por institución como defensa en profundidad
+      // (el filtro definitivo debe ser RLS en Supabase).
+      final tenantRows = instId != null
+          ? response.where((row) {
+              final p = row['profiles'];
+              if (p is Map) return p['institution_id'] == instId;
+              if (p is List && p.isNotEmpty) {
+                return p.first['institution_id'] == instId;
+              }
+              return false;
+            }).toList()
+          : response;
+
+      final subscriptions = tenantRows
           .map<Subscription>((row) => Subscription.fromJson(row))
           .toList();
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:intl/intl.dart';
 
 /// Header del calendario semanal con título, rango de fechas y filtros.

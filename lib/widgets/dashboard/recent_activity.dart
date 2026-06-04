@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/activity/activity_bloc.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/activity/activity_bloc.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 class DashboardRecentActivity extends StatelessWidget {
   const DashboardRecentActivity({super.key});

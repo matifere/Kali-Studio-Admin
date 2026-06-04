@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/models/payment.dart';
+import 'package:argrity/models/payment.dart';
 
 /// Datos de ejemplo de pagos para desarrollo.
 const List<Payment> kMockPayments = [

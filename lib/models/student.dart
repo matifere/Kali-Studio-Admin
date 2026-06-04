@@ -32,15 +32,10 @@ class Student {
     this.attendedThisMonth = 0,
   });
   String get initials {
-    //si bien puede tener un nombre mas largo (por ejemplo nombre segundo nombre apellido segundo apellido), despues nos complicaria la UI asi que lo voy a dejar asi
-    if (name.split(" ").length <= 1) {
-      if (name.isEmpty) {
-        return "";
-      }
-      return name.substring(0, 1);
-    }
-    return name.split(' ')[0].substring(0, 1) +
-        name.split(' ')[1].substring(0, 1);
+    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts[0].substring(0, 1);
+    return parts[0].substring(0, 1) + parts[1].substring(0, 1);
   }
 
   Color get avatarColor {

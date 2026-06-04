@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/models/schedule_template.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/models/schedule_template.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+
+enum _RecurrenceOption { oneMonth, twoMonths, restOfYear }
 
 class CreateTurnoDialog extends StatefulWidget {
   const CreateTurnoDialog({super.key});
@@ -21,7 +23,12 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
   String? _error;
 
   List<ScheduleTemplate>? _selectedTemplates;
-  int _recurrenceWeeks = 1;
+  _RecurrenceOption _recurrenceOption = _RecurrenceOption.oneMonth;
+
+  int _weeksUntilEndOfYear(DateTime from) {
+    final endOfYear = DateTime(from.year, 12, 31);
+    return ((endOfYear.difference(from).inDays) / 7).ceil().clamp(1, 999);
+  }
 
   @override
   void initState() {
@@ -65,10 +72,15 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate() && _selectedTemplates != null && _selectedTemplates!.isNotEmpty) {
-      // Dispatch TurnoCreated con la lista de plantillas agrupadas
+      final weekStart = context.read<TurnosBloc>().state.currentWeekStart;
+      final weeks = switch (_recurrenceOption) {
+        _RecurrenceOption.oneMonth   => 4,
+        _RecurrenceOption.twoMonths  => 8,
+        _RecurrenceOption.restOfYear => _weeksUntilEndOfYear(weekStart),
+      };
       context.read<TurnosBloc>().add(TurnoCreated(
-        templates: _selectedTemplates!, 
-        recurrenceWeeks: _recurrenceWeeks,
+        templates: _selectedTemplates!,
+        recurrenceWeeks: weeks,
       ));
       
       Navigator.of(context).pop();
@@ -185,10 +197,10 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                   const SizedBox(height: 20),
 
                   // Frecuencia
-                  Text('Frecuencia de Repetición', style: KaliText.label(KaliColors.espresso)),
+                  Text('Duración', style: KaliText.label(KaliColors.espresso)),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<int>(
-                    initialValue: _recurrenceWeeks,
+                  DropdownButtonFormField<_RecurrenceOption>(
+                    initialValue: _recurrenceOption,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -197,12 +209,21 @@ class _CreateTurnoDialogState extends State<CreateTurnoDialog> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 1, child: Text('Solo esta semana (1 repetición)')),
-                      DropdownMenuItem(value: 4, child: Text('Todo el mes (4 repeticiones)')),
-                      DropdownMenuItem(value: 8, child: Text('Dos meses (8 repeticiones)')),
+                      DropdownMenuItem(
+                        value: _RecurrenceOption.oneMonth,
+                        child: Text('1 mes'),
+                      ),
+                      DropdownMenuItem(
+                        value: _RecurrenceOption.twoMonths,
+                        child: Text('2 meses'),
+                      ),
+                      DropdownMenuItem(
+                        value: _RecurrenceOption.restOfYear,
+                        child: Text('Resto del año (hasta el 31 de diciembre)'),
+                      ),
                     ],
                     onChanged: (val) {
-                      if (val != null) setState(() => _recurrenceWeeks = val);
+                      if (val != null) setState(() => _recurrenceOption = val);
                     },
                   ),
                   

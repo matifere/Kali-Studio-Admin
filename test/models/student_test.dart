@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kali_studio/models/student.dart';
+import 'package:argrity/models/student.dart';
 
 void main() {
   group('Student.fromJson', () {

@@ -1,4 +1,4 @@
-# kali_studio
+# argrity
 
 A new Flutter project.
 

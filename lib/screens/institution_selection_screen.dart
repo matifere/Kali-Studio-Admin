@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
-import 'package:kali_studio/widgets/auth_wrapper.dart';
-import 'package:kali_studio/screens/login_screen.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
+import 'package:argrity/widgets/auth_wrapper.dart';
+import 'package:argrity/screens/login_screen.dart';
 
 class InstitutionSelectionScreen extends StatefulWidget {
   const InstitutionSelectionScreen({super.key});
@@ -62,7 +62,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al crear institución: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo crear la institución. Intentá nuevamente.')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
-import 'package:kali_studio/models/student.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditStudentDialog extends StatefulWidget {
@@ -85,9 +85,9 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al actualizar alumno: $e'),
-            duration: const Duration(seconds: 6),
+          const SnackBar(
+            content: Text('No se pudo actualizar el alumno. Intentá nuevamente.'),
+            duration: Duration(seconds: 6),
           ),
         );
       }

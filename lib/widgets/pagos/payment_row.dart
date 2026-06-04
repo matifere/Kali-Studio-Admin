@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:kali_studio/models/payment.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/models/payment.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 /// Fila de la tabla de pagos.
 class PaymentRow extends StatefulWidget {

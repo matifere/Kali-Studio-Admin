@@ -4,10 +4,10 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:kali_studio/bloc/pagos/pagos_bloc.dart';
-import 'package:kali_studio/models/subscription.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/pagos/assign_plan_dialog.dart';
+import 'package:argrity/bloc/pagos/pagos_bloc.dart';
+import 'package:argrity/models/subscription.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/pagos/assign_plan_dialog.dart';
 
 /// Barra de filtros y acciones de la sección de pagos.
 class PagosFilters extends StatelessWidget {
@@ -229,7 +229,7 @@ class PagosFilters extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al exportar: $e')),
+          const SnackBar(content: Text('No se pudo exportar el archivo. Intentá nuevamente.')),
         );
       }
     }

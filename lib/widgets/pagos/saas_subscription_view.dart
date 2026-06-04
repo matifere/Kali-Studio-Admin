@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/services/profile_cache.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -83,7 +83,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar datos: $e')),
+          const SnackBar(content: Text('No se pudieron cargar los datos. Intentá nuevamente.')),
         );
       }
     }
@@ -118,7 +118,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')),
         );
       }
     } finally {
@@ -175,7 +175,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')),
         );
       }
     } finally {

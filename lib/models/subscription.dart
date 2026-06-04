@@ -71,12 +71,10 @@ class Subscription {
   }
 
   String get studentInitials {
-    if (studentName.split(" ").length <= 1) {
-      if (studentName.isEmpty) return "";
-      return studentName.substring(0, 1);
-    }
-    return studentName.split(' ')[0].substring(0, 1) +
-        studentName.split(' ')[1].substring(0, 1);
+    final parts = studentName.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts[0].substring(0, 1);
+    return parts[0].substring(0, 1) + parts[1].substring(0, 1);
   }
 
   Color get avatarColor {

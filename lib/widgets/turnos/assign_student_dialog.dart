@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/turnos/turnos_bloc.dart';
-import 'package:kali_studio/models/class_session.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/avatar_provider.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/avatar_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AssignStudentDialog extends StatefulWidget {

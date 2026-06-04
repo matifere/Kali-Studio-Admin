@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/kali_icon_button.dart';
-import 'package:kali_studio/widgets/pagos/create_plan_dialog.dart';
-import 'package:kali_studio/widgets/pagos/edit_plan_dialog.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/pagos/create_plan_dialog.dart';
+import 'package:argrity/widgets/pagos/edit_plan_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Directorio/Tabla de planes de pago.
@@ -101,7 +101,7 @@ class _PlansTableState extends State<PlansTable> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error al desactivar plan: $e')),
+              const SnackBar(content: Text('No se pudo desactivar el plan. Intentá nuevamente.')),
             );
           }
         }
@@ -145,7 +145,7 @@ class _PlansTableState extends State<PlansTable> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error al eliminar plan: $e')),
+              const SnackBar(content: Text('No se pudo eliminar el plan. Intentá nuevamente.')),
             );
           }
         }

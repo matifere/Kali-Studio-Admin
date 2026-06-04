@@ -16,10 +16,10 @@ class SupaAuthClass {
     required Map<String, dynamic> metadata,
   }) async {
     final supabaseUrl = kIsWeb
-        ? 'https://tmfcnvtjzmtpqhzvfxos.supabase.co'
+        ? const String.fromEnvironment('SUPABASE_URL')
         : dotenv.env['URL']!;
     final supabaseAnon = kIsWeb
-        ? 'sb_publishable_TkebjBTlimQS7Uu4HWE-tQ_v3ylhC_b'
+        ? const String.fromEnvironment('SUPABASE_ANON')
         : dotenv.env['ANON']!;
     final response = await http.post(
       Uri.parse('$supabaseUrl/auth/v1/signup'),
@@ -147,30 +147,31 @@ class SupaAuthClass {
   Future<String> registrarUsuario(
       String email, String password, String fullName) async {
     try {
-      final AuthResponse respuesta = await auth.signUp(
+      // Usamos HTTP directo para NO crear una sesión local. Si usáramos
+      // auth.signUp(), Supabase dispara signedIn → el listener de main.dart
+      // navega a AuthWrapper y destruye el RegisterScreen antes de que pueda
+      // mostrar el feedback de éxito.
+      final result = await _signUpViaHttp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'sudo'},
+        metadata: {'full_name': fullName, 'role': 'sudo'},
       );
-      if (respuesta.user != null) {
-        try {
-          await Supabase.instance.client.from('profiles').upsert({
-            'id': respuesta.user!.id,
-            'email': email,
-            'full_name': fullName,
-            'role': 'sudo',
-            'is_active': false,
-          });
-        } catch (e) {
-          // print('Error upserting profile: $e');
-        }
-        await auth.signOut();
-        return 'Pending';
-      } else {
-        return 'Error session == null';
-      }
-    } on AuthException catch (e) {
-      return e.message;
+
+      if (result.startsWith('Error:')) return result.substring(6);
+
+      // El trigger de Supabase crea el perfil; el upsert garantiza is_active:false.
+      // Si falla por RLS (sin sesión activa), el trigger ya cubrió la creación base.
+      try {
+        await Supabase.instance.client.from('profiles').upsert({
+          'id': result,
+          'email': email,
+          'full_name': fullName,
+          'role': 'sudo',
+          'is_active': false,
+        });
+      } catch (_) {}
+
+      return 'Pending';
     } catch (e) {
       return '$e';
     }
@@ -190,11 +191,23 @@ class SupaAuthClass {
               .eq('id', respuesta.user!.id)
               .maybeSingle();
 
-          if (profile != null && profile['role'] == 'client') {
+          if (profile == null) {
+            await auth.signOut();
+            return 'Acceso denegado: No se encontró el perfil de usuario.';
+          }
+          if (profile['role'] == 'client') {
             await auth.signOut();
             return 'Acceso denegado: No tienes permisos de administrador.';
           }
-        } catch (_) {}
+          // Nota: is_active: false no se bloquea aquí porque usuarios sudo con
+          // cuenta nueva (pendiente de activación) necesitan llegar a InactiveScreen
+          // para completar el pago. AuthWrapper gestiona esa navegación.
+        } catch (_) {
+          // Si la verificación de permisos falla, denegar acceso por defecto
+          // (fail-closed: nunca otorgar acceso ante una falla de seguridad).
+          await auth.signOut();
+          return 'Error al verificar permisos. Intentá nuevamente.';
+        }
         return 'Ok';
       } else {
         return 'Error session == null';

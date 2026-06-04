@@ -1,11 +1,11 @@
 {
-    "name": "chimpance-admin",
-    "short_name": "chimpance-admin",
+    "name": "Argity",
+    "short_name": "Argity",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#F5A623",
-    "theme_color": "#F5A623",
-    "description": "Chimpance Admin - Portal de Gestión.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Argity - Pilates Class Booking App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

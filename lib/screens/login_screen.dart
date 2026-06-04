@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/auth/auth_bloc.dart';
-import 'package:kali_studio/screens/register_screen.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
+import 'package:argrity/bloc/auth/auth_bloc.dart';
+import 'package:argrity/screens/register_screen.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class LoginScreen extends StatefulWidget {
@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')),
         );
       }
     }
@@ -121,55 +121,46 @@ class _LoginScreenState extends State<LoginScreen> {
         final isLoading = state is AuthLoading;
         return Scaffold(
           backgroundColor: KaliColors.background,
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 48,
-              children: [
-                // ── Logo + título ──────────────────────────────────────────
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    ClipOval(
-                      child: Image.network(
-                        'https://chimpance-admin.web.app/favicon.png',
-                        width: 72,
-                        height: 72,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 72,
-                          height: 72,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: KaliColors.espresso,
-                          ),
-                          child: const Icon(Icons.pets, color: KaliColors.background),
-                        ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ── Logo + título ──────────────────────────────────────────
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/argity_logo.png',
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Bienvenid@ de nuevo",
-                      style: KaliText.loginDisplay(KaliColors.espresso),
-                    ),
-                    Text(
-                      "Accede a tu panel de gestion",
-                      style: KaliText.loginBody(KaliColors.espresso),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Bienvenid@ de nuevo",
+                        style: KaliText.loginDisplay(KaliColors.espresso),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Accede a tu panel de gestion",
+                        style: KaliText.loginBody(KaliColors.espresso),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
 
-                // ── Formulario ─────────────────────────────────────────────
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsetsGeometry.all(40),
-                    child: SizedBox(
-                      width: widthInForm,
-                      child: Column(
-                        spacing: 28,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
+                  // ── Formulario ─────────────────────────────────────────────
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsetsGeometry.all(40),
+                      child: SizedBox(
+                        width: widthInForm,
+                        child: Column(
+                          spacing: 28,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                           KaliTextField(
                             label: "EMAIL",
                             hint: "tu@ejemplo.com",
@@ -257,6 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
+        ),
         );
       },
     );

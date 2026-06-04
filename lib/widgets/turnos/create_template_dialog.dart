@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kali_studio/models/schedule_template.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/models/schedule_template.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateTemplateDialog extends StatefulWidget {

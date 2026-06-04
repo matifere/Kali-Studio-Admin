@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 
 class AlumnosStatCards extends StatelessWidget {
   const AlumnosStatCards({super.key});

@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:kali_studio/screens/dashboard_screen.dart';
-import 'package:kali_studio/screens/institution_selection_screen.dart';
-import 'package:kali_studio/screens/inactive_screen.dart';
-import 'package:kali_studio/services/profile_cache.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
+import 'package:argrity/screens/dashboard_screen.dart';
+import 'package:argrity/screens/institution_selection_screen.dart';
+import 'package:argrity/screens/inactive_screen.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/theme/kali_theme.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});

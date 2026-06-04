@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kali_studio/services/auth_service.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/common/kali_icon_button.dart';
-import 'package:kali_studio/widgets/dashboard/top_navbar.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
+import 'package:argrity/services/auth_service.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/dashboard/top_navbar.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EntrenadoresScreen extends StatelessWidget {
@@ -154,9 +154,9 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al eliminar: $e'),
-              duration: const Duration(seconds: 8),
+            const SnackBar(
+              content: Text('No se pudo eliminar el registro. Intentá nuevamente.'),
+              duration: Duration(seconds: 8),
             ),
           );
         }

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kali_studio/bloc/activity/activity_bloc.dart';
-import 'package:kali_studio/models/student.dart';
+import 'package:argrity/bloc/activity/activity_bloc.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'alumnos_event.dart';
@@ -43,10 +44,15 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
         reservations!reservations_user_id_fkey(*, class_sessions(*))
       ''';
 
-      final response = await client
+      final instId = ProfileCache.institutionId;
+      var profileQuery = client
           .from('profiles')
           .select(selectQuery)
           .eq('role', 'client');
+      if (instId != null) {
+        profileQuery = profileQuery.eq('institution_id', instId);
+      }
+      final response = await profileQuery;
 
       final students =
           response.map<Student>((data) => Student.fromJson(data)).toList();

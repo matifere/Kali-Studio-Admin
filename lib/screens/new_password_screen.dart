@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kali_studio/theme/kali_theme.dart';
-import 'package:kali_studio/widgets/kali_text_field.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NewPasswordScreen extends StatefulWidget {
