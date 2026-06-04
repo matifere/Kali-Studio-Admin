@@ -1,11 +1,18 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupaAuthClass {
   final GoTrueClient auth = Supabase.instance.client.auth;
+
+  // URL y key se configuran desde main.dart justo después de Supabase.initialize().
+  static String _supabaseUrl = '';
+  static String _supabaseAnon = '';
+
+  static void configure({required String url, required String anonKey}) {
+    _supabaseUrl = url;
+    _supabaseAnon = anonKey;
+  }
 
   // Registra un nuevo usuario via REST API directamente para no interferir
   // con la sesión del admin (el tempClient compartía SharedPreferences con el
@@ -15,12 +22,9 @@ class SupaAuthClass {
     required String password,
     required Map<String, dynamic> metadata,
   }) async {
-    final supabaseUrl = kIsWeb
-        ? const String.fromEnvironment('SUPABASE_URL')
-        : dotenv.env['URL']!;
-    final supabaseAnon = kIsWeb
-        ? const String.fromEnvironment('SUPABASE_ANON')
-        : dotenv.env['ANON']!;
+    final supabaseUrl = _supabaseUrl;
+    final supabaseAnon = _supabaseAnon;
+
     final response = await http.post(
       Uri.parse('$supabaseUrl/auth/v1/signup'),
       headers: {
@@ -33,6 +37,10 @@ class SupaAuthClass {
         'data': metadata,
       }),
     );
+
+    if (response.body.isEmpty) {
+      return 'Error:Respuesta vacía del servidor. Verificá la conexión.';
+    }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
 

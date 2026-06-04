@@ -14,6 +14,7 @@ import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/screens/login_screen.dart';
+import 'package:argrity/services/auth_service.dart';
 import 'package:argrity/screens/new_password_screen.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
@@ -56,6 +57,7 @@ Future<void> main() async {
 
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(url: url, anonKey: anon);
+  SupaAuthClass.configure(url: url, anonKey: anon);
   runApp(const KaliApp());
 }
 
