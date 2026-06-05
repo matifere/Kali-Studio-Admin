@@ -90,6 +90,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
   }
 
   Future<void> _subscribe(Map<String, dynamic> plan) async {
+    if (_isProcessing) return;
     setState(() => _isProcessing = true);
     try {
       final institutionId = ProfileCache.institutionId;
@@ -107,18 +108,29 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
 
       final data = response.data;
       if (data == null) throw Exception('Respuesta vacía del servidor.');
+      
+      // Si el servidor devolvió un error (aunque tenga status 200)
+      if (data is Map && data['error'] != null) {
+        throw Exception(data['error']);
+      }
 
       final urlString = data['sandbox_init_point'] ?? data['init_point'];
-      if (urlString == null) throw Exception('No se recibió enlace de pago.');
+      if (urlString == null) throw Exception('No se recibió enlace de pago. Data: $data');
 
-      final url = Uri.parse(urlString as String);
+      final url = Uri.parse(urlString.toString());
       if (!await canLaunchUrl(url)) throw Exception('No se pudo abrir el enlace de pago.');
 
       await launchUrl(url, mode: LaunchMode.externalApplication);
+    } on FunctionException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error del servidor: ${e.details ?? e.reasonPhrase ?? "Desconocido"}')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')),
+          SnackBar(content: Text('Error: ${e.toString()}')),
         );
       }
     } finally {
@@ -360,7 +372,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, left: 4),
                 child: Text(
-                  '${plan['currency']}/mes',
+                  '${plan['currency']}/${(plan['interval'] == 'year' || plan['billing_cycle'] == 'yearly' || (plan['name'] ?? '').toString().toLowerCase().contains('anual')) ? 'año' : 'mes'}',
                   style: KaliText.body(highlight ? KaliColors.sand : KaliColors.clayDark, size: 14),
                 ),
               ),

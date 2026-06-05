@@ -135,11 +135,12 @@ Deno.serve(async (req) => {
       actions.push("tenant_subscriptions → cancelled (periodo forzado a ahora).");
     }
 
-    // 5b. profiles → is_active = false (todos los perfiles de la institución)
+    // 5b. profiles → is_active = false (solo el perfil sudo de la institución)
     const { error: profilesError } = await supabase
       .from("profiles")
       .update({ is_active: false })
-      .eq("institution_id", institutionId);
+      .eq("institution_id", institutionId)
+      .eq("role", "sudo");
 
     if (profilesError) {
       actions.push(`Error desactivando profiles: ${profilesError.message}`);

@@ -57,12 +57,16 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        reason: `Suscripción Chimpancé: ${plan.name}`,
+        reason: `Suscripción ArgityTurnos: ${plan.name}`,
         auto_recurring: {
-          frequency: 1,
+          frequency: plan.interval === "year" || plan.billing_cycle === "yearly" || plan.name?.toLowerCase().includes("anual") ? 12 : 1,
           frequency_type: "months",
           transaction_amount: Number(plan.price),
           currency_id: plan.currency ?? "ARS",
+          free_trial: {
+            frequency: 7,
+            frequency_type: "days"
+          }
         },
         back_url: backUrl,
         external_reference: institution_id,
