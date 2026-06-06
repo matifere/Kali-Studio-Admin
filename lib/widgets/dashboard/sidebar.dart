@@ -37,43 +37,45 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 240,
-      color: KaliColors.sand,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: [
-                Image.asset(
-                  'assets/images/argity_logo.png',
-                  width: 28,
-                  height: 28,
-                  fit: BoxFit.contain,
+    return Material(
+        color: KaliColors.sand,
+        child: Container(
+          width: 240,
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/argity_logo.png',
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'argity',
+                      style: KaliText.heading(KaliColors.espresso, size: 18),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'argity',
-                  style: KaliText.heading(KaliColors.espresso, size: 18),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 48),
+              _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
+              _buildMenuItem(Icons.people_outline, 'Alumnos'),
+              if (_role != 'admin')
+                _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
+              _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
+              if (_role != 'admin')
+                _buildMenuItem(Icons.payment_outlined, 'Pagos'),
+              const Spacer(),
+              _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
+            ],
           ),
-          const SizedBox(height: 48),
-          _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
-          _buildMenuItem(Icons.people_outline, 'Alumnos'),
-          if (_role != 'admin')
-            _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
-          _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
-          if (_role != 'admin') _buildMenuItem(Icons.payment_outlined, 'Pagos'),
-          const Spacer(),
-          _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildMenuItem(IconData icon, String title) {
@@ -108,7 +110,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
   Widget _buildBottomMenuItem(IconData icon, String title) {
     return InkWell(
       onTap: () async {
-        final url = Uri.parse('https://middleouttech.netlify.app/');
+        final url = Uri.parse('https://argity.com');
         try {
           await launchUrl(url);
         } catch (e) {

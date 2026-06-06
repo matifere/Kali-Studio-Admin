@@ -206,16 +206,37 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      await Supabase.instance.client
-          .from('class_sessions')
-          .delete()
-          .eq('id', event.sessionId);
-      _activityBloc?.add(ActivityLogged(ActivityEntry(
-        title: 'Turno cancelado',
-        subtitle: 'Se eliminó la sesión del cronograma.',
-        category: ActivityCategory.turno,
-        timestamp: DateTime.now(),
-      )));
+      if (event.deleteAllFuture) {
+        final dateIso = DateFormat('yyyy-MM-dd').format(event.session.date);
+        final endOfYearIso = '${event.session.date.year}-12-31';
+
+        await Supabase.instance.client
+            .from('class_sessions')
+            .delete()
+            .eq('name', event.session.name)
+            .gte('date', dateIso)
+            .lte('date', endOfYearIso);
+
+        _activityBloc?.add(ActivityLogged(ActivityEntry(
+          title: 'Serie de turnos cancelada',
+          subtitle: 'Se eliminaron las clases de ${event.session.name} hasta fin de año.',
+          category: ActivityCategory.turno,
+          timestamp: DateTime.now(),
+        )));
+      } else {
+        await Supabase.instance.client
+            .from('class_sessions')
+            .delete()
+            .eq('id', event.session.id);
+
+        _activityBloc?.add(ActivityLogged(ActivityEntry(
+          title: 'Turno cancelado',
+          subtitle: 'Se eliminó la sesión del cronograma.',
+          category: ActivityCategory.turno,
+          timestamp: DateTime.now(),
+        )));
+      }
+
       emit(state.copyWith(clearSelection: true));
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {

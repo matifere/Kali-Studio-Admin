@@ -28,7 +28,12 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
 
   @override
   void dispose() {
-    _subscriptionChannel?.unsubscribe();
+    final channel = _subscriptionChannel;
+    if (channel != null) {
+      // Usar microtask previene un deadlock interno de supabase_flutter 
+      // si dispose() es llamado como resultado de un evento realtime concurrente.
+      Future.microtask(() => channel.unsubscribe());
+    }
     super.dispose();
   }
 
@@ -36,8 +41,9 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     final institutionId = ProfileCache.institutionId;
     if (institutionId == null) return;
 
+    final uniqueId = DateTime.now().millisecondsSinceEpoch;
     _subscriptionChannel = Supabase.instance.client
-        .channel('public:tenant_subscriptions')
+        .channel('public:tenant_subscriptions_$uniqueId')
         .onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
@@ -48,7 +54,9 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
               value: institutionId,
             ),
             callback: (payload) {
-              _fetchData(); // Volvemos a hacer fetch para traer los joins de saas_plans actualizados
+              if (mounted) {
+                _fetchData(); // Volvemos a hacer fetch para traer los joins actualizados
+              }
             })
         .subscribe();
   }

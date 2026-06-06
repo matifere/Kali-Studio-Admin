@@ -38,8 +38,10 @@ class TurnoDeselected extends TurnosEvent {}
 
 /// El usuario cancela (elimina) un turno.
 class TurnoDeleted extends TurnosEvent {
-  final String sessionId;
-  TurnoDeleted(this.sessionId);
+  final ClassSession session;
+  final bool deleteAllFuture;
+
+  TurnoDeleted(this.session, {this.deleteAllFuture = false});
 }
 
 /// El usuario ha guardado la modificación de un turno.

@@ -124,8 +124,9 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
               const Spacer(),
 
               // ── Iconos ─────────────────────────────────────────────────────
-              const _NotificationsButton(),
-              const SizedBox(width: 16),
+              // TODO: Descomentar cuando las notificaciones estén funcionales
+              // const _NotificationsButton(),
+              // const SizedBox(width: 16),
 
               // ── Perfil de Usuario (clickeable) ─────────────────────────────
               _UserProfileButton(

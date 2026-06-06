@@ -22,7 +22,8 @@ class TurnoDetailPanel extends StatelessWidget {
 
   bool get _canModifyStudents {
     if (ProfileCache.isAdmin) {
-      if (turno.instructorName == null || ProfileCache.fullName == null) return false;
+      if (turno.instructorName == null || ProfileCache.fullName == null)
+        return false;
       return turno.instructorName == ProfileCache.fullName;
     }
     return true; // Sudo u otros roles pueden modificar siempre
@@ -48,7 +49,7 @@ class TurnoDetailPanel extends StatelessWidget {
         children: [
           _buildPanelHeader(),
           _buildSlotInfo(),
-          if (turno.description != null && turno.description!.isNotEmpty) 
+          if (turno.description != null && turno.description!.isNotEmpty)
             _buildDescription(),
           const SizedBox(height: 16),
           Expanded(child: _buildEnrolledStudents(context)),
@@ -111,14 +112,20 @@ class TurnoDetailPanel extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: turno.isFull ? const Color(0xFFD4685C).withValues(alpha: 0.1) : Colors.transparent,
+                  color: turno.isFull
+                      ? const Color(0xFFD4685C).withValues(alpha: 0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   turno.occupancyText,
                   style: KaliText.label(
-                    turno.isFull ? const Color(0xFFD4685C) : KaliColors.espresso.withValues(alpha: 0.7),
-                  ).copyWith(fontWeight: turno.isFull ? FontWeight.bold : FontWeight.normal),
+                    turno.isFull
+                        ? const Color(0xFFD4685C)
+                        : KaliColors.espresso.withValues(alpha: 0.7),
+                  ).copyWith(
+                      fontWeight:
+                          turno.isFull ? FontWeight.bold : FontWeight.normal),
                 ),
               ),
             ],
@@ -188,7 +195,8 @@ class TurnoDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'ALUMNOS INSCRIPTOS',
-                style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
+                style:
+                    KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
               ),
               if (!turno.isFull && _canModifyStudents)
                 InkWell(
@@ -218,7 +226,8 @@ class TurnoDetailPanel extends StatelessWidget {
               ? Center(
                   child: Text(
                     'No hay alumnos inscriptos.',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                    style: KaliText.body(
+                        KaliColors.espresso.withValues(alpha: 0.5)),
                   ),
                 )
               : ListView.builder(
@@ -233,48 +242,66 @@ class TurnoDetailPanel extends StatelessWidget {
                         radius: 14,
                         backgroundColor: KaliColors.clay,
                         child: Text(
-                          student.studentName.isNotEmpty ? student.studentName[0].toUpperCase() : '?', 
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
-                        ),
+                            student.studentName.isNotEmpty
+                                ? student.studentName[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold)),
                       ),
                       title: Text(
                         student.studentName,
-                        style: KaliText.body(KaliColors.espresso, weight: FontWeight.w500),
+                        style: KaliText.body(KaliColors.espresso,
+                            weight: FontWeight.w500),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: _canModifyStudents ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Tooltip(
-                            message: student.status == 'attended' ? 'Presente' : 'Marcar presente',
-                            child: Checkbox(
-                              value: student.status == 'attended',
-                              activeColor: KaliColors.clay,
-                              onChanged: (_) {
-                                context.read<TurnosBloc>().add(TurnoStudentAttendanceToggled(
-                                  reservationId: student.id,
-                                  currentStatus: student.status,
-                                ));
-                              },
-                              visualDensity: VisualDensity.compact,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton(
-                            icon: Icon(Icons.close, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
-                            onPressed: () {
-                              context.read<TurnosBloc>().add(TurnoStudentRemoved(student.id));
-                            },
-                            tooltip: 'Desinscribir',
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
-                      ) : (student.status == 'attended'
-                          ? const Icon(Icons.check_circle, size: 16, color: KaliColors.clay)
-                          : const SizedBox()),
+                      trailing: _canModifyStudents
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Tooltip(
+                                  message: student.status == 'attended'
+                                      ? 'Presente'
+                                      : 'Marcar presente',
+                                  child: Checkbox(
+                                    value: student.status == 'attended',
+                                    activeColor: KaliColors.clay,
+                                    onChanged: (_) {
+                                      context
+                                          .read<TurnosBloc>()
+                                          .add(TurnoStudentAttendanceToggled(
+                                            reservationId: student.id,
+                                            currentStatus: student.status,
+                                          ));
+                                    },
+                                    visualDensity: VisualDensity.compact,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4)),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: Icon(Icons.close,
+                                      size: 16,
+                                      color: KaliColors.espresso
+                                          .withValues(alpha: 0.5)),
+                                  onPressed: () {
+                                    context
+                                        .read<TurnosBloc>()
+                                        .add(TurnoStudentRemoved(student.id));
+                                  },
+                                  tooltip: 'Desinscribir',
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ],
+                            )
+                          : (student.status == 'attended'
+                              ? const Icon(Icons.check_circle,
+                                  size: 16, color: KaliColors.clay)
+                              : const SizedBox()),
                     );
                   },
                 ),
@@ -309,25 +336,37 @@ class TurnoDetailPanel extends StatelessWidget {
             icon: Icons.delete_outline,
             label: 'Cancelar Sesión',
             onTap: () async {
-              final confirm = await showDialog<bool>(
+              final action = await showDialog<int>(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('Cancelar sesión'),
-                  content: Text('¿Seguro que deseas cancelar la clase de ${turno.name}? Esta acción eliminará el turno completamente.'),
+                  content: Text(
+                      '¿Seguro que deseas cancelar la clase de ${turno.name}? Esta acción eliminará el turno completamente.'),
                   actions: [
-                    TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Volver')),
                     TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(true), 
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Cancelar Sesión')
-                    ),
+                        onPressed: () => Navigator.of(ctx).pop(0),
+                        child: const Text('Volver')),
+                    TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(2),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: const Text('Esta y futuras',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(1),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: const Text('Solo esta')),
                   ],
                 ),
               );
 
-              if (confirm == true) {
+              if (action != null && action > 0) {
                 if (context.mounted) {
-                  context.read<TurnosBloc>().add(TurnoDeleted(turno.id));
+                  context.read<TurnosBloc>().add(TurnoDeleted(
+                        turno,
+                        deleteAllFuture: action == 2,
+                      ));
                 }
               }
             },
@@ -362,13 +401,16 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.isDestructive
-        ? const Color(0xFFD4685C)
-        : KaliColors.espresso;
+    final color =
+        widget.isDestructive ? const Color(0xFFD4685C) : KaliColors.espresso;
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

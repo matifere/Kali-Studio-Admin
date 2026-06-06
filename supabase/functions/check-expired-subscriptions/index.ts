@@ -86,16 +86,17 @@ Deno.serve(async (req) => {
           // Si no encontró como preapproval, intentar como preapproval_plan
           // y buscar suscripciones activas bajo ese plan
           const planSearchRes = await fetch(
-            `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${encodeURIComponent(mpId)}&status=authorized`,
+            `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${encodeURIComponent(mpId)}`,
             { headers: { "Authorization": `Bearer ${MP_ACCESS_TOKEN}` } },
           );
 
           if (planSearchRes.ok) {
             const planData = await planSearchRes.json();
-            const authorized = (planData.results ?? []).length > 0;
-            mpStatus = authorized ? "authorized" : "not_found";
+            const activeSubsList = (planData.results ?? []).filter((s: { status: string }) => s.status === "authorized" || s.status === "pending");
+            const authorized = activeSubsList.length > 0;
+            mpStatus = authorized ? activeSubsList[0].status : "not_found";
             console.log(
-              `[check-expired] institution=${institutionId} plan_id=${mpId} authorized_subs=${planData.results?.length ?? 0}`,
+              `[check-expired] institution=${institutionId} plan_id=${mpId} valid_subs=${activeSubsList.length}`,
             );
           } else {
             mpStatus = "api_error";
@@ -103,8 +104,8 @@ Deno.serve(async (req) => {
           }
         }
 
-        // 2. Si el estado no es 'authorized', desactivar
-        if (mpStatus !== null && mpStatus !== "authorized") {
+        // 2. Si el estado no es 'authorized' ni 'pending', desactivar
+        if (mpStatus !== null && mpStatus !== "authorized" && mpStatus !== "pending") {
           await deactivateInstitution(supabase, institutionId, mpStatus);
           action = `deactivated (mp_status=${mpStatus})`;
         }

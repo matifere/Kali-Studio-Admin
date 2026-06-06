@@ -191,8 +191,8 @@ async function verifyPreapprovalWithMP(
 
     console.log(`[verifyPreapprovalWithMP] id=${preapprovalId} status=${status} ref=${externalRef} expected=${expectedInstitutionId}`);
 
-    // Solo es válido si está autorizado Y pertenece a la institución correcta
-    if (status !== "authorized") return false;
+    // Solo es válido si está autorizado o pendiente (por free trial) Y pertenece a la institución correcta
+    if (status !== "authorized" && status !== "pending") return false;
     if (externalRef !== expectedInstitutionId) {
       console.error(`[verifyPreapprovalWithMP] ALERTA: external_reference (${externalRef}) no coincide con institution_id (${expectedInstitutionId})`);
       return false;
@@ -231,7 +231,7 @@ async function manualVerify(
   const mpPlanId = sub?.mp_preapproval_id;
   if (mpPlanId) {
     const res = await fetch(
-      `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${encodeURIComponent(mpPlanId)}&status=authorized`,
+      `https://api.mercadopago.com/preapproval/search?preapproval_plan_id=${encodeURIComponent(mpPlanId)}`,
       { headers: { "Authorization": `Bearer ${token}` } },
     );
 
@@ -240,8 +240,11 @@ async function manualVerify(
       const subs = data.results ?? [];
       console.log(`[manualVerify] suscripciones autorizadas encontradas: ${subs.length}`);
       if (subs.length > 0) {
-        // Verificar que el external_reference coincida con nuestra institución
-        const matchingSub = subs.find((s: { external_reference: string }) => s.external_reference === institutionId);
+        // Verificar que el external_reference coincida con nuestra institución y esté en estado válido
+        const matchingSub = subs.find((s: { external_reference: string, status: string }) => 
+          s.external_reference === institutionId && 
+          (s.status === "authorized" || s.status === "pending")
+        );
         if (matchingSub) {
           await activateInstitution(supabase, token, institutionId, matchingSub.id);
           return true;
@@ -287,7 +290,7 @@ async function processPreapproval(
 
   if (!institutionId) return;
 
-  if (status === "authorized") {
+  if (status === "authorized" || status === "pending") {
     const nextPaymentDate = data.next_payment_date;
     await activateInstitution(supabase, token, institutionId, preapprovalId, saasPlanId, nextPaymentDate);
   } else if (status === "cancelled" || status === "expired") {
@@ -348,9 +351,9 @@ async function searchAndActivate(
   token: string,
   institutionId: string,
 ): Promise<boolean> {
-  // Buscar preapprovals por external_reference
+  // Buscar preapprovals por external_reference sin filtrar status en la URL para obtener todos
   const res = await fetch(
-    `https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(institutionId)}&status=authorized`,
+    `https://api.mercadopago.com/preapproval/search?external_reference=${encodeURIComponent(institutionId)}`,
     { headers: { "Authorization": `Bearer ${token}` } },
   );
 
@@ -376,8 +379,11 @@ async function searchAndActivate(
   console.log(`[searchAndActivate] preapprovals encontrados: ${preapprovals.length}`);
 
   if (preapprovals.length > 0) {
-    await activateInstitution(supabase, token, institutionId, preapprovals[0].id);
-    return true;
+    const validPreapprovals = preapprovals.filter((p: { status: string }) => p.status === "authorized" || p.status === "pending");
+    if (validPreapprovals.length > 0) {
+      await activateInstitution(supabase, token, institutionId, validPreapprovals[0].id);
+      return true;
+    }
   }
 
   return false;
