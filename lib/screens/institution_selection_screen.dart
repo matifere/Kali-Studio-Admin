@@ -9,10 +9,12 @@ class InstitutionSelectionScreen extends StatefulWidget {
   const InstitutionSelectionScreen({super.key});
 
   @override
-  State<InstitutionSelectionScreen> createState() => _InstitutionSelectionScreenState();
+  State<InstitutionSelectionScreen> createState() =>
+      _InstitutionSelectionScreenState();
 }
 
-class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen> {
+class _InstitutionSelectionScreenState
+    extends State<InstitutionSelectionScreen> {
   final TextEditingController _createNameCtrl = TextEditingController();
   bool _isLoading = false;
 
@@ -25,7 +27,8 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
   Future<void> _handleCreate() async {
     final name = _createNameCtrl.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingresa un nombre para la institución')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Ingresa un nombre para la institución')));
       return;
     }
 
@@ -48,7 +51,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
           .select('id')
           .eq('slug', slug)
           .single();
-      
+
       final instId = instRes['id'];
 
       // Actualizamos el perfil del usuario actual para asignarlo a la institución
@@ -58,11 +61,14 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
       }).eq('id', user.id);
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const AuthWrapper()));
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const AuthWrapper()));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo crear la institución. Intentá nuevamente.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text('No se pudo crear la institución. Intentá nuevamente.')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -85,7 +91,8 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
             onPressed: () async {
               await Supabase.instance.client.auth.signOut();
               if (context.mounted) {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()));
               }
             },
           )
@@ -122,7 +129,7 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                     const SizedBox(height: 32),
                     KaliTextField(
                       label: 'NOMBRE DE LA INSTITUCIÓN',
-                      hint: 'Ej. Chimpance Admin',
+                      hint: 'Ej. MiInst',
                       controller: _createNameCtrl,
                     ),
                     const SizedBox(height: 48),
@@ -135,9 +142,14 @@ class _InstitutionSelectionScreenState extends State<InstitutionSelectionScreen>
                           backgroundColor: KaliColors.espresso,
                           foregroundColor: KaliColors.warmWhite,
                         ),
-                        child: _isLoading 
-                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: KaliColors.warmWhite, strokeWidth: 2))
-                          : const Text('CREAR Y CONTINUAR'),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    color: KaliColors.warmWhite,
+                                    strokeWidth: 2))
+                            : const Text('CREAR Y CONTINUAR'),
                       ),
                     ),
                   ],

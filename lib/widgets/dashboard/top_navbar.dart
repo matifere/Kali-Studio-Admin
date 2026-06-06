@@ -8,7 +8,6 @@ import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
 
-
 // ── Barra de navegación superior ──────────────────────────────────────────────
 //
 // Convertida a StatefulWidget para poder redibujar la sección del nombre
@@ -49,7 +48,8 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
           ),
           backgroundColor: KaliColors.espresso,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
     }
@@ -86,9 +86,9 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
         final metadata = user?.userMetadata ?? {};
         final fullName = metadata['full_name'] as String? ?? 'Usuario Admin';
         final displayRole = switch (_role.toLowerCase()) {
-          'sudo'  => 'DUEÑO',
+          'sudo' => 'DUEÑO',
           'admin' => 'PROFESOR',
-          _       => _role.toUpperCase(),
+          _ => _role.toUpperCase(),
         };
         final avatarUrl = metadata['avatar_url'] as String?;
         final initial = fullName.isNotEmpty ? fullName[0].toUpperCase() : '?';
@@ -177,8 +177,12 @@ class _UserProfileButtonState extends State<_UserProfileButton> {
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTapDown: (details) => _showUserMenu(context, details.globalPosition),
         child: AnimatedContainer(
@@ -374,7 +378,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
     }
     if (password.isNotEmpty) {
       if (password.length < 6) {
-        setState(() => _error = 'La contraseña debe tener al menos 6 caracteres');
+        setState(
+            () => _error = 'La contraseña debe tener al menos 6 caracteres');
         return;
       }
       if (password != confirm) {
@@ -383,7 +388,10 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       }
     }
 
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
     try {
       final client = Supabase.instance.client;
@@ -405,14 +413,16 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
       if (nameChanged) {
         await client
             .from('profiles')
-            .update({'full_name': name})
-            .eq('id', userId);
+            .update({'full_name': name}).eq('id', userId);
       }
 
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        setState(() { _isLoading = false; _error = 'No se pudo guardar: $e'; });
+        setState(() {
+          _isLoading = false;
+          _error = 'No se pudo guardar: $e';
+        });
       }
     }
   }
@@ -443,7 +453,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                     ),
                   ),
                   IconButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close, color: KaliColors.espresso),
                   ),
                 ],
@@ -472,7 +483,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 13, color: Color(0xFF8A7C6E)),
+                  const Icon(Icons.info_outline,
+                      size: 13, color: Color(0xFF8A7C6E)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -491,11 +503,14 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                 obscureText: !_showPassword,
                 suffix: IconButton(
                   icon: Icon(
-                    _showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    _showPassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     size: 18,
                     color: KaliColors.espresso.withValues(alpha: 0.45),
                   ),
-                  onPressed: () => setState(() => _showPassword = !_showPassword),
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
                 ),
               ),
               const SizedBox(height: 16),
@@ -506,7 +521,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                 obscureText: !_showConfirm,
                 suffix: IconButton(
                   icon: Icon(
-                    _showConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    _showConfirm
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     size: 18,
                     color: KaliColors.espresso.withValues(alpha: 0.45),
                   ),
@@ -530,20 +547,25 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
                     child: Text(
                       'Cancelar',
-                      style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                      style: KaliText.body(
+                          KaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                   const SizedBox(width: 16),
                   MouseRegion(
-                    cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                    cursor: _isLoading
+                        ? SystemMouseCursors.basic
+                        : SystemMouseCursors.click,
                     child: GestureDetector(
                       onTap: _isLoading ? null : _save,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 16),
                         decoration: BoxDecoration(
                           color: _isLoading
                               ? KaliColors.espresso.withValues(alpha: 0.6)
@@ -615,7 +637,8 @@ class _ProfileField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 13),
+          style: KaliText.body(KaliColors.espresso,
+              weight: FontWeight.w600, size: 13),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -625,18 +648,22 @@ class _ProfileField extends StatelessWidget {
           style: KaliText.body(KaliColors.espresso, size: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: KaliText.body(KaliColors.espresso.withValues(alpha: 0.35), size: 14),
+            hintStyle: KaliText.body(
+                KaliColors.espresso.withValues(alpha: 0.35),
+                size: 14),
             suffixIcon: suffix,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.15)),
+              borderSide: BorderSide(
+                  color: KaliColors.espresso.withValues(alpha: 0.15)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: KaliColors.espresso),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
         ),
       ],
@@ -645,6 +672,7 @@ class _ProfileField extends StatelessWidget {
 }
 
 // ── Botón de Notificaciones con menú ──────────────────────────────────────────
+// ignore: unused_element
 class _NotificationsButton extends StatelessWidget {
   const _NotificationsButton();
 
@@ -696,10 +724,13 @@ class _NotificationsButton extends StatelessWidget {
     );
   }
 
-  void _showNotificationsMenu(BuildContext context, List<NotificationItem> notifications) {
+  void _showNotificationsMenu(
+      BuildContext context, List<NotificationItem> notifications) {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-    final Offset position = button.localToGlobal(Offset.zero, ancestor: overlay);
+    final RenderBox overlay =
+        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final Offset position =
+        button.localToGlobal(Offset.zero, ancestor: overlay);
 
     showMenu<String>(
       context: context,
@@ -722,7 +753,8 @@ class _NotificationsButton extends StatelessWidget {
             children: [
               Text(
                 'Notificaciones',
-                style: KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
+                style:
+                    KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Divider(color: KaliColors.sand2, height: 1),
@@ -736,24 +768,32 @@ class _NotificationsButton extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text('No hay notificaciones',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))),
+                    style: KaliText.body(
+                        KaliColors.espresso.withValues(alpha: 0.5))),
               ),
             ),
           )
         else
           ...notifications.map((n) => PopupMenuItem(
                 value: n.id,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(n.title, style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 14)),
+                    Text(n.title,
+                        style: KaliText.body(KaliColors.espresso,
+                            weight: FontWeight.w600, size: 14)),
                     const SizedBox(height: 4),
-                    Text(n.message, style: KaliText.body(KaliColors.espresso, size: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Text(n.message,
+                        style: KaliText.body(KaliColors.espresso, size: 13),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 4),
                     Text(
                       '${n.timestamp.hour.toString().padLeft(2, '0')}:${n.timestamp.minute.toString().padLeft(2, '0')}',
-                      style: KaliText.caption(KaliColors.espresso.withValues(alpha: 0.4)),
+                      style: KaliText.caption(
+                          KaliColors.espresso.withValues(alpha: 0.4)),
                     ),
                   ],
                 ),

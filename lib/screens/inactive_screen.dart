@@ -34,7 +34,8 @@ class _InactiveScreenState extends State<InactiveScreen> {
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        const Icon(Icons.hourglass_empty_rounded, size: 80, color: KaliColors.espresso),
+        const Icon(Icons.hourglass_empty_rounded,
+            size: 80, color: KaliColors.espresso),
         Text('Cuenta Pendiente', style: KaliText.heading(KaliColors.espresso)),
         Text(
           'Tu cuenta ha sido creada y está pendiente de aprobación.\nPor favor, contactá al administrador de tu institución.',
@@ -55,15 +56,17 @@ class _InactiveScreenState extends State<InactiveScreen> {
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        const Icon(Icons.workspace_premium_rounded, size: 64, color: KaliColors.espresso),
-        Text('Activa tu Institución', style: KaliText.heading(KaliColors.espresso)),
+        const Icon(Icons.workspace_premium_rounded,
+            size: 64, color: KaliColors.espresso),
+        Text('Activa tu Institución',
+            style: KaliText.heading(KaliColors.espresso)),
         Text(
-          'Para comenzar a gestionar tu institución, por favor adquiere una suscripción a Chimpancé.',
+          'Para comenzar a gestionar tu institución, por favor adquiere una suscripción.',
           textAlign: TextAlign.center,
           style: KaliText.body(KaliColors.clayDark),
         ),
         const SizedBox(height: 24),
-        
+
         // Reutilizamos el componente completo de suscripciones.
         // La activación ocurre automáticamente vía webhook IPN de Mercado Pago
         // + Supabase Realtime (AuthWrapper detecta el cambio en profiles).
@@ -78,4 +81,3 @@ class _InactiveScreenState extends State<InactiveScreen> {
     );
   }
 }
-

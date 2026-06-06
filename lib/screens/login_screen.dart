@@ -35,7 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Ingresá tu email y te enviamos un link para crear una nueva contraseña.'),
+            const Text(
+                'Ingresá tu email y te enviamos un link para crear una nueva contraseña.'),
             const SizedBox(height: 16),
             TextField(
               controller: emailCtrl,
@@ -68,17 +69,21 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://chimpance-admin.web.app',
+        redirectTo: 'https://argity.com',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Listo! Revisá tu email para restablecer tu contraseña')),
+          const SnackBar(
+              content: Text(
+                  'Estamos trabajando en esto, si tienes problemas para ingresar envia un mail por nuestra pagina')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ocurrió un error inesperado. Intentá nuevamente.')),
+          const SnackBar(
+              content:
+                  Text('Ocurrió un error inesperado. Intentá nuevamente.')),
         );
       }
     }
@@ -161,94 +166,95 @@ class _LoginScreenState extends State<LoginScreen> {
                           spacing: 28,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                          KaliTextField(
-                            label: "EMAIL",
-                            hint: "tu@ejemplo.com",
-                            controller: emailControl,
-                            suffixIcon: Icons.mail,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              KaliTextField(
-                                label: "CONTRASEÑA",
-                                hint: "••••••••",
-                                controller: contraControl,
-                                obscureText: _isPassObscured,
-                                suffixIcon: _isPassObscured
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                onSuffixTap: () => setState(
-                                  () => _isPassObscured = !_isPassObscured,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: _handleForgotPassword,
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  'olvide mi contraseña',
-                                  style: KaliText.caption(KaliColors.clayDark),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: FilledButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () => _handleLogin(context),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        color: KaliColors.warmWhite,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text("ENTRAR"),
+                            KaliTextField(
+                              label: "EMAIL",
+                              hint: "tu@ejemplo.com",
+                              controller: emailControl,
+                              suffixIcon: Icons.mail,
                             ),
-                          ),
-                          Column(
-                            children: [
-                              const Row(
-                                spacing: 4,
-                                children: [
-                                  Expanded(child: Divider()),
-                                  Text("o"),
-                                  Expanded(child: Divider()),
-                                ],
-                              ),
-                              Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const RegisterScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text("Crear Cuenta"),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                KaliTextField(
+                                  label: "CONTRASEÑA",
+                                  hint: "••••••••",
+                                  controller: contraControl,
+                                  obscureText: _isPassObscured,
+                                  suffixIcon: _isPassObscured
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  onSuffixTap: () => setState(
+                                    () => _isPassObscured = !_isPassObscured,
+                                  ),
                                 ),
+                                TextButton(
+                                  onPressed: _handleForgotPassword,
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'olvide mi contraseña',
+                                    style:
+                                        KaliText.caption(KaliColors.clayDark),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: FilledButton(
+                                onPressed: isLoading
+                                    ? null
+                                    : () => _handleLogin(context),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          color: KaliColors.warmWhite,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text("ENTRAR"),
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            Column(
+                              children: [
+                                const Row(
+                                  spacing: 4,
+                                  children: [
+                                    Expanded(child: Divider()),
+                                    Text("o"),
+                                    Expanded(child: Divider()),
+                                  ],
+                                ),
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const RegisterScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text("Crear Cuenta"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         );
       },
     );
