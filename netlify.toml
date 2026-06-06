@@ -1,5 +1,5 @@
 [build]
-  command = "if [ -z \"$MY_SUPABASE_URL\" ]; then echo 'ERROR: MY_SUPABASE_URL is not set in Netlify'; exit 1; fi && echo \"URL='${MY_SUPABASE_URL}'\" > .env && echo \"ANON='${ANON}'\" >> .env && echo \"VAPID_PUBLIC_KEY='${VAPID_PUBLIC_KEY}'\" >> .env && if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git -b stable --depth 1; fi && ./flutter/bin/flutter build web --release"
+  command = "touch .env && if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git -b stable --depth 1; fi && ./flutter/bin/flutter build web --release --dart-define=SUPABASE_URL=\"$MY_SUPABASE_URL\" --dart-define=SUPABASE_ANON=\"$ANON\""
   publish = "build/web"
 
 [[redirects]]

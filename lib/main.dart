@@ -41,7 +41,11 @@ Future<void> main() async {
 
   // Cargamos .env en todas las plataformas (está en flutter assets, funciona en web también).
   // En producción web, --dart-define sobreescribe los valores del .env.
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (_) {
+    // Silently ignore on production if .env is missing, we will rely on dart-defines
+  }
 
   const buildUrl = String.fromEnvironment('SUPABASE_URL');
   const buildAnon = String.fromEnvironment('SUPABASE_ANON');
