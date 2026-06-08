@@ -84,7 +84,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Gestiona tu comunidad en Minerva.',
+                            'Gestiona tu comunidad.',
                             style: KaliText.body(
                               KaliColors.espresso.withValues(alpha: 0.6),
                               size: 14,

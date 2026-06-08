@@ -37,7 +37,7 @@ class EntrenadoresScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Gestioná el equipo de entrenadores del estudio.',
+                  'Gestioná el equipo de entrenadores.',
                   style: KaliText.body(
                     KaliColors.espresso.withValues(alpha: 0.6),
                     size: 14,
@@ -75,7 +75,10 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
   }
 
   Future<void> _loadTrainers() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final res = await Supabase.instance.client
           .from('profiles')
@@ -91,16 +94,19 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() { _error = 'Error al cargar entrenadores: $e'; _isLoading = false; });
+        setState(() {
+          _error = 'Error al cargar entrenadores: $e';
+          _isLoading = false;
+        });
       }
     }
   }
 
   void _onTrainerCreated(Map<String, dynamic> trainer) {
     setState(() {
-      _trainers = [..._trainers, trainer]
-        ..sort((a, b) => (a['full_name'] as String? ?? '')
-            .compareTo(b['full_name'] as String? ?? ''));
+      _trainers = [..._trainers, trainer]..sort((a, b) =>
+          (a['full_name'] as String? ?? '')
+              .compareTo(b['full_name'] as String? ?? ''));
     });
   }
 
@@ -111,7 +117,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Eliminar entrenador',
-          style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 18),
+          style: KaliText.body(KaliColors.espresso,
+              weight: FontWeight.w600, size: 18),
         ),
         content: Text(
           '¿Seguro que querés eliminar a ${trainer['full_name']}? Esta acción no se puede deshacer.',
@@ -126,7 +133,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Eliminar',
-              style: KaliText.body(const Color(0xFFD4685C), weight: FontWeight.w600),
+              style: KaliText.body(const Color(0xFFD4685C),
+                  weight: FontWeight.w600),
             ),
           ),
         ],
@@ -142,7 +150,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
             .select('id');
 
         if (deleted.isEmpty) {
-          throw Exception('No se eliminó ningún registro. Verificá los permisos en Supabase.');
+          throw Exception(
+              'No se eliminó ningún registro. Verificá los permisos en Supabase.');
         }
 
         if (mounted) {
@@ -155,7 +164,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No se pudo eliminar el registro. Intentá nuevamente.'),
+              content:
+                  Text('No se pudo eliminar el registro. Intentá nuevamente.'),
               duration: Duration(seconds: 8),
             ),
           );
@@ -190,7 +200,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
           else if (_error != null)
             Padding(
               padding: const EdgeInsets.all(40),
-              child: Text(_error!, style: KaliText.body(const Color(0xFFD4685C))),
+              child:
+                  Text(_error!, style: KaliText.body(const Color(0xFFD4685C))),
             )
           else if (_trainers.isEmpty)
             Padding(
@@ -206,7 +217,8 @@ class _EntrenadoresTableState extends State<_EntrenadoresTable> {
                     const SizedBox(height: 12),
                     Text(
                       'Aún no hay entrenadores registrados.',
-                      style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                      style: KaliText.body(
+                          KaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -309,11 +321,16 @@ class _TrainerRowState extends State<_TrainerRow> {
     final name = widget.trainer['full_name'] as String? ?? 'Sin nombre';
     final email = widget.trainer['email'] as String? ?? '—';
     final isActive = widget.trainer['is_active'] as bool? ?? true;
-    final statusColor = isActive ? const Color(0xFF5C9E6C) : const Color(0xFFD4685C);
+    final statusColor =
+        isActive ? const Color(0xFF5C9E6C) : const Color(0xFFD4685C);
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered ? KaliColors.warmWhite : Colors.white,
@@ -341,7 +358,8 @@ class _TrainerRowState extends State<_TrainerRow> {
                   Expanded(
                     child: Text(
                       name,
-                      style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 14),
+                      style: KaliText.body(KaliColors.espresso,
+                          weight: FontWeight.w600, size: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -354,7 +372,9 @@ class _TrainerRowState extends State<_TrainerRow> {
               flex: 4,
               child: Text(
                 email,
-                style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.55), size: 13),
+                style: KaliText.body(
+                    KaliColors.espresso.withValues(alpha: 0.55),
+                    size: 13),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -367,7 +387,8 @@ class _TrainerRowState extends State<_TrainerRow> {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                        color: statusColor, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -410,8 +431,12 @@ class _AddTrainerButtonState extends State<_AddTrainerButton> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: () async {
           final trainer = await showDialog<Map<String, dynamic>>(
@@ -435,7 +460,8 @@ class _AddTrainerButtonState extends State<_AddTrainerButton> {
               const SizedBox(width: 6),
               Text(
                 'Añadir Entrenador',
-                style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                style: KaliText.body(KaliColors.warmWhite,
+                    weight: FontWeight.w600, size: 13),
               ),
             ],
           ),
@@ -483,9 +509,13 @@ class _CreateTrainerDialogState extends State<_CreateTrainerDialog> {
       return;
     }
 
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
-    final result = await SupaAuthClass().registrarEntrenador(email, password, name);
+    final result =
+        await SupaAuthClass().registrarEntrenador(email, password, name);
 
     if (result.startsWith('Ok:')) {
       final newId = result.substring(3);
@@ -499,7 +529,11 @@ class _CreateTrainerDialogState extends State<_CreateTrainerDialog> {
         });
       }
     } else {
-      if (mounted) setState(() { _isLoading = false; _error = result; });
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+          _error = result;
+        });
     }
   }
 
@@ -510,118 +544,129 @@ class _CreateTrainerDialogState extends State<_CreateTrainerDialog> {
       backgroundColor: KaliColors.warmWhite,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
-        child: SingleChildScrollView(child: Padding(padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Añadir Entrenador',
-                    style: GoogleFonts.cormorantGaramond(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600,
-                      color: KaliColors.espresso,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close, color: KaliColors.espresso),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Se registrará con acceso de entrenador (rol admin).',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-            ),
-            const SizedBox(height: 28),
-
-            KaliTextField(
-              controller: _nameController,
-              label: 'Nombre completo',
-              hint: 'Ej. Valentina López',
-            ),
-            const SizedBox(height: 16),
-            KaliTextField(
-              controller: _emailController,
-              label: 'Correo electrónico',
-              hint: 'correo@ejemplo.com',
-            ),
-            const SizedBox(height: 16),
-            KaliTextField(
-              controller: _passwordController,
-              label: 'Contraseña temporal',
-              hint: 'Mínimo 6 caracteres',
-              obscureText: _obscurePassword,
-              suffixIcon: _obscurePassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              onSuffixTap: () => setState(() => _obscurePassword = !_obscurePassword),
-            ),
-
-            if (_error != null) ...[
-              const SizedBox(height: 14),
-              Text(_error!, style: KaliText.body(const Color(0xFFD4685C), size: 13)),
-            ],
-
-            const SizedBox(height: 28),
-
-            // Botones
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancelar',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                MouseRegion(
-                  cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: _isLoading ? null : _submit,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: _isLoading
-                            ? KaliColors.espresso.withValues(alpha: 0.6)
-                            : KaliColors.espresso,
-                        borderRadius: BorderRadius.circular(28),
+        child: SingleChildScrollView(
+            child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Añadir Entrenador',
+                      style: GoogleFonts.cormorantGaramond(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: KaliColors.espresso,
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                color: KaliColors.warmWhite,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Registrar Entrenador',
-                              style: KaliText.body(
-                                KaliColors.warmWhite,
-                                weight: FontWeight.w600,
-                                size: 13,
-                              ),
-                            ),
                     ),
                   ),
-                ),
+                  IconButton(
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close, color: KaliColors.espresso),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Se registrará con acceso de entrenador (rol admin).',
+                style:
+                    KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+              ),
+              const SizedBox(height: 28),
+
+              KaliTextField(
+                controller: _nameController,
+                label: 'Nombre completo',
+                hint: 'Ej. Valentina López',
+              ),
+              const SizedBox(height: 16),
+              KaliTextField(
+                controller: _emailController,
+                label: 'Correo electrónico',
+                hint: 'correo@ejemplo.com',
+              ),
+              const SizedBox(height: 16),
+              KaliTextField(
+                controller: _passwordController,
+                label: 'Contraseña temporal',
+                hint: 'Mínimo 6 caracteres',
+                obscureText: _obscurePassword,
+                suffixIcon: _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                onSuffixTap: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
+
+              if (_error != null) ...[
+                const SizedBox(height: 14),
+                Text(_error!,
+                    style: KaliText.body(const Color(0xFFD4685C), size: 13)),
               ],
-            ),
-          ],
-        ),
+
+              const SizedBox(height: 28),
+
+              // Botones
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Cancelar',
+                      style: KaliText.body(
+                          KaliColors.espresso.withValues(alpha: 0.6)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  MouseRegion(
+                    cursor: _isLoading
+                        ? SystemMouseCursors.basic
+                        : SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: _isLoading ? null : _submit,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: _isLoading
+                              ? KaliColors.espresso.withValues(alpha: 0.6)
+                              : KaliColors.espresso,
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: KaliColors.warmWhite,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Registrar Entrenador',
+                                style: KaliText.body(
+                                  KaliColors.warmWhite,
+                                  weight: FontWeight.w600,
+                                  size: 13,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         )),
       ),
     );

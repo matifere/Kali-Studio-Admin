@@ -54,14 +54,14 @@ class _PagosScreenState extends State<PagosScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Historial de cobros y transacciones del estudio.',
+                    'Historial de cobros y transacciones.',
                     style: KaliText.body(
                       KaliColors.espresso.withValues(alpha: 0.6),
                       size: 14,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // TabBar
                   Container(
                     decoration: const BoxDecoration(
@@ -76,9 +76,12 @@ class _PagosScreenState extends State<PagosScreen> {
                       indicatorWeight: 3,
                       labelColor: KaliColors.espresso,
                       unselectedLabelColor: KaliColors.clayDark,
-                      labelStyle: KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
-                      unselectedLabelStyle: KaliText.body(KaliColors.clayDark, weight: FontWeight.w500),
-                      overlayColor: const WidgetStatePropertyAll(Color(0x4DF4EBE1)), // KaliColors.sand.withValues(alpha: 0.3)
+                      labelStyle: KaliText.body(KaliColors.espresso,
+                          weight: FontWeight.bold),
+                      unselectedLabelStyle: KaliText.body(KaliColors.clayDark,
+                          weight: FontWeight.w500),
+                      overlayColor: const WidgetStatePropertyAll(Color(
+                          0x4DF4EBE1)), // KaliColors.sand.withValues(alpha: 0.3)
                       tabs: const [
                         Tab(text: 'Alumnos'),
                         Tab(text: 'Suscripción de Software'),
@@ -126,4 +129,3 @@ class _PagosScreenState extends State<PagosScreen> {
     );
   }
 }
-
