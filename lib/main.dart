@@ -51,7 +51,8 @@ Future<void> main() async {
   const buildAnon = String.fromEnvironment('SUPABASE_ANON');
 
   final String url = buildUrl.isNotEmpty ? buildUrl : (dotenv.env['URL'] ?? '');
-  final String anon = buildAnon.isNotEmpty ? buildAnon : (dotenv.env['ANON'] ?? '');
+  final String anon =
+      buildAnon.isNotEmpty ? buildAnon : (dotenv.env['ANON'] ?? '');
 
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(url: url, anonKey: anon);

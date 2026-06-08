@@ -22,13 +22,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
   bool _profileChecked = ProfileCache.isLoaded;
   bool _hasInstitution = ProfileCache.institutionId != null;
   bool _isActive = false;
+  /// true una vez que _checkProfile() completó la verificación de suscripción.
+  /// Mientras sea false, el stream listener NO puede sobreescribir _isActive
+  /// para evitar la race condition que causa bypass del paywall.
+  bool _subscriptionChecked = false;
   StreamSubscription<List<Map<String, dynamic>>>? _profileSub;
 
   @override
   void initState() {
     super.initState();
-    _checkProfile();
-    _listenProfileChanges();
+    _checkProfile().then((_) {
+      // Recién después de verificar la suscripción habilitamos el listener.
+      _listenProfileChanges();
+    });
   }
 
   void _listenProfileChanges() {
@@ -39,15 +45,50 @@ class _AuthWrapperState extends State<AuthWrapper> {
         .from('profiles')
         .stream(primaryKey: ['id'])
         .eq('id', user.id)
-        .listen((data) {
-          if (data.isNotEmpty && mounted) {
+        .listen((data) async {
+          if (data.isNotEmpty && mounted && _subscriptionChecked) {
             final profile = data.first;
-            final currentIsActive = profile['is_active'] as bool? ?? true;
-            if (currentIsActive != _isActive) {
-              setState(() => _isActive = currentIsActive);
+            final profileIsActive = profile['is_active'] as bool? ?? true;
+
+            // Re-verificar la validez de la suscripción antes de decidir
+            // si el usuario puede acceder al dashboard.
+            final shouldBeActive = profileIsActive && await _isSubscriptionValid();
+
+            if (mounted && shouldBeActive != _isActive) {
+              setState(() => _isActive = shouldBeActive);
             }
           }
         });
+  }
+
+  /// Verifica si la suscripción de la institución es válida.
+  /// Retorna true solo para estados explícitamente activos.
+  Future<bool> _isSubscriptionValid() async {
+    final isSudo = ProfileCache.role == 'sudo';
+    final institutionId = ProfileCache.institutionId;
+    if (!isSudo || institutionId == null) return true;
+
+    try {
+      final subData = await Supabase.instance.client
+          .from('tenant_subscriptions')
+          .select('status, current_period_end')
+          .eq('institution_id', institutionId)
+          .maybeSingle();
+
+      if (subData == null) return false;
+
+      final status = subData['status'] as String?;
+      if (status == 'active' || status == 'authorized' || status == 'pending') {
+        return true;
+      } else if (status == 'cancelled' && subData['current_period_end'] != null) {
+        final end = DateTime.tryParse(subData['current_period_end'].toString());
+        return end != null && DateTime.now().isBefore(end);
+      }
+      return false;
+    } catch (_) {
+      // Fail-closed: ante cualquier error, denegar acceso
+      return false;
+    }
   }
 
   @override
@@ -79,51 +120,27 @@ class _AuthWrapperState extends State<AuthWrapper> {
         );
       }
 
-      bool isSubValid = true;
-      final isSudo = (data?['role'] as String? ?? 'sudo') == 'sudo';
-      if (isSudo && data != null && data['institution_id'] != null) {
-        final subData = await Supabase.instance.client
-            .from('tenant_subscriptions')
-            .select('status, current_period_end')
-            .eq('institution_id', data['institution_id'])
-            .maybeSingle();
-
-        if (subData == null) {
-          // Sin suscripción → debe pagar
-          isSubValid = false;
-        } else {
-          final status = subData['status'] as String?;
-          //TODO reemplazar por el condicional correspondiente
-          if (status == 'active' ||
-              status == 'authorized' ||
-              status == 'pending') {
-            // Suscripción válida (activa, autorizada o en prueba gratuita)
-            isSubValid = true;
-          } else if (status == 'cancelled' &&
-              subData['current_period_end'] != null) {
-            // Cancelada pero puede tener período restante
-            final end =
-                DateTime.tryParse(subData['current_period_end'].toString());
-            isSubValid = end != null && DateTime.now().isBefore(end);
-          } else {
-            // Cualquier otro estado (expired, paused sin período, etc.)
-            isSubValid = false;
-          }
-        }
-      }
+      final isSubValid = await _isSubscriptionValid();
 
       if (mounted) {
         setState(() {
           _isActive = data != null
               ? ((data['is_active'] as bool? ?? true) && isSubValid)
-              : true;
+              : false;
           _hasInstitution = data != null && data['institution_id'] != null;
           _profileChecked = true;
+          _subscriptionChecked = true;
         });
       }
     } catch (_) {
-      // En caso de error, marcamos como verificado para no quedar bloqueados.
-      if (mounted) setState(() => _profileChecked = true);
+      // Fail-closed: ante cualquier error, marcar como inactivo.
+      if (mounted) {
+        setState(() {
+          _profileChecked = true;
+          _subscriptionChecked = true;
+          _isActive = false;
+        });
+      }
     }
   }
 
