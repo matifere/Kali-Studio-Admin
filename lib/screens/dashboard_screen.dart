@@ -123,7 +123,7 @@ class _DashboardHomeState extends State<_DashboardHome> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Esto es lo que está pasando en Minerva Admin hoy.',
+                  'Esto es lo que está pasando hoy.',
                   style: KaliText.body(
                     KaliColors.espresso.withValues(alpha: 0.6),
                     size: 16,
