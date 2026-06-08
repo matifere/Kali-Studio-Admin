@@ -55,7 +55,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
-          current is AuthSuccess || current is AuthFailure || current is AuthPending,
+          current is AuthSuccess ||
+          current is AuthFailure ||
+          current is AuthPending,
       listener: (context, state) {
         if (state is AuthSuccess) {
           context.read<AuthBloc>().add(AuthReset());
@@ -67,7 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           context.read<AuthBloc>().add(AuthReset());
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Cuenta creada. Esperá que el administrador te dé acceso.'),
+              content: Text('Cuenta creada.'),
               duration: Duration(seconds: 5),
             ),
           );
@@ -90,7 +92,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Container(
-                        constraints: const BoxConstraints(maxWidth: 900, maxHeight: 600),
+                        constraints:
+                            const BoxConstraints(maxWidth: 900, maxHeight: 600),
                         decoration: BoxDecoration(
                           color: KaliColors.warmWhite,
                           borderRadius: BorderRadius.circular(16),
