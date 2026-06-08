@@ -21,7 +21,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   // (scaffold en blanco, imperceptible) hasta que _checkProfile() confirme.
   bool _profileChecked = ProfileCache.isLoaded;
   bool _hasInstitution = ProfileCache.institutionId != null;
-  bool _isActive = true;
+  bool _isActive = false;
   StreamSubscription<List<Map<String, dynamic>>>? _profileSub;
 
   @override
@@ -93,12 +93,17 @@ class _AuthWrapperState extends State<AuthWrapper> {
           isSubValid = false;
         } else {
           final status = subData['status'] as String?;
-          if (status == 'active' || status == 'authorized' || status == 'pending') {
+          //TODO reemplazar por el condicional correspondiente
+          if (status == 'active' ||
+              status == 'authorized' ||
+              status == 'pending') {
             // Suscripción válida (activa, autorizada o en prueba gratuita)
             isSubValid = true;
-          } else if (status == 'cancelled' && subData['current_period_end'] != null) {
+          } else if (status == 'cancelled' &&
+              subData['current_period_end'] != null) {
             // Cancelada pero puede tener período restante
-            final end = DateTime.tryParse(subData['current_period_end'].toString());
+            final end =
+                DateTime.tryParse(subData['current_period_end'].toString());
             isSubValid = end != null && DateTime.now().isBefore(end);
           } else {
             // Cualquier otro estado (expired, paused sin período, etc.)
@@ -109,7 +114,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       if (mounted) {
         setState(() {
-          _isActive = data != null ? ((data['is_active'] as bool? ?? true) && isSubValid) : true;
+          _isActive = data != null
+              ? ((data['is_active'] as bool? ?? true) && isSubValid)
+              : true;
           _hasInstitution = data != null && data['institution_id'] != null;
           _profileChecked = true;
         });
@@ -133,4 +140,3 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return const DashboardScreen();
   }
 }
-
