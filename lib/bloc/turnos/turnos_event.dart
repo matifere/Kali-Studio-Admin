@@ -50,16 +50,22 @@ class TurnoEdited extends TurnosEvent {
   TurnoEdited(this.turno);
 }
 
+enum EnrollmentType {
+  single,
+  month,
+  year,
+}
+
 /// Se inscribe a un alumno a un turno
 class TurnoStudentAssigned extends TurnosEvent {
   final String userId;
   final ClassSession session;
-  final bool enrollInFuture;
+  final EnrollmentType enrollmentType;
 
   TurnoStudentAssigned({
     required this.userId, 
     required this.session,
-    this.enrollInFuture = false,
+    this.enrollmentType = EnrollmentType.single,
   });
 }
 

@@ -293,8 +293,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         if (instId != null) 'institution_id': instId,
       });
 
-      // 2. Si marcamos recurrencia, buscamos las 3 clases *futuras* con el mismo template
-      if (event.enrollInFuture && event.session.templateId != null) {
+      // 2. Si marcamos recurrencia, buscamos las clases futuras con el mismo template
+      if (event.enrollmentType != EnrollmentType.single && event.session.templateId != null) {
         final startIso = DateFormat('yyyy-MM-dd').format(event.session.date
             .add(const Duration(days: 1))); // From tomorrow onwards
 
@@ -314,13 +314,14 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
         // Only project if maxRes > 0
         if (maxRes > 0) {
+          final limitCount = event.enrollmentType == EnrollmentType.month ? 3 : 52;
           final futureSessionsResponse = await db
               .from('class_sessions')
               .select('id, date')
               .eq('template_id', event.session.templateId!)
               .gte('date', startIso)
               .order('date', ascending: true)
-              .limit(3);
+              .limit(limitCount);
 
           final futureSessions = futureSessionsResponse as List<dynamic>;
 
@@ -365,7 +366,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       _activityBloc?.add(ActivityLogged(ActivityEntry(
         title: 'Alumno inscripto a turno',
         subtitle:
-            'Inscripción confirmada en ${event.session.name}${event.enrollInFuture ? ' (recurrente)' : ''}.',
+            'Inscripción confirmada en ${event.session.name}${event.enrollmentType != EnrollmentType.single ? ' (recurrente)' : ''}.',
         category: ActivityCategory.alumno,
         timestamp: DateTime.now(),
       )));

@@ -20,7 +20,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   List<Map<String, dynamic>> _filteredProfiles = [];
   bool _isLoading = true;
   String? _error;
-  bool _enrollInFuture = false;
+  EnrollmentType _enrollmentType = EnrollmentType.single;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -143,7 +143,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
       TurnoStudentAssigned(
         userId: userId, 
         session: widget.session,
-        enrollInFuture: _enrollInFuture,
+        enrollmentType: _enrollmentType,
       )
     );
     Navigator.of(context).pop();
@@ -198,15 +198,42 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
             ),
             const SizedBox(height: 16),
             if (widget.session.templateId != null) ...[
-              CheckboxListTile(
-                title: Text('Proyectar e inscribir al alumno también en estas clases durante todo el mes', style: KaliText.body(KaliColors.espresso, size: 14)),
-                value: _enrollInFuture,
-                onChanged: (v) => setState(() => _enrollInFuture = v ?? false),
-                activeColor: KaliColors.espresso,
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-              ),
+              Text('Opciones de inscripción recurrentes', style: KaliText.body(KaliColors.espresso, size: 14, weight: FontWeight.w600)),
               const SizedBox(height: 8),
+              DropdownButtonFormField<EnrollmentType>(
+                value: _enrollmentType,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                  ),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: EnrollmentType.single,
+                    child: Text('Solo a esta clase'),
+                  ),
+                  DropdownMenuItem(
+                    value: EnrollmentType.month,
+                    child: Text('Proyectar durante todo el mes'),
+                  ),
+                  DropdownMenuItem(
+                    value: EnrollmentType.year,
+                    child: Text('Proyectar durante todo el año'),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() => _enrollmentType = v);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
             ],
             Expanded(
               child: _isLoading
