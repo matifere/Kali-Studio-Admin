@@ -80,16 +80,28 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
 
       bool isSubValid = true;
-      if (data != null && data['institution_id'] != null) {
+      final isSudo = (data?['role'] as String? ?? 'sudo') == 'sudo';
+      if (isSudo && data != null && data['institution_id'] != null) {
         final subData = await Supabase.instance.client
             .from('tenant_subscriptions')
             .select('status, current_period_end')
             .eq('institution_id', data['institution_id'])
             .maybeSingle();
-            
-        if (subData != null && subData['status'] == 'cancelled' && subData['current_period_end'] != null) {
-          final end = DateTime.tryParse(subData['current_period_end'].toString());
-          if (end != null && DateTime.now().isAfter(end)) {
+
+        if (subData == null) {
+          // Sin suscripción → debe pagar
+          isSubValid = false;
+        } else {
+          final status = subData['status'] as String?;
+          if (status == 'active' || status == 'authorized' || status == 'pending') {
+            // Suscripción válida (activa, autorizada o en prueba gratuita)
+            isSubValid = true;
+          } else if (status == 'cancelled' && subData['current_period_end'] != null) {
+            // Cancelada pero puede tener período restante
+            final end = DateTime.tryParse(subData['current_period_end'].toString());
+            isSubValid = end != null && DateTime.now().isBefore(end);
+          } else {
+            // Cualquier otro estado (expired, paused sin período, etc.)
             isSubValid = false;
           }
         }
