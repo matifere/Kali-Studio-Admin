@@ -21,12 +21,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     try {
       final now = DateTime.now();
       final todayIso = DateFormat('yyyy-MM-dd').format(now);
-      final firstDayOfMonth = DateFormat('yyyy-MM-dd').format(DateTime(now.year, now.month, 1));
       final supabase = Supabase.instance.client;
 
-      // Las stats deben ser solo de la institución del usuario. payments no
-      // tiene institution_id propio: la pertenencia se determina vía el perfil
-      // del alumno (mismo criterio que PagosBloc).
+      // Las stats deben ser solo de la institución del usuario.
       final instId = ProfileCache.institutionId;
 
       // Ambas queries en paralelo
@@ -40,18 +37,17 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       }
       final sessionsFuture = sessionsQuery;
 
-      var paymentsQuery = supabase
-          .from('payments')
-          .select('amount, profiles!payments_user_id_fkey!inner(institution_id)')
-          .gte('payment_date', firstDayOfMonth)
-          .eq('status', 'completed');
-      if (instId != null) {
-        paymentsQuery = paymentsQuery.eq('profiles.institution_id', instId);
-      }
-      final paymentsFuture = paymentsQuery;
+      // Ingresos = mismo cálculo que la tarjeta de Pagos: precio del plan de
+      // las suscripciones activas de la institución. Se filtra igual que
+      // PagosBloc (por el institution_id del perfil del alumno).
+      final subsFuture = supabase.from('subscriptions').select(
+            'status, end_date, '
+            'profiles!subscriptions_user_id_fkey(institution_id), '
+            'plans(price)',
+          );
 
       final sessions = await sessionsFuture as List<dynamic>;
-      final paymentsData = await paymentsFuture;
+      final subsData = await subsFuture;
 
       int turnosHoy = sessions.length;
       int capacidadTotal = 0;
@@ -65,9 +61,29 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         }
       }
 
+      final today = DateTime(now.year, now.month, now.day);
       double ingresos = 0.0;
-      for (final p in paymentsData) {
-        ingresos += (p['amount'] as num).toDouble();
+      for (final sub in subsData) {
+        // Filtro de institución (igual que PagosBloc).
+        if (instId != null) {
+          final p = sub['profiles'];
+          final pInst = p is Map
+              ? p['institution_id']
+              : (p is List && p.isNotEmpty ? p.first['institution_id'] : null);
+          if (pInst != instId) continue;
+        }
+        // Solo activas y no vencidas por fecha (PagosBloc marca expired si
+        // hoy > end_date, y esas no cuentan como ingreso).
+        if (sub['status'] != 'active') continue;
+        final endStr = sub['end_date'] as String?;
+        final end = endStr != null ? DateTime.tryParse(endStr) : null;
+        if (end != null && today.isAfter(DateTime(end.year, end.month, end.day))) {
+          continue;
+        }
+        final plan = sub['plans'];
+        final planMap = plan is List ? (plan.isNotEmpty ? plan.first : null) : plan;
+        final price = (planMap is Map ? planMap['price'] as num? : null) ?? 0;
+        ingresos += price.toDouble();
       }
 
       emit(state.copyWith(
