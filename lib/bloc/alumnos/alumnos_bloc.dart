@@ -20,6 +20,7 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
     on<AlumnosLoadRequested>(_onLoadRequested);
     on<AlumnosPageChanged>(_onPageChanged);
     on<AlumnosFilterChanged>(_onFilterChanged);
+    on<AlumnosStudentStatusChanged>(_onStudentStatusChanged);
   }
 
   // ── Carga / refresco ───────────────────────────────────────────────────────
@@ -38,10 +39,13 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
     try {
       final client = Supabase.instance.client;
 
+      // Solo las columnas que usa Student.fromJson: traer '*' con todos los
+      // joins multiplicaba el payload (historial completo de reservas con
+      // sesiones enteras por alumno).
       const selectQuery = '''
-        *,
-        subscriptions!subscriptions_user_id_fkey(*, plans(*)),
-        reservations!reservations_user_id_fkey(*, class_sessions(*))
+        id, avatar_url, full_name, email, is_active, created_at, patologias,
+        subscriptions!subscriptions_user_id_fkey(status, end_date, plans(name)),
+        reservations!reservations_user_id_fkey(status, class_sessions(name, template_id, date, start_time))
       ''';
 
       final instId = ProfileCache.institutionId;
@@ -109,6 +113,34 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
     if (current is AlumnosLoaded) {
       emit(current.copyWithPage(event.page));
     }
+  }
+
+  // ── Cambio de estado activo/inactivo (patch local, sin refetch) ───────────
+  void _onStudentStatusChanged(
+    AlumnosStudentStatusChanged event,
+    Emitter<AlumnosState> emit,
+  ) {
+    final current = state;
+    if (current is! AlumnosLoaded) return;
+
+    final updated = [
+      for (final s in current.students)
+        s.id == event.studentId ? s.copyWith(isActive: event.isActive) : s,
+    ];
+
+    // Re-aplica los filtros activos; si el alumno sale de la lista filtrada
+    // la página actual puede quedar fuera de rango, por eso se clampa.
+    var next = AlumnosLoaded(
+      students: updated,
+      currentPage: current.currentPage,
+      searchQuery: current.searchQuery,
+      patologiaFilter: current.patologiaFilter,
+      isActiveFilter: current.isActiveFilter,
+    );
+    if (next.currentPage > next.totalPages) {
+      next = next.copyWithPage(next.totalPages);
+    }
+    emit(next);
   }
 
   // ── Cambio de filtros ──────────────────────────────────────────────────────

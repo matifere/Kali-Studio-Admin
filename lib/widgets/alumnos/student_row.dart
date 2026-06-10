@@ -47,14 +47,20 @@ class _StudentRowState extends State<StudentRow> {
 
     if (confirmed == true && context.mounted) {
       try {
-        final deleted = await Supabase.instance.client
-            .from('profiles')
-            .delete()
-            .eq('id', widget.student.id)
-            .select('id');
+        // Borra tanto el perfil como el usuario de auth.users. Esto requiere
+        // el service_role key (no puede vivir en la app), así que lo hace la
+        // Edge Function 'delete-student', que valida permisos por institución.
+        final response = await Supabase.instance.client.functions.invoke(
+          'delete-student',
+          body: {'student_id': widget.student.id},
+        );
 
-        if (deleted.isEmpty) {
-          throw Exception('No se pudo eliminar el alumno. Verificá los permisos en Supabase.');
+        final data = response.data;
+        if (data is Map && data['error'] != null) {
+          throw Exception(data['error']);
+        }
+        if (data is! Map || data['ok'] != true) {
+          throw Exception('No se pudo eliminar el alumno. Intentá nuevamente.');
         }
 
         if (context.mounted) {
@@ -73,6 +79,43 @@ class _StudentRowState extends State<StudentRow> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _toggleActive(BuildContext context) async {
+    final s = widget.student;
+    final newValue = !s.isActive;
+    final bloc = context.read<AlumnosBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Actualización optimista: la fila cambia al instante sin refetch del
+    // directorio; si la DB rechaza el update se revierte con el mismo evento.
+    bloc.add(AlumnosStudentStatusChanged(s.id, newValue));
+
+    try {
+      final result = await Supabase.instance.client
+          .from('profiles')
+          .update({'is_active': newValue})
+          .eq('id', s.id)
+          .select('id, is_active');
+
+      if (result.isEmpty) {
+        throw Exception('No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
+      }
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(newValue ? '${s.name} ahora está activo' : '${s.name} ahora está inactivo'),
+        ),
+      );
+    } catch (e) {
+      bloc.add(AlumnosStudentStatusChanged(s.id, s.isActive));
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo cambiar el estado del alumno. Intentá nuevamente.'),
+          duration: Duration(seconds: 6),
+        ),
+      );
     }
   }
 
@@ -128,7 +171,10 @@ class _StudentRowState extends State<StudentRow> {
             // Estado
             Expanded(
               flex: 2,
-              child: _StatusIndicator(isActive: s.isActive),
+              child: _StatusIndicator(
+                isActive: s.isActive,
+                onTap: () => _toggleActive(context),
+              ),
             ),
 
             // Asistencias este mes
@@ -276,7 +322,8 @@ class _AttendanceCell extends StatelessWidget {
 // ─── Indicador de estado ──────────────────────────────────────────────────────
 class _StatusIndicator extends StatelessWidget {
   final bool isActive;
-  const _StatusIndicator({required this.isActive});
+  final VoidCallback? onTap;
+  const _StatusIndicator({required this.isActive, this.onTap});
 
   static const _activeColor = Color(0xFF5C9E6C);
   static const _inactiveColor = Color(0xFFD4685C);
@@ -285,19 +332,30 @@ class _StatusIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isActive ? _activeColor : _inactiveColor;
 
-    return Row(
-      children: [
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    return Tooltip(
+      message: isActive ? 'Marcar como inactivo' : 'Marcar como activo',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isActive ? 'Activo' : 'Inactivo',
+                style: KaliText.body(color, weight: FontWeight.w500),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(width: 8),
-        Text(
-          isActive ? 'Activo' : 'Inactivo',
-          style: KaliText.body(color, weight: FontWeight.w500),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 /// Modelo de datos de un alumno.
 class Student {
@@ -43,6 +44,33 @@ class Student {
     return colores[name.length % colores.length];
   }
 
+  /// Copia con el estado activo cambiado (para actualizaciones optimistas).
+  Student copyWith({bool? isActive}) => Student(
+        id: id,
+        avatarImage: avatarImage,
+        name: name,
+        email: email,
+        plan: plan,
+        isActive: isActive ?? this.isActive,
+        nextShift: nextShift,
+        shiftClass: shiftClass,
+        createdAt: createdAt,
+        patologias: patologias,
+        planEndDate: planEndDate,
+        reactivate: reactivate,
+        attendedThisMonth: attendedThisMonth,
+      );
+
+  /// Fecha legible en español ("mié 12 jun · 18:00"); si el locale no está
+  /// inicializado (p. ej. tests unitarios), cae al formato crudo de la DB.
+  static String _formatShift(DateTime start, Object date, Object startTime) {
+    try {
+      return DateFormat('EEE d MMM · HH:mm', 'es_ES').format(start);
+    } catch (_) {
+      return '$date a las $startTime';
+    }
+  }
+
   factory Student.fromJson(Map<String, dynamic> json) {
     // 1. Extracción segura del Plan
     // Supabase devuelve los joins como Listas (arrays) de Mapas.
@@ -65,32 +93,35 @@ class Student {
     }
 
     // 2. Extracción segura del Próximo Turno y Clase
+    // La query no garantiza orden en las reservas: buscamos la sesión futura
+    // más próxima (no cancelada). Las pasadas no son "próximo turno".
+    final now = DateTime.now();
     String nextShiftDate = 'Sin turno asignado';
     String shiftClassName = 'Sin clase';
 
-    if (json['reservations'] != null &&
-        (json['reservations'] as List).isNotEmpty) {
-      // Asumimos que la query ordena las reservas para que la [0] sea la más próxima
-      final firstReservation = json['reservations'][0];
-
-      if (firstReservation['class_sessions'] != null) {
-        final session = firstReservation['class_sessions'];
-        shiftClassName = session['name'] ??
-            session['template_id'] ??
-            'Clase'; // Fallback por si no tiene nombre directo
+    DateTime? bestStart;
+    if (json['reservations'] != null) {
+      for (final r in json['reservations'] as List) {
+        if (r['status'] == 'cancelled') continue;
+        final session = r['class_sessions'];
+        if (session == null) continue;
 
         final date = session['date'];
         final startTime = session['start_time'];
+        if (date == null || startTime == null) continue;
 
-        if (date != null && startTime != null) {
-          // Formateo crudo. Luego podrías usar el paquete 'intl' para dejarlo más prolijo.
-          nextShiftDate = '$date a las $startTime';
+        final start = DateTime.tryParse('$date $startTime');
+        if (start == null || start.isBefore(now)) continue;
+
+        if (bestStart == null || start.isBefore(bestStart)) {
+          bestStart = start;
+          shiftClassName = session['name'] ?? session['template_id'] ?? 'Clase';
+          nextShiftDate = _formatShift(start, date, startTime);
         }
       }
     }
 
     // 3. Contar asistencias del mes actual
-    final now = DateTime.now();
     final firstOfMonth = DateTime(now.year, now.month, 1);
     final lastOfMonth = DateTime(now.year, now.month + 1, 0);
     int attendedThisMonth = 0;

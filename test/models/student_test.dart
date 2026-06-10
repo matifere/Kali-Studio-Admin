@@ -97,12 +97,54 @@ void main() {
       expect(s.planEndDate, DateTime(2024, 12, 31));
     });
 
-    test('nextShift and shiftClass from first reservation', () {
+    test('nextShift es la reserva futura más próxima (no la primera de la lista)', () {
+      final now = DateTime.now();
+      String inDays(int d) {
+        final dt = now.add(Duration(days: d));
+        return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+      }
+
+      final s = Student.fromJson({
+        ...base(),
+        'reservations': [
+          // Más lejana primero: el orden de la query no garantiza nada.
+          {
+            'status': 'confirmed',
+            'class_sessions': {
+              'name': 'Mat Pilates',
+              'date': inDays(10),
+              'start_time': '10:00',
+            },
+          },
+          {
+            'status': 'confirmed',
+            'class_sessions': {
+              'name': 'Reformer Pilates',
+              'date': inDays(3),
+              'start_time': '10:00',
+            },
+          },
+          // Cancelada aún más cercana: debe ignorarse.
+          {
+            'status': 'cancelled',
+            'class_sessions': {
+              'name': 'Cancelada',
+              'date': inDays(1),
+              'start_time': '10:00',
+            },
+          },
+        ],
+      });
+      expect(s.shiftClass, 'Reformer Pilates');
+      expect(s.nextShift, isNot('Sin turno asignado'));
+    });
+
+    test('las reservas pasadas no cuentan como próximo turno', () {
       final s = Student.fromJson({
         ...base(),
         'reservations': [
           {
-            'status': 'confirmed',
+            'status': 'attended',
             'class_sessions': {
               'name': 'Reformer Pilates',
               'date': '2024-03-15',
@@ -111,8 +153,8 @@ void main() {
           },
         ],
       });
-      expect(s.shiftClass, 'Reformer Pilates');
-      expect(s.nextShift, contains('2024-03-15'));
+      expect(s.nextShift, 'Sin turno asignado');
+      expect(s.shiftClass, 'Sin clase');
     });
 
     test('attendedThisMonth counts only current-month attended reservations', () {

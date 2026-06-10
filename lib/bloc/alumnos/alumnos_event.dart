@@ -12,6 +12,15 @@ class AlumnosPageChanged extends AlumnosEvent {
   AlumnosPageChanged(this.page);
 }
 
+/// Cambió el estado activo/inactivo de un alumno (actualización optimista:
+/// patchea la lista en memoria sin refetch; el revert usa el mismo evento).
+class AlumnosStudentStatusChanged extends AlumnosEvent {
+  final String studentId;
+  final bool isActive;
+
+  AlumnosStudentStatusChanged(this.studentId, this.isActive);
+}
+
 /// Se aplicaron nuevos filtros en el directorio de alumnos.
 class AlumnosFilterChanged extends AlumnosEvent {
   final String searchQuery;
