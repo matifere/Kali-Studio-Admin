@@ -15,8 +15,10 @@ import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/screens/login_screen.dart';
 import 'package:argrity/services/auth_service.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/screens/new_password_screen.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
+import 'package:argrity/widgets/kali_splash.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -155,6 +157,10 @@ class _KaliAppViewState extends State<_KaliAppView> {
           (route) => false,
         );
       } else if (event.event == AuthChangeEvent.signedOut) {
+        // Limpiar acá cubre también los signOut() directos (InactiveScreen,
+        // NewPasswordScreen, etc.) que no pasan por AuthBloc; si quedara el
+        // caché del usuario anterior, AuthWrapper enrutaría con sus datos.
+        ProfileCache.clear();
         _navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
@@ -188,9 +194,9 @@ class _KaliAppViewState extends State<_KaliAppView> {
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold neutro (fondo liso) como estado inicial,
+    // Splash con branding como estado inicial mientras se resuelve la sesión;
     // toda la navegación la maneja _navigatorKey dinámicamente.
-    Widget home = const Scaffold(backgroundColor: KaliColors.warmWhite);
+    Widget home = const KaliSplash();
 
     return MaterialApp(
       navigatorKey: _navigatorKey,

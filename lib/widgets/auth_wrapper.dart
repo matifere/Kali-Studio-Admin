@@ -6,7 +6,7 @@ import 'package:argrity/screens/dashboard_screen.dart';
 import 'package:argrity/screens/institution_selection_screen.dart';
 import 'package:argrity/screens/inactive_screen.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/widgets/kali_splash.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -21,7 +21,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   // (scaffold en blanco, imperceptible) hasta que _checkProfile() confirme.
   bool _profileChecked = ProfileCache.isLoaded;
   bool _hasInstitution = ProfileCache.institutionId != null;
-  bool _isActive = false;
+  // Arrancamos con el último valor conocido: si el usuario ya estaba activo,
+  // un remount no debe mostrar InactiveScreen mientras se re-verifica.
+  bool _isActive = ProfileCache.isActive;
   /// true una vez que _checkProfile() completó la verificación de suscripción.
   /// Mientras sea false, el stream listener NO puede sobreescribir _isActive
   /// para evitar la race condition que causa bypass del paywall.
@@ -54,6 +56,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
             // si el usuario puede acceder al dashboard.
             final shouldBeActive = profileIsActive && await _isSubscriptionValid();
 
+            ProfileCache.updateIsActive(shouldBeActive);
             if (mounted && shouldBeActive != _isActive) {
               setState(() => _isActive = shouldBeActive);
             }
@@ -122,11 +125,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       final isSubValid = await _isSubscriptionValid();
 
+      final isActive = data != null
+          ? ((data['is_active'] as bool? ?? true) && isSubValid)
+          : false;
+      ProfileCache.updateIsActive(isActive);
+
       if (mounted) {
         setState(() {
-          _isActive = data != null
-              ? ((data['is_active'] as bool? ?? true) && isSubValid)
-              : false;
+          _isActive = isActive;
           _hasInstitution = data != null && data['institution_id'] != null;
           _profileChecked = true;
           _subscriptionChecked = true;
@@ -134,6 +140,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
     } catch (_) {
       // Fail-closed: ante cualquier error, marcar como inactivo.
+      ProfileCache.updateIsActive(false);
       if (mounted) {
         setState(() {
           _profileChecked = true;
@@ -146,10 +153,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    // Hasta que el perfil esté confirmado mostramos un scaffold en blanco —
-    // sin spinner, invisible para el usuario (~100-200ms).
+    // Hasta que el perfil esté confirmado mostramos el splash con branding
+    // en lugar de un scaffold en blanco.
     if (!_profileChecked) {
-      return const Scaffold(backgroundColor: KaliColors.warmWhite);
+      return const KaliSplash();
     }
 
     if (!_hasInstitution) return const InstitutionSelectionScreen();
