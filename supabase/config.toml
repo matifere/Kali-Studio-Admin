@@ -423,3 +423,8 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/mp-webhook/deno.json"
 entrypoint = "./functions/mp-webhook/index.ts"
+
+[functions.delete-student]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/delete-student/index.ts"

@@ -133,11 +133,16 @@ void main() {
         equals('sudo'),
         reason: 'El rol debe ser sudo para el dueño de una institución',
       );
+      // El trigger de la DB crea el perfil con is_active=true y la RLS impide
+      // que el cliente lo cambie. El bloqueo hasta pagar no depende de
+      // is_active: AuthWrapper verifica tenant_subscriptions (fail-closed) y
+      // enruta a InactiveScreen hasta que mp-webhook active la suscripción.
       expect(
         profile['is_active'],
-        isFalse,
+        isTrue,
         reason:
-            'El usuario nuevo debe quedar inactivo hasta ser activado por un admin',
+            'El trigger de la DB crea el perfil activo; el paywall se aplica '
+            'vía tenant_subscriptions en AuthWrapper, no vía is_active',
       );
     });
   });

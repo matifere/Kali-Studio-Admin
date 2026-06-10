@@ -192,6 +192,13 @@ class SupaAuthClass {
       final authHeader =
           accessToken != null ? 'Bearer $accessToken' : 'Bearer $_supabaseAnon';
 
+      // NOTA: el perfil nace con is_active=true (lo fija el trigger de la DB y
+      // la RLS impide que el cliente lo cambie). El bloqueo hasta pagar NO
+      // depende de is_active: AuthWrapper verifica tenant_subscriptions
+      // (fail-closed) y enruta a InactiveScreen hasta que el pago active la
+      // suscripción vía mp-webhook.
+      // No fatal si falla: el trigger ya creó el perfil base con los
+      // metadatos del signup; este upsert solo completa email/full_name.
       await http.post(
         Uri.parse('$_supabaseUrl/rest/v1/profiles'),
         headers: {
@@ -205,7 +212,6 @@ class SupaAuthClass {
           'email': email,
           'full_name': fullName,
           'role': 'sudo',
-          'is_active': false,
         }),
       );
 

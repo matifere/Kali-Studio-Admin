@@ -61,8 +61,36 @@ Deno.serve(async (req) => {
       const payload = await req.json().catch(() => ({}));
       console.log(`[POST] type=${payload.type} action=${payload.action}`);
 
-      // Las verificaciones internas (desde Flutter/Edge Functions) no llevan firma de MP
+      // Las verificaciones internas (desde Flutter/Edge Functions) no llevan
+      // firma de MP; exigen en cambio un JWT válido de un sudo de la misma
+      // institución (la función corre con verify_jwt=false, así que sin este
+      // chequeo cualquiera podría desactivar instituciones ajenas).
       const isInternalRequest = payload.type === "manual_verify" || payload.type === "manual_deactivate";
+
+      if (isInternalRequest) {
+        const authHeader = req.headers.get("Authorization") ?? "";
+        const token = authHeader.replace(/^Bearer\s+/i, "");
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+        if (userError || !userData?.user) {
+          console.error("[POST] Evento interno sin JWT válido. Rechazado.");
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        const { data: callerProfile } = await supabase
+          .from("profiles")
+          .select("role, institution_id")
+          .eq("id", userData.user.id)
+          .maybeSingle();
+
+        if (
+          !callerProfile ||
+          callerProfile.role !== "sudo" ||
+          String(callerProfile.institution_id) !== String(payload.institution_id)
+        ) {
+          console.error("[POST] Evento interno de un caller sin permisos. Rechazado.");
+          return new Response("Forbidden", { status: 403 });
+        }
+      }
 
       // El botón de "Probar" en el dashboard de Mercado Pago envía un payload de prueba
       // que suele fallar la validación de firma (faltan headers o el hash no coincide).
@@ -76,53 +104,59 @@ Deno.serve(async (req) => {
       // Validar firma de MP para eventos IPN reales (no internos)
       if (!isInternalRequest) {
         const MP_WEBHOOK_SECRET = Deno.env.get("MP_WEBHOOK_SECRET");
-        if (MP_WEBHOOK_SECRET) {
-          const xSignature = req.headers.get("x-signature");
-          const xRequestId = req.headers.get("x-request-id");
-
-          if (!xSignature || !xRequestId) {
-            console.error("[POST] Evento IPN sin headers de firma. Rechazado.");
-            return new Response("Unauthorized", { status: 401 });
-          }
-
-          // Parsear x-signature: "ts=TIMESTAMP,v1=HASH"
-          const parts: Record<string, string> = {};
-          for (const part of xSignature.split(",")) {
-            const [key, ...rest] = part.split("=");
-            parts[key.trim()] = rest.join("=").trim();
-          }
-
-          const ts = parts["ts"];
-          const v1 = parts["v1"];
-          if (!ts || !v1) {
-            console.error("[POST] Formato de x-signature inválido. Rechazado.");
-            return new Response("Unauthorized", { status: 401 });
-          }
-
-          // Construir el string a firmar según docs de MP
-          const dataId = payload.data?.id ?? "";
-          const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-
-          // Calcular HMAC-SHA256
-          const key = await crypto.subtle.importKey(
-            "raw",
-            new TextEncoder().encode(MP_WEBHOOK_SECRET),
-            { name: "HMAC", hash: "SHA-256" },
-            false,
-            ["sign"],
-          );
-          const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
-          const computed = Array.from(new Uint8Array(signature))
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join("");
-
-          if (computed !== v1) {
-            console.error(`[POST] Firma inválida. Esperada: ${computed}, Recibida: ${v1}. Rechazado.`);
-            return new Response("Unauthorized", { status: 401 });
-          }
-
-          console.log("[POST] Firma de MP verificada ✓");
+        if (!MP_WEBHOOK_SECRET) {
+          // Fail-closed: sin el secret no podemos verificar que el evento
+          // venga de Mercado Pago, y aceptar eventos sin firma permitiría
+          // falsificar activaciones de suscripción.
+          console.error("[POST] MP_WEBHOOK_SECRET no configurado. Evento rechazado.");
+          return new Response("Server misconfigured", { status: 500 });
         }
+
+        const xSignature = req.headers.get("x-signature");
+        const xRequestId = req.headers.get("x-request-id");
+
+        if (!xSignature || !xRequestId) {
+          console.error("[POST] Evento IPN sin headers de firma. Rechazado.");
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        // Parsear x-signature: "ts=TIMESTAMP,v1=HASH"
+        const parts: Record<string, string> = {};
+        for (const part of xSignature.split(",")) {
+          const [key, ...rest] = part.split("=");
+          parts[key.trim()] = rest.join("=").trim();
+        }
+
+        const ts = parts["ts"];
+        const v1 = parts["v1"];
+        if (!ts || !v1) {
+          console.error("[POST] Formato de x-signature inválido. Rechazado.");
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        // Construir el string a firmar según docs de MP
+        const dataId = payload.data?.id ?? "";
+        const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+        // Calcular HMAC-SHA256
+        const key = await crypto.subtle.importKey(
+          "raw",
+          new TextEncoder().encode(MP_WEBHOOK_SECRET),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"],
+        );
+        const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+        const computed = Array.from(new Uint8Array(signature))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        if (computed !== v1) {
+          console.error(`[POST] Firma inválida. Esperada: ${computed}, Recibida: ${v1}. Rechazado.`);
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        console.log("[POST] Firma de MP verificada ✓");
       }
 
       // Verificación manual desde Flutter (botón "Verificar Estado del Pago")

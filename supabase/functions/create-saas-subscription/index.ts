@@ -29,6 +29,37 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // La función corre con verify_jwt=false: validamos acá que el caller sea
+    // el sudo de la institución. Sin esto, cualquiera podría upsertear una
+    // tenant_subscription 'pending' (que AuthWrapper acepta como válida) para
+    // una institución arbitraria.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData?.user) {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: callerProfile } = await supabase
+      .from("profiles")
+      .select("role, institution_id")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+
+    if (
+      !callerProfile ||
+      callerProfile.role !== "sudo" ||
+      String(callerProfile.institution_id) !== String(institution_id)
+    ) {
+      return new Response(JSON.stringify({ error: "No tenés permisos sobre esta institución" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // 1. Obtener datos del plan de nuestra DB
     const { data: plan, error: planError } = await supabase
       .from("saas_plans")
