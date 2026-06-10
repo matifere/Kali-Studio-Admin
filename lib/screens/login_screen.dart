@@ -73,9 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'Estamos trabajando en esto, si tienes problemas para ingresar envia un mail por nuestra pagina')),
+          SnackBar(
+            content: Text(
+                'Te enviamos un email a $email con el link para restablecer tu contraseña. Revisá también la carpeta de spam.'),
+            duration: const Duration(seconds: 6),
+          ),
         );
       }
     } catch (e) {
