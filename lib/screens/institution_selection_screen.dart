@@ -4,6 +4,7 @@ import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:argrity/screens/login_screen.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 class InstitutionSelectionScreen extends StatefulWidget {
   const InstitutionSelectionScreen({super.key});
@@ -60,18 +61,27 @@ class _InstitutionSelectionScreenState
         'role': 'sudo',
       }).eq('id', user.id);
 
+      // Refrescamos el caché para que AuthWrapper enrute con datos actualizados
+      // y no vuelva a mostrar esta pantalla mientras re-verifica el perfil.
+      ProfileCache.set(
+        role: 'sudo',
+        institutionId: instId as String?,
+        fullName: ProfileCache.fullName,
+      );
+
       if (mounted) {
+        // No apagamos _isLoading: mantenemos el indicador hasta que la
+        // navegación reemplace esta pantalla por la siguiente.
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const AuthWrapper()));
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content:
                 Text('No se pudo crear la institución. Intentá nuevamente.')));
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

@@ -24,7 +24,7 @@ class DashboardStatCards extends StatelessWidget {
 
             final widgets = <Widget>[];
 
-            if (!ProfileCache.isAdmin) {
+            if (ProfileCache.isSudo) {
               widgets.add(
                 _buildStatCard(
                   title: 'INGRESOS TOTALES',
@@ -90,7 +90,7 @@ class DashboardStatCards extends StatelessWidget {
   }
 
   Widget _buildSkeletonRow({required bool isNarrow}) {
-    final cardsCount = ProfileCache.isAdmin ? 2 : 3;
+    final cardsCount = ProfileCache.isSudo ? 3 : 2;
     final cards = List.generate(cardsCount, (_) => _buildSkeletonCard());
     
     if (isNarrow) {
