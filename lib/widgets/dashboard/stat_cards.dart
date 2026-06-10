@@ -27,12 +27,12 @@ class DashboardStatCards extends StatelessWidget {
             if (ProfileCache.isSudo) {
               widgets.add(
                 _buildStatCard(
-                  title: 'INGRESOS TOTALES',
+                  title: 'INGRESOS DEL MES',
                   value:
                       '\$${NumberFormat('#,###', 'es_ES').format(state.ingresosMensuales)}',
                   icon: Icons.payments_outlined,
                   bottomWidget: Text(
-                    'Ingresos del mes actual',
+                    'Pagos cobrados este mes',
                     style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                 ),

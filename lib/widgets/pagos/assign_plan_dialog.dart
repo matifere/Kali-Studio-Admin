@@ -106,11 +106,16 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
 
       final subscriptionId = subRes['id'] as String;
       final selectedPlan = _plans.firstWhere((p) => p['id'] == _selectedPlanId);
+      // status y payment_date son imprescindibles: el default de la DB es
+      // 'pending' con fecha null, y el dashboard solo suma pagos 'completed'
+      // con payment_date dentro del mes (INGRESOS TOTALES daba siempre $0).
       await db.from('payments').insert({
         'user_id': _selectedStudentId,
         'subscription_id': subscriptionId,
         'amount': selectedPlan['price'],
         'currency': selectedPlan['currency'] ?? 'ARS',
+        'status': 'completed',
+        'payment_date': DateTime.now().toIso8601String(),
       });
 
       if (mounted) {
