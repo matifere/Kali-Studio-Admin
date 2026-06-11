@@ -116,6 +116,9 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
         'currency': selectedPlan['currency'] ?? 'ARS',
         'status': 'completed',
         'payment_date': DateTime.now().toIso8601String(),
+        // Sin esto el pago quedaba con institution_id en null (la suscripción
+        // de arriba sí lo seteaba, pero el pago no): mismo scope de institución.
+        if (instId != null) 'institution_id': instId,
       });
 
       if (mounted) {
