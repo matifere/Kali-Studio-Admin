@@ -42,6 +42,7 @@ class ScheduleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmall = MediaQuery.of(context).size.width < 640;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
       child: Column(
@@ -55,7 +56,7 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               Text(
                 'Calendario Semanal',
-                style: KaliText.heading(KaliColors.espresso, size: 40)
+                style: KaliText.heading(KaliColors.espresso, size: isSmall ? 28 : 40)
                     .copyWith(fontWeight: FontWeight.w600),
               ),
               // Navigation controls

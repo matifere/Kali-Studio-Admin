@@ -41,6 +41,21 @@ class WeeklySchedule extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // En celular la grilla de 7 días no entra: mostramos un solo día con
+        // un selector arriba, en vez de obligar a scrollear horizontalmente.
+        const double mobileBreakpoint = 640.0;
+        if (constraints.maxWidth < mobileBreakpoint) {
+          return _MobileDaySchedule(
+            currentWeekStart: currentWeekStart,
+            sessions: sessions,
+            selectedTurno: selectedTurno,
+            onTurnoSelected: onTurnoSelected,
+            startHour: _startHour,
+            totalSlots: _totalSlots,
+            slotsPerHour: _slotsPerHour,
+          );
+        }
+
         const double minWidth = 680.0;
         final needsScroll = constraints.maxWidth < minWidth;
         final schedule = Column(
@@ -165,33 +180,48 @@ class WeeklySchedule extends StatelessWidget {
 
   // ── Columna lateral de horas ───────────────────────────────────────────────
   Widget _buildTimeLabels(double slotH) {
-    return SizedBox(
-      width: 60,
-      child: Column(
-        children: List.generate(_totalSlots, (i) {
-          final hour = _startHour + i ~/ _slotsPerHour;
-          final isFullHour = i % _slotsPerHour == 0;
-          return SizedBox(
-            height: slotH,
-            child: isFullHour
-                ? Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Text(
-                        '${hour.toString().padLeft(2, '0')}:00',
-                        style: KaliText.label(
-                          KaliColors.espresso.withValues(alpha: 0.3),
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          );
-        }),
-      ),
+    return _buildTimeLabelsColumn(
+      slotH: slotH,
+      startHour: _startHour,
+      totalSlots: _totalSlots,
+      slotsPerHour: _slotsPerHour,
     );
   }
+}
+
+// ── Columna lateral de horas (reutilizable por la vista semanal y la diaria) ──
+Widget _buildTimeLabelsColumn({
+  required double slotH,
+  required int startHour,
+  required int totalSlots,
+  required int slotsPerHour,
+}) {
+  return SizedBox(
+    width: 60,
+    child: Column(
+      children: List.generate(totalSlots, (i) {
+        final hour = startHour + i ~/ slotsPerHour;
+        final isFullHour = i % slotsPerHour == 0;
+        return SizedBox(
+          height: slotH,
+          child: isFullHour
+              ? Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Text(
+                      '${hour.toString().padLeft(2, '0')}:00',
+                      style: KaliText.label(
+                        KaliColors.espresso.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        );
+      }),
+    ),
+  );
 }
 
 // ─── Columna de un día con turnos posicionados ───────────────────────────────
@@ -366,4 +396,205 @@ class _SessionLayout {
   final int colIndex;
   final int totalCols;
   const _SessionLayout(this.turno, this.colIndex, this.totalCols);
+}
+
+// ─── Vista diaria para celular ────────────────────────────────────────────────
+//
+// Selector de días arriba + una sola columna de turnos a ancho completo, para
+// evitar el scroll horizontal de la grilla semanal en pantallas angostas.
+class _MobileDaySchedule extends StatefulWidget {
+  final DateTime currentWeekStart;
+  final List<ClassSession> sessions;
+  final ClassSession? selectedTurno;
+  final ValueChanged<ClassSession> onTurnoSelected;
+  final int startHour;
+  final int totalSlots;
+  final int slotsPerHour;
+
+  const _MobileDaySchedule({
+    required this.currentWeekStart,
+    required this.sessions,
+    required this.selectedTurno,
+    required this.onTurnoSelected,
+    required this.startHour,
+    required this.totalSlots,
+    required this.slotsPerHour,
+  });
+
+  @override
+  State<_MobileDaySchedule> createState() => _MobileDayScheduleState();
+}
+
+class _MobileDayScheduleState extends State<_MobileDaySchedule> {
+  // Día seleccionado dentro de la semana (0 = lunes … 6 = domingo).
+  late int _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _todayIndexOrZero();
+  }
+
+  int _todayIndexOrZero() {
+    final now = DateTime.now();
+    for (int i = 0; i < 7; i++) {
+      final d = widget.currentWeekStart.add(Duration(days: i));
+      if (d.year == now.year && d.month == now.month && d.day == now.day) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _buildDayPicker(),
+        Expanded(child: _buildDayBody()),
+      ],
+    );
+  }
+
+  // ── Selector de días (Lun … Dom) ───────────────────────────────────────────
+  Widget _buildDayPicker() {
+    final now = DateTime.now();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 12, 6, 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: KaliColors.espresso.withValues(alpha: 0.06),
+          ),
+        ),
+      ),
+      child: Row(
+        children: List.generate(7, (i) {
+          final dayDate = widget.currentWeekStart.add(Duration(days: i));
+          final isToday = dayDate.year == now.year &&
+              dayDate.month == now.month &&
+              dayDate.day == now.day;
+          final isSelected = i == _selectedDay;
+          final dayName =
+              DateFormat('EEE', 'es_ES').format(dayDate).toUpperCase();
+          return Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => setState(() => _selectedDay = i),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    dayName,
+                    style: KaliText.label(
+                      isSelected
+                          ? KaliColors.espresso
+                          : KaliColors.espresso.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? KaliColors.espresso
+                          : (isToday
+                              ? KaliColors.sand
+                              : Colors.transparent),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${dayDate.day}',
+                      style: KaliText.body(
+                        isSelected
+                            ? KaliColors.warmWhite
+                            : KaliColors.espresso,
+                        weight:
+                            isSelected || isToday ? FontWeight.w700 : FontWeight.w400,
+                        size: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  // ── Cuerpo: horas + columna del día seleccionado ───────────────────────────
+  Widget _buildDayBody() {
+    final now = DateTime.now();
+    final dayDate = widget.currentWeekStart.add(Duration(days: _selectedDay));
+    final isToday = dayDate.year == now.year &&
+        dayDate.month == now.month &&
+        dayDate.day == now.day;
+    final dayTurnos =
+        widget.sessions.where((t) => t.dayIndex == _selectedDay).toList();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Slots más altos que en desktop para que el toque sea cómodo.
+        const double minSlotH = 26.0;
+        final double slotH = (constraints.maxHeight / widget.totalSlots)
+            .clamp(minSlotH, double.infinity);
+        final double totalH = slotH * widget.totalSlots;
+
+        final content = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTimeLabelsColumn(
+              slotH: slotH,
+              startHour: widget.startHour,
+              totalSlots: widget.totalSlots,
+              slotsPerHour: widget.slotsPerHour,
+            ),
+            Expanded(
+              child: _DayColumn(
+                dayIndex: _selectedDay,
+                isToday: isToday,
+                turnos: dayTurnos,
+                selectedTurno: widget.selectedTurno,
+                onTurnoSelected: widget.onTurnoSelected,
+                startHour: widget.startHour,
+                slotHeight: slotH,
+                totalSlots: widget.totalSlots,
+              ),
+            ),
+          ],
+        );
+
+        final body = totalH > constraints.maxHeight
+            ? SingleChildScrollView(
+                child: SizedBox(height: totalH, child: content),
+              )
+            : SizedBox(height: constraints.maxHeight, child: content);
+
+        if (dayTurnos.isEmpty) {
+          return Stack(
+            children: [
+              body,
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Center(
+                    child: Text(
+                      'No hay turnos este día',
+                      style: KaliText.body(
+                        KaliColors.espresso.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        return body;
+      },
+    );
+  }
 }

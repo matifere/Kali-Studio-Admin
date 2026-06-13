@@ -245,27 +245,52 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                 style: KaliText.heading(KaliColors.espresso, size: 24),
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool isNarrow = constraints.maxWidth < 480;
+                  final badges = Wrap(
+                    spacing: 16,
+                    runSpacing: 12,
                     children: [
                       _buildInfoBadge('Plan', currentPlanName),
-                      const SizedBox(width: 16),
                       _buildInfoBadge('Estado', _translateStatus(currentStatus)),
                     ],
-                  ),
-                  if (currentStatus == 'active' || currentStatus == 'authorized')
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                      onPressed: _cancelSubscription,
-                      icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('Cancelar Suscripción'),
+                  );
+                  final bool showCancel = currentStatus == 'active' ||
+                      currentStatus == 'authorized';
+                  final cancelButton = OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
                     ),
-                ],
+                    onPressed: _cancelSubscription,
+                    icon: const Icon(Icons.cancel_outlined),
+                    label: const Text('Cancelar Suscripción'),
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        badges,
+                        if (showCancel) ...[
+                          const SizedBox(height: 16),
+                          SizedBox(width: double.infinity, child: cancelButton),
+                        ],
+                      ],
+                    );
+                  }
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(child: badges),
+                      if (showCancel) ...[
+                        const SizedBox(width: 16),
+                        cancelButton,
+                      ],
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -286,20 +311,30 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         if (_plans.isEmpty)
           Text('No hay planes disponibles en este momento.', style: KaliText.body(KaliColors.espresso))
         else
-          Wrap(
-            spacing: 24,
-            runSpacing: 24,
-            children: _plans.map((plan) {
-              final matchesPlanId = _currentSubscription?['saas_plan_id'] == plan['id'];
-              final status = _currentSubscription?['status'];
-              final isActive = status == 'active' || status == 'authorized';
-              final isPending = status == 'pending';
-              
-              final isCurrent = matchesPlanId && isActive;
-              final isThisPlanPending = matchesPlanId && isPending;
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // En teléfonos angostos la card ocupa todo el ancho; si no, 300px.
+              final double cardWidth =
+                  constraints.maxWidth < 340 ? constraints.maxWidth : 300;
+              return Wrap(
+                spacing: 24,
+                runSpacing: 24,
+                children: _plans.map((plan) {
+                  final matchesPlanId =
+                      _currentSubscription?['saas_plan_id'] == plan['id'];
+                  final status = _currentSubscription?['status'];
+                  final isActive =
+                      status == 'active' || status == 'authorized';
+                  final isPending = status == 'pending';
 
-              return _buildPlanCard(plan, isCurrent, isThisPlanPending);
-            }).toList(),
+                  final isCurrent = matchesPlanId && isActive;
+                  final isThisPlanPending = matchesPlanId && isPending;
+
+                  return _buildPlanCard(
+                      plan, isCurrent, isThisPlanPending, cardWidth);
+                }).toList(),
+              );
+            },
           ),
       ],
     );
@@ -323,10 +358,11 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     );
   }
 
-  Widget _buildPlanCard(Map<String, dynamic> plan, bool isCurrent, bool isThisPlanPending) {
+  Widget _buildPlanCard(Map<String, dynamic> plan, bool isCurrent,
+      bool isThisPlanPending, double width) {
     final highlight = isCurrent || isThisPlanPending;
     return Container(
-      width: 300,
+      width: width,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: highlight ? KaliColors.espresso : KaliColors.warmWhite,
