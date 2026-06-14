@@ -106,7 +106,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const double widthInForm = 360;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isSmall = screenWidth < 480;
+    // El padding de la tarjeta y el del scroll exterior se descuentan del ancho
+    // disponible para que el formulario nunca desborde en pantallas angostas.
+    final double cardPadding = isSmall ? 24 : 40;
+    final double widthInForm =
+        (screenWidth - 32 - cardPadding * 2).clamp(0.0, 360.0);
     return BlocConsumer<AuthBloc, AuthState>(
       // El listener solo se activa cuando hay una transición real
       // (no en rebuilds de hot reload con estado previo ya emitido).
@@ -161,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // ── Formulario ─────────────────────────────────────────────
                   Card(
                     child: Padding(
-                      padding: const EdgeInsetsGeometry.all(40),
+                      padding: EdgeInsets.all(cardPadding),
                       child: SizedBox(
                         width: widthInForm,
                         child: Column(
