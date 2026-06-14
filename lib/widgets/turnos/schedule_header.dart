@@ -43,6 +43,48 @@ class ScheduleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSmall = MediaQuery.of(context).size.width < 640;
+    final filters = _filterWidgets();
+    final actions = _actionWidgets(compact: isSmall);
+
+    // ── Versión compacta para celular ─────────────────────────────────────────
+    // Sin título grande (ya navegaste a Turnos) y todo en lo mínimo vertical
+    // posible, porque con la barra de Chrome el alto útil es muy chico.
+    if (isSmall) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _navControls(compact: true),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _weekRange,
+                    style: KaliText.body(KaliColors.espresso,
+                        weight: FontWeight.w600, size: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            if (filters.isNotEmpty || actions.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [...filters, ...actions],
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // ── Versión escritorio ──────────────────────────────────────────────────
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
       child: Column(
@@ -56,39 +98,10 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               Text(
                 'Calendario Semanal',
-                style: KaliText.heading(KaliColors.espresso, size: isSmall ? 28 : 40)
+                style: KaliText.heading(KaliColors.espresso, size: 40)
                     .copyWith(fontWeight: FontWeight.w600),
               ),
-              // Navigation controls
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: KaliColors.espresso.withValues(alpha: 0.1)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left_rounded, size: 24),
-                      onPressed: onPreviousWeek,
-                      color: KaliColors.espresso,
-                      tooltip: 'Semana Anterior',
-                    ),
-                    Container(
-                        width: 1,
-                        height: 24,
-                        color: KaliColors.espresso.withValues(alpha: 0.1)),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right_rounded, size: 24),
-                      onPressed: onNextWeek,
-                      color: KaliColors.espresso,
-                      tooltip: 'Próxima Semana',
-                    ),
-                  ],
-                ),
-              ),
+              _navControls(compact: false),
             ],
           ),
           const SizedBox(height: 6),
@@ -100,7 +113,7 @@ class ScheduleHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // ── Filtros y Botones de Acción ──
           SizedBox(
             width: double.infinity,
@@ -110,94 +123,131 @@ class ScheduleHeader extends StatelessWidget {
               spacing: 16,
               runSpacing: 16,
               children: [
-                // Filtros
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    if (showDropdownFilters && showInstructorFilter)
-                      _FilterDropdown(
-                        label: selectedInstructor ?? 'Todos los Instructores',
-                        options: ['Todos los Instructores', ...availableInstructors],
-                        selectedValue: selectedInstructor ?? 'Todos los Instructores',
-                        onChanged: (val) {
-                          onFilterChanged(
-                            val == 'Todos los Instructores' ? null : val,
-                            selectedRoom,
-                          );
-                        },
-                      ),
-                    if (showDropdownFilters)
-                      _FilterDropdown(
-                        label: selectedRoom ?? 'Todas las Salas',
-                        options: ['Todas las Salas', ...availableRooms],
-                        selectedValue: selectedRoom ?? 'Todas las Salas',
-                        onChanged: (val) {
-                          onFilterChanged(
-                            selectedInstructor,
-                            val == 'Todas las Salas' ? null : val,
-                          );
-                        },
-                      ),
-                  ],
+                  children: filters,
                 ),
-                // Botones de Acción
-                if (onCreateTurno != null || onCreateTemplate != null)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    if (onCreateTemplate != null)
-                    OutlinedButton.icon(
-                      onPressed: onCreateTemplate,
-                      icon: Icon(Icons.settings_outlined,
-                          size: 20,
-                          color: KaliColors.espresso.withValues(alpha: 0.7)),
-                      label: Text(
-                        'Administrar Plantillas',
-                        style: KaliText.body(
-                            KaliColors.espresso.withValues(alpha: 0.7),
-                            weight: FontWeight.w600),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: BorderSide(
-                            color: KaliColors.espresso.withValues(alpha: 0.2)),
-                      ),
-                    ),
-                    if (onCreateTurno != null)
-                    ElevatedButton.icon(
-                      onPressed: onCreateTurno,
-                      icon: const Icon(Icons.add_rounded,
-                          size: 20, color: Colors.white),
-                      label: Text(
-                        'Nuevo Turno',
-                        style: KaliText.body(Colors.white,
-                            weight: FontWeight.w600),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: KaliColors.espresso,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
-                  ],
-                ),
+                if (actions.isNotEmpty)
+                  Wrap(spacing: 12, runSpacing: 12, children: actions),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  // ── Controles de navegación de semana (◀ ▶) ────────────────────────────────
+  Widget _navControls({required bool compact}) {
+    final double iconSize = compact ? 20 : 24;
+    final BoxConstraints? constraints =
+        compact ? const BoxConstraints(minWidth: 36, minHeight: 36) : null;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.chevron_left_rounded, size: iconSize),
+            onPressed: onPreviousWeek,
+            color: KaliColors.espresso,
+            tooltip: 'Semana Anterior',
+            padding: compact ? EdgeInsets.zero : null,
+            constraints: constraints,
+          ),
+          Container(
+              width: 1,
+              height: 24,
+              color: KaliColors.espresso.withValues(alpha: 0.1)),
+          IconButton(
+            icon: Icon(Icons.chevron_right_rounded, size: iconSize),
+            onPressed: onNextWeek,
+            color: KaliColors.espresso,
+            tooltip: 'Próxima Semana',
+            padding: compact ? EdgeInsets.zero : null,
+            constraints: constraints,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Dropdowns de filtro ────────────────────────────────────────────────────
+  List<Widget> _filterWidgets() {
+    return [
+      if (showDropdownFilters && showInstructorFilter)
+        _FilterDropdown(
+          label: selectedInstructor ?? 'Todos los Instructores',
+          options: ['Todos los Instructores', ...availableInstructors],
+          selectedValue: selectedInstructor ?? 'Todos los Instructores',
+          onChanged: (val) {
+            onFilterChanged(
+              val == 'Todos los Instructores' ? null : val,
+              selectedRoom,
+            );
+          },
+        ),
+      if (showDropdownFilters)
+        _FilterDropdown(
+          label: selectedRoom ?? 'Todas las Salas',
+          options: ['Todas las Salas', ...availableRooms],
+          selectedValue: selectedRoom ?? 'Todas las Salas',
+          onChanged: (val) {
+            onFilterChanged(
+              selectedInstructor,
+              val == 'Todas las Salas' ? null : val,
+            );
+          },
+        ),
+    ];
+  }
+
+  // ── Botones de acción (crear turno / plantillas) ───────────────────────────
+  List<Widget> _actionWidgets({required bool compact}) {
+    final EdgeInsets pad = compact
+        ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
+        : const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
+    return [
+      if (onCreateTemplate != null)
+        OutlinedButton.icon(
+          onPressed: onCreateTemplate,
+          icon: Icon(Icons.settings_outlined,
+              size: compact ? 18 : 20,
+              color: KaliColors.espresso.withValues(alpha: 0.7)),
+          label: Text(
+            compact ? 'Plantillas' : 'Administrar Plantillas',
+            style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7),
+                weight: FontWeight.w600, size: 13),
+          ),
+          style: OutlinedButton.styleFrom(
+            padding: pad,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
+          ),
+        ),
+      if (onCreateTurno != null)
+        ElevatedButton.icon(
+          onPressed: onCreateTurno,
+          icon: Icon(Icons.add_rounded, size: compact ? 18 : 20, color: Colors.white),
+          label: Text(
+            compact ? 'Turno' : 'Nuevo Turno',
+            style: KaliText.body(Colors.white,
+                weight: FontWeight.w600, size: 13),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: KaliColors.espresso,
+            padding: pad,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 0,
+          ),
+        ),
+    ];
   }
 }
 
