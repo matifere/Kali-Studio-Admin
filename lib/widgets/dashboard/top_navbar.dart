@@ -96,8 +96,8 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
         final bool isUltraMobile = MediaQuery.of(ctx).size.width < 500;
 
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-              isUltraMobile ? 20 : 40, 32, isUltraMobile ? 20 : 40, 0),
+          padding: EdgeInsets.fromLTRB(isUltraMobile ? 20 : 40,
+              isMobile ? 12 : 32, isUltraMobile ? 20 : 40, 0),
           child: Row(
             children: [
               if (isMobile)

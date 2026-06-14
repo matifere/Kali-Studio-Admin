@@ -17,8 +17,10 @@ class ScheduleBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmall = MediaQuery.of(context).size.width < 640;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+      padding: EdgeInsets.symmetric(
+          horizontal: isSmall ? 16 : 28, vertical: isSmall ? 10 : 18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(
@@ -35,9 +37,12 @@ class ScheduleBottomBar extends StatelessWidget {
           const Spacer(),
 
           // Stats
-          _StatChip(label: 'CAPACIDAD SEMANAL', value: _capacityPercent),
-          const SizedBox(width: 32),
-          _StatChip(label: 'TOTAL CLASES', value: '$_totalClasses'),
+          _StatChip(
+              label: 'CAPACIDAD SEMANAL',
+              value: _capacityPercent,
+              compact: isSmall),
+          SizedBox(width: isSmall ? 20 : 32),
+          _StatChip(label: 'TOTAL CLASES', value: '$_totalClasses', compact: isSmall),
         ],
       ),
     );
@@ -71,8 +76,9 @@ class ScheduleBottomBar extends StatelessWidget {
 class _StatChip extends StatelessWidget {
   final String label;
   final String value;
+  final bool compact;
 
-  const _StatChip({required this.label, required this.value});
+  const _StatChip({required this.label, required this.value, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -84,15 +90,15 @@ class _StatChip extends StatelessWidget {
           label,
           style: KaliText.label(
             KaliColors.espresso.withValues(alpha: 0.45),
-          ),
+          ).copyWith(fontSize: compact ? 10 : null),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: compact ? 2 : 4),
         Text(
           value,
           style: KaliText.body(
             KaliColors.espresso,
             weight: FontWeight.w700,
-            size: 22,
+            size: compact ? 16 : 22,
           ),
         ),
       ],

@@ -460,7 +460,7 @@ class _MobileDayScheduleState extends State<_MobileDaySchedule> {
   Widget _buildDayPicker() {
     final now = DateTime.now();
     return Container(
-      padding: const EdgeInsets.fromLTRB(6, 12, 6, 12),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -490,12 +490,12 @@ class _MobileDayScheduleState extends State<_MobileDaySchedule> {
                       isSelected
                           ? KaliColors.espresso
                           : KaliColors.espresso.withValues(alpha: 0.45),
-                    ),
+                    ).copyWith(fontSize: 11, letterSpacing: 0.5),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Container(
-                    width: 34,
-                    height: 34,
+                    width: 30,
+                    height: 30,
                     decoration: BoxDecoration(
                       color: isSelected
                           ? KaliColors.espresso
@@ -513,7 +513,7 @@ class _MobileDayScheduleState extends State<_MobileDaySchedule> {
                             : KaliColors.espresso,
                         weight:
                             isSelected || isToday ? FontWeight.w700 : FontWeight.w400,
-                        size: 15,
+                        size: 14,
                       ),
                     ),
                   ),
