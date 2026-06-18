@@ -39,10 +39,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
     try {
       final client = Supabase.instance.client;
       final sessionDate = widget.session.date;
-      final weekStart = sessionDate.subtract(Duration(days: sessionDate.weekday - 1));
-      final weekEnd = weekStart.add(const Duration(days: 6));
-      final startIso = weekStart.toIso8601String().split('T')[0];
-      final endIso = weekEnd.toIso8601String().split('T')[0];
+      final monthStart = DateTime(sessionDate.year, sessionDate.month, 1);
+      final monthEnd = DateTime(sessionDate.year, sessionDate.month + 1, 0);
+      final startIso = monthStart.toIso8601String().split('T')[0];
+      final endIso = monthEnd.toIso8601String().split('T')[0];
 
       // 1. Fetch profiles
       final profilesRes = await client
@@ -54,7 +54,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
       // 2. Fetch active/pending subscriptions
       final subsRes = await client
           .from('subscriptions')
-          .select('user_id, status, plans(max_reservations_per_week)')
+          .select('user_id, status, plans(max_reservations_per_month)')
           .inFilter('status', ['active', 'pending']);
 
       // Map subscriptions by user_id
@@ -63,7 +63,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
         userSubs[sub['user_id']] = sub;
       }
 
-      // 3. Fetch reservations for the week
+      // 3. Fetch reservations for the month
       final resRes = await client
           .from('reservations')
           .select('user_id, class_sessions!inner(date)')
@@ -94,10 +94,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               disabledReason = 'Sin plan activo';
             } else {
               final plansData = sub['plans'];
-              maxRes = (plansData != null && plansData['max_reservations_per_week'] != null)
-                  ? plansData['max_reservations_per_week'] as int
+              maxRes = (plansData != null && plansData['max_reservations_per_month'] != null)
+                  ? plansData['max_reservations_per_month'] as int
                   : 0;
-              // El admin puede inscribir más allá del límite semanal del alumno.
+              // El admin puede inscribir más allá del límite mensual del alumno.
             }
 
             p['disabledReason'] = disabledReason;
@@ -268,7 +268,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                                 ? Text(disabledReason, style: TextStyle(color: Colors.red[700], fontSize: 12))
                                 : Text(
                                     (maxRes ?? 0) > 0
-                                        ? '$currRes/$maxRes reservas esta semana'
+                                        ? '$currRes/$maxRes reservas este mes'
                                         : 'Con plan activo',
                                     style: TextStyle(
                                       color: ((maxRes ?? 0) > 0 && (currRes ?? 0) >= maxRes!)

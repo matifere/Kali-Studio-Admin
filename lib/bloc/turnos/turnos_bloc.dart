@@ -301,15 +301,15 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         // Fetch max reservations limit for the user
         final subRes = await db
             .from('subscriptions')
-            .select('plans(max_reservations_per_week)')
+            .select('plans(max_reservations_per_month)')
             .eq('user_id', event.userId)
             .inFilter('status', ['active', 'pending']).maybeSingle();
 
         int maxRes = 0;
         if (subRes != null &&
             subRes['plans'] != null &&
-            subRes['plans']['max_reservations_per_week'] != null) {
-          maxRes = subRes['plans']['max_reservations_per_week'] as int;
+            subRes['plans']['max_reservations_per_month'] != null) {
+          maxRes = subRes['plans']['max_reservations_per_month'] as int;
         }
 
         // Only project if maxRes > 0
@@ -326,27 +326,26 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           final futureSessions = futureSessionsResponse as List<dynamic>;
 
           if (futureSessions.isNotEmpty) {
-            // Fetch user's existing future reservations to count per week
+            // Fetch user's existing future reservations to count per month
             final futureRes = await db
                 .from('reservations')
                 .select('class_sessions!inner(date)')
                 .eq('user_id', event.userId)
                 .gte('class_sessions.date', startIso);
 
-            DateTime startOfWeek(DateTime d) => DateTime(d.year, d.month, d.day)
-                .subtract(Duration(days: d.weekday - 1));
+            DateTime startOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
 
             final Map<DateTime, int> resCount = {};
             for (var r in futureRes as List<dynamic>) {
               final d = DateTime.parse(r['class_sessions']['date']);
-              final sow = startOfWeek(d);
-              resCount[sow] = (resCount[sow] ?? 0) + 1;
+              final som = startOfMonth(d);
+              resCount[som] = (resCount[som] ?? 0) + 1;
             }
 
             for (final row in futureSessions) {
               final sessionDate = DateTime.parse(row['date']);
-              final sow = startOfWeek(sessionDate);
-              final currCount = resCount[sow] ?? 0;
+              final som = startOfMonth(sessionDate);
+              final currCount = resCount[som] ?? 0;
 
               if (currCount < maxRes) {
                 inserts.add({
@@ -355,7 +354,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
                   'status': 'confirmed',
                   if (instId != null) 'institution_id': instId,
                 });
-                resCount[sow] = currCount + 1;
+                resCount[som] = currCount + 1;
               }
             }
           }
