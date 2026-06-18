@@ -20,7 +20,7 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
   String? _description;
   double _price = 0.0;
   String _currency = 'ARS';
-  int _maxReservationsPerWeek = 2;
+  int _maxReservationsPerMonth = 8;
   bool _isActive = true;
 
   final List<String> _currencies = ['ARS', 'USD'];
@@ -45,7 +45,7 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
         'description': _description,
         'price': _price,
         'currency': _currency,
-        'max_reservations_per_week': _maxReservationsPerWeek,
+        'max_reservations_per_month': _maxReservationsPerMonth,
         'is_active': _isActive,
         if (instId != null) 'institution_id': instId,
       };
@@ -112,7 +112,7 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
                 const SizedBox(height: 8),
                 TextFormField(
                   maxLines: 2,
-                  decoration: _inputDecoration('Ej. Permite hasta 2 reservas por semana'),
+                  decoration: _inputDecoration('Ej. Permite hasta 8 reservas por mes'),
                   onSaved: (v) => _description = v?.isEmpty == true ? null : v,
                 ),
                 const SizedBox(height: 16),
@@ -164,15 +164,15 @@ class _CreatePlanDialogState extends State<CreatePlanDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Max reservations per week
-                Text('Máximo de Reservas por Semana', style: KaliText.label(KaliColors.espresso)),
+                // Max reservations per month
+                Text('Máximo de Reservas por Mes', style: KaliText.label(KaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
-                  initialValue: '2',
+                  initialValue: '8',
                   keyboardType: TextInputType.number,
-                  decoration: _inputDecoration('Ej. 2'),
+                  decoration: _inputDecoration('Ej. 8'),
                   validator: (v) => int.tryParse(v ?? '') == null ? 'Número inválido' : null,
-                  onSaved: (v) => _maxReservationsPerWeek = int.parse(v!),
+                  onSaved: (v) => _maxReservationsPerMonth = int.parse(v!),
                 ),
                 const SizedBox(height: 16),
 

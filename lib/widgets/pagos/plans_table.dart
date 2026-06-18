@@ -30,7 +30,7 @@ class _PlansTableState extends State<PlansTable> {
     try {
       final res = await Supabase.instance.client
           .from('plans')
-          .select('id, name, description, price, currency, max_reservations_per_week, is_active')
+          .select('id, name, description, price, currency, max_reservations_per_month, is_active')
           .order('name', ascending: true);
       if (mounted) {
         setState(() {
@@ -352,7 +352,7 @@ class _PlanRowState extends State<_PlanRow> {
     final double price = (p['price'] as num?)?.toDouble() ?? 0.0;
     final String currency = p['currency'] ?? 'ARS';
     final int maxReservations =
-        (p['max_reservations_per_week'] as num?)?.toInt() ?? 2;
+        (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
     final bool isActive = p['is_active'] ?? true;
 
     return MouseRegion(
@@ -409,7 +409,7 @@ class _PlanRowState extends State<_PlanRow> {
             Expanded(
               flex: 3,
               child: Text(
-                '$maxReservations clases / sem',
+                '$maxReservations clases / mes',
                 style: KaliText.body(
                   KaliColors.espresso,
                   weight: FontWeight.w400,

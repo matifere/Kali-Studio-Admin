@@ -23,7 +23,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
   String? _description;
   late double _price;
   late String _currency;
-  late int _maxReservationsPerWeek;
+  late int _maxReservationsPerMonth;
   late bool _isActive;
 
   final List<String> _currencies = ['ARS', 'USD'];
@@ -36,7 +36,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
     _description = p['description'];
     _price = (p['price'] as num?)?.toDouble() ?? 0.0;
     _currency = p['currency'] ?? 'ARS';
-    _maxReservationsPerWeek = (p['max_reservations_per_week'] as num?)?.toInt() ?? 2;
+    _maxReservationsPerMonth = (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
     _isActive = p['is_active'] ?? true;
   }
 
@@ -55,7 +55,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
         'description': _description,
         'price': _price,
         'currency': _currency,
-        'max_reservations_per_week': _maxReservationsPerWeek,
+        'max_reservations_per_month': _maxReservationsPerMonth,
         'is_active': _isActive,
       };
 
@@ -127,7 +127,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                 TextFormField(
                   initialValue: _description,
                   maxLines: 2,
-                  decoration: _inputDecoration('Ej. Permite hasta 2 reservas por semana'),
+                  decoration: _inputDecoration('Ej. Permite hasta 8 reservas por mes'),
                   onSaved: (v) => _description = v?.isEmpty == true ? null : v,
                 ),
                 const SizedBox(height: 16),
@@ -180,15 +180,15 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Max reservations per week
-                Text('Máximo de Reservas por Semana', style: KaliText.label(KaliColors.espresso)),
+                // Max reservations per month
+                Text('Máximo de Reservas por Mes', style: KaliText.label(KaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
-                  initialValue: _maxReservationsPerWeek.toString(),
+                  initialValue: _maxReservationsPerMonth.toString(),
                   keyboardType: TextInputType.number,
-                  decoration: _inputDecoration('Ej. 2'),
+                  decoration: _inputDecoration('Ej. 8'),
                   validator: (v) => int.tryParse(v ?? '') == null ? 'Número inválido' : null,
-                  onSaved: (v) => _maxReservationsPerWeek = int.parse(v!),
+                  onSaved: (v) => _maxReservationsPerMonth = int.parse(v!),
                 ),
                 const SizedBox(height: 16),
 
