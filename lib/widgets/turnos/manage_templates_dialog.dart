@@ -39,7 +39,10 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
     final filtered = _filteredTemplates;
     final map = <String, List<ScheduleTemplate>>{};
     for (final t in filtered) {
-      map.putIfAbsent(t.name, () => []).add(t);
+      // Agrupar por nombre + horario: dos plantillas con el mismo nombre
+      // pero distinto horario quedan en grupos separados.
+      final key = '${t.name}|${t.startTime}|${t.endTime}';
+      map.putIfAbsent(key, () => []).add(t);
     }
     // Sort each group's entries by day order
     for (final group in map.values) {
@@ -225,8 +228,8 @@ class _ManageTemplatesDialogState extends State<ManageTemplatesDialog> {
                     ? Center(child: Text('No hay plantillas que coincidan con la búsqueda.', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
                     : ListView(
                         children: _groupedTemplates.entries.map((entry) {
-                          final name = entry.key;
                           final group = entry.value;
+                          final name = group.first.name;
                           final days = group
                               .map((t) => _dayLabels[t.dayOfWeek.toLowerCase()] ?? t.dayOfWeek)
                               .join(', ');
