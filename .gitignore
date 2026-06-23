@@ -8,7 +8,8 @@
 !.env.example
 .buildlog/
 .history
-
+.agents/
+code_audit_report.md
 
 
 # Flutter repo-specific

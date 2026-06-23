@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
-import 'package:argrity/widgets/pagos/create_plan_dialog.dart';
-import 'package:argrity/widgets/pagos/edit_plan_dialog.dart';
+import 'package:argrity/widgets/pagos/plan_form_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Directorio/Tabla de planes de pago.
@@ -208,7 +207,7 @@ class _PlansTableState extends State<PlansTable> {
                           onEdit: () {
                             showDialog(
                               context: context,
-                              builder: (context) => EditPlanDialog(
+                              builder: (context) => PlanFormDialog(
                                 plan: p,
                                 onRefresh: _loadPlans,
                               ),
@@ -298,7 +297,7 @@ class _CreatePlanButtonState extends State<_CreatePlanButton> {
         onTap: () async {
           await showDialog(
             context: context,
-            builder: (context) => const CreatePlanDialog(),
+            builder: (context) => const PlanFormDialog(),
           );
           widget.onCreated();
         },

@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Dialog que presenta el formulario de edición de un plan existente.
-class EditPlanDialog extends StatefulWidget {
-  final Map<String, dynamic> plan;
-  final VoidCallback onRefresh;
+/// Dialog que presenta el formulario de creación o edición de un plan.
+class PlanFormDialog extends StatefulWidget {
+  final Map<String, dynamic>? plan;
+  final VoidCallback? onRefresh;
 
-  const EditPlanDialog({super.key, required this.plan, required this.onRefresh});
+  const PlanFormDialog({super.key, this.plan, this.onRefresh});
 
   @override
-  State<EditPlanDialog> createState() => _EditPlanDialogState();
+  State<PlanFormDialog> createState() => _PlanFormDialogState();
 }
 
-class _EditPlanDialogState extends State<EditPlanDialog> {
+class _PlanFormDialogState extends State<PlanFormDialog> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isSaving = false;
@@ -28,16 +28,27 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
 
   final List<String> _currencies = ['ARS', 'USD'];
 
+  bool get _isEditMode => widget.plan != null;
+
   @override
   void initState() {
     super.initState();
-    final p = widget.plan;
-    _name = p['name'] ?? '';
-    _description = p['description'];
-    _price = (p['price'] as num?)?.toDouble() ?? 0.0;
-    _currency = p['currency'] ?? 'ARS';
-    _maxReservationsPerMonth = (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
-    _isActive = p['is_active'] ?? true;
+    if (_isEditMode) {
+      final p = widget.plan!;
+      _name = p['name'] ?? '';
+      _description = p['description'];
+      _price = (p['price'] as num?)?.toDouble() ?? 0.0;
+      _currency = p['currency'] ?? 'ARS';
+      _maxReservationsPerMonth = (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
+      _isActive = p['is_active'] ?? true;
+    } else {
+      _name = '';
+      _description = null;
+      _price = 0.0;
+      _currency = 'ARS';
+      _maxReservationsPerMonth = 8;
+      _isActive = true;
+    }
   }
 
   Future<void> _submit() async {
@@ -50,6 +61,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
     });
 
     try {
+      final db = Supabase.instance.client;
       final payload = {
         'name': _name,
         'description': _description,
@@ -59,22 +71,28 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
         'is_active': _isActive,
       };
 
-      await Supabase.instance.client
-          .from('plans')
-          .update(payload)
-          .eq('id', widget.plan['id']);
+      if (_isEditMode) {
+        await db.from('plans').update(payload).eq('id', widget.plan!['id']);
+      } else {
+        final user = db.auth.currentUser;
+        final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+        final instId = profile?['institution_id'];
+        if (instId != null) payload['institution_id'] = instId;
+
+        await db.from('plans').insert(payload);
+      }
 
       if (mounted) {
-        widget.onRefresh();
+        widget.onRefresh?.call();
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Plan actualizado exitosamente')),
+          SnackBar(content: Text(_isEditMode ? 'Plan actualizado exitosamente' : 'Plan creado exitosamente')),
         );
       }
     } catch (e) {
       setState(() {
         _isSaving = false;
-        _error = 'Error al actualizar el plan: $e';
+        _error = 'Error al guardar el plan: $e';
       });
     }
   }
@@ -95,12 +113,12 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Editar Plan',
+                  _isEditMode ? 'Editar Plan' : 'Crear Nuevo Plan',
                   style: KaliText.heading(KaliColors.espresso, size: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Modifica los datos del plan de pagos.',
+                  _isEditMode ? 'Modifica los datos del plan de pagos.' : 'Define un plan de pagos para los alumnos del estudio.',
                   style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 24),
@@ -143,7 +161,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                           Text('Precio', style: KaliText.label(KaliColors.espresso)),
                           const SizedBox(height: 8),
                           TextFormField(
-                            initialValue: _price.toString(),
+                            initialValue: _price == 0.0 && !_isEditMode ? '' : _price.toString(),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             decoration: _inputDecoration('Ej. 25000'),
                             validator: (v) => double.tryParse(v ?? '') == null ? 'Número inválido' : null,
@@ -227,7 +245,7 @@ class _EditPlanDialogState extends State<EditPlanDialog> {
                               height: 20,
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2))
-                          : Text('Guardar Cambios',
+                          : Text(_isEditMode ? 'Guardar Cambios' : 'Guardar Plan',
                               style: KaliText.body(Colors.white,
                                   weight: FontWeight.w600)),
                     ),
