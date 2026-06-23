@@ -106,29 +106,16 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         throw Exception('Institución no encontrada.');
       }
 
-      final response = await Supabase.instance.client.functions.invoke(
-        'create-saas-subscription',
-        body: {
-          'institution_id': institutionId,
-          'saas_plan_id': plan['id'],
-        },
-      );
+      await Supabase.instance.client.rpc('bypass_saas_subscription', params: {
+        'p_plan_id': plan['id'],
+      });
 
-      final data = response.data;
-      if (data == null) throw Exception('Respuesta vacía del servidor.');
-      
-      // Si el servidor devolvió un error (aunque tenga status 200)
-      if (data is Map && data['error'] != null) {
-        throw Exception(data['error']);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Suscripción activada exitosamente.')),
+        );
+        await _fetchData();
       }
-
-      final urlString = data['sandbox_init_point'] ?? data['init_point'];
-      if (urlString == null) throw Exception('No se recibió enlace de pago. Data: $data');
-
-      final url = Uri.parse(urlString.toString());
-      if (!await canLaunchUrl(url)) throw Exception('No se pudo abrir el enlace de pago.');
-
-      await launchUrl(url, mode: LaunchMode.externalApplication);
     } on FunctionException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

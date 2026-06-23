@@ -95,7 +95,6 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
         'status': 'active',
         'start_date': startDate.toIso8601String().split('T')[0],
         'end_date': endDate.toIso8601String().split('T')[0],
-        if (instId != null) 'institution_id': instId,
       };
 
       final subRes = await db

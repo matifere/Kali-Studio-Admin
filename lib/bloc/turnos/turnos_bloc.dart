@@ -74,7 +74,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final instructorFilter = state.selectedInstructor;
 
       const sessionSelect =
-          '*, reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
+          '*, schedule_templates(name, description, start_time, end_time, capacity, instructor_name), '
+          'reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
 
       var query = client
           .from('class_sessions')
@@ -153,14 +154,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
           insertData.add({
             'template_id': template.id,
-            'name': template.name,
-            'description': template.description,
             'date': dateIso,
-            'start_time': template.startTime,
-            'end_time': template.endTime,
-            'capacity': template.capacity,
             'status': 'scheduled',
-            'instructor_name': template.instructorName,
             if (instId != null) 'institution_id': instId,
           });
         }
@@ -213,7 +208,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         await Supabase.instance.client
             .from('class_sessions')
             .delete()
-            .eq('name', event.session.name)
+            .eq('template_id', event.session.templateId!)
             .gte('date', dateIso)
             .lte('date', endOfYearIso);
 
@@ -281,7 +276,6 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     try {
       final db = Supabase.instance.client;
-      final instId = _cachedInstId;
 
       final inserts = <Map<String, dynamic>>[];
 
@@ -290,7 +284,6 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         'user_id': event.userId,
         'session_id': event.session.id,
         'status': 'confirmed',
-        if (instId != null) 'institution_id': instId,
       });
 
       // 2. Si marcamos recurrencia, buscamos las clases futuras con el mismo template
@@ -352,7 +345,6 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
                   'user_id': event.userId,
                   'session_id': row['id'],
                   'status': 'confirmed',
-                  if (instId != null) 'institution_id': instId,
                 });
                 resCount[som] = currCount + 1;
               }
