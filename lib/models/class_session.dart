@@ -30,7 +30,7 @@ class TurnoReservation {
 
 class ClassSession {
   final String id;
-  final String? templateId;
+  final String? groupId;
   final String name;
   final String? description;
   final DateTime date;
@@ -45,7 +45,7 @@ class ClassSession {
 
   const ClassSession({
     required this.id,
-    this.templateId,
+    this.groupId,
     required this.name,
     this.description,
     required this.date,
@@ -70,16 +70,16 @@ class ClassSession {
 
     return ClassSession(
       id: json['id'],
-      templateId: json['template_id'],
-      name: json['name'] ?? json['schedule_templates']?['name'] ?? 'Sin Nombre',
-      description: json['description'] ?? json['schedule_templates']?['description'],
+      groupId: json['group_id'],
+      name: json['name'] ?? 'Sin Nombre',
+      description: json['description'],
       date: DateTime.parse(json['date']),
-      startTime: json['start_time'] ?? json['schedule_templates']?['start_time'] ?? '00:00',
-      endTime: json['end_time'] ?? json['schedule_templates']?['end_time'] ?? '00:00',
-      capacity: json['capacity'] ?? json['schedule_templates']?['capacity'] ?? 0,
+      startTime: json['start_time'] ?? '00:00',
+      endTime: json['end_time'] ?? '00:00',
+      capacity: json['capacity'] ?? 0,
       status: json['status'] ?? 'scheduled',
       cancellationReason: json['cancellation_reason'],
-      instructorName: json['instructor_name'] ?? json['schedule_templates']?['instructor_name'],
+      instructorName: json['instructor_name'],
       enrolled: reservations.length,
       enrolledStudents: reservations,
     );

@@ -45,7 +45,7 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
       const selectQuery = '''
         id, avatar_url, full_name, email, is_active, created_at, patologias,
         subscriptions!subscriptions_user_id_fkey(status, end_date, plans(name)),
-        reservations!reservations_user_id_fkey(status, class_sessions(name, template_id, date, start_time, schedule_templates(name, start_time)))
+        reservations!reservations_user_id_fkey(status, class_sessions(name, date, start_time))
       ''';
 
       final instId = ProfileCache.institutionId;

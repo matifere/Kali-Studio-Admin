@@ -4,6 +4,7 @@ import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditTurnoDialog extends StatefulWidget {
   final ClassSession turno;
@@ -24,10 +25,15 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
   late String? _description;
+  bool _editFutureSessions = false;
+
+  List<String> _instructors = [];
+  bool _isLoadingInstructors = true;
 
   @override
   void initState() {
     super.initState();
+    _loadInstructors();
     final t = widget.turno;
     _name = t.name;
     _instructor = t.instructorName;
@@ -40,6 +46,34 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
 
     final endParts = t.endTime.split(':');
     _endTime = TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]));
+  }
+
+  Future<void> _loadInstructors() async {
+    try {
+      final res = await Supabase.instance.client
+          .from('profiles')
+          .select('full_name')
+          .eq('role', 'admin')
+          .order('full_name', ascending: true);
+      
+      final list = (res as List).map((e) => e['full_name'] as String).toList();
+      
+      if (mounted) {
+        setState(() {
+          _instructors = list;
+          _isLoadingInstructors = false;
+          if (_instructor != null && !_instructors.contains(_instructor)) {
+             _instructors.add(_instructor!);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingInstructors = false;
+        });
+      }
+    }
   }
 
   Future<void> _pickTime(bool isStart) async {
@@ -83,7 +117,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
 
     final updatedTurno = ClassSession(
       id: widget.turno.id,
-      templateId: widget.turno.templateId,
+      groupId: widget.turno.groupId,
       name: _name,
       description: _description,
       date: _date,
@@ -95,7 +129,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
       status: widget.turno.status,
     );
 
-    context.read<TurnosBloc>().add(TurnoEdited(updatedTurno));
+    context.read<TurnosBloc>().add(TurnoEdited(updatedTurno, editFutureSessions: _editFutureSessions));
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno actualizado existosamente')));
   }
@@ -140,11 +174,20 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 // Instructor
                 Text('Instructor', style: KaliText.label(KaliColors.espresso)),
                 const SizedBox(height: 8),
-                TextFormField(
-                  initialValue: _instructor,
-                  decoration: _inputDecoration('Ej. Micaela'),
-                  onSaved: (v) => _instructor = v?.isEmpty == true ? null : v,
-                ),
+                _isLoadingInstructors
+                    ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
+                    : DropdownButtonFormField<String>(
+                        initialValue: _instructor,
+                        hint: const Text('Sin instructor'),
+                        decoration: _inputDecoration('Seleccionar...'),
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('Sin instructor')),
+                          ..._instructors.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+                        ],
+                        onChanged: (val) {
+                          setState(() => _instructor = val);
+                        },
+                      ),
                 const SizedBox(height: 16),
 
                 // Capacity
@@ -238,6 +281,26 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                     ),
                   ],
                 ),
+                
+                if (widget.turno.groupId != null) ...[
+                  const SizedBox(height: 24),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: KaliColors.sand.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                    ),
+                    child: CheckboxListTile(
+                      title: Text('Modificar turnos futuros también', style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+                      subtitle: Text('Aplica los cambios a todos los turnos de este grupo en la misma franja horaria hacia adelante.', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6), size: 12)),
+                      value: _editFutureSessions,
+                      activeColor: KaliColors.espresso,
+                      onChanged: (val) {
+                        if (val != null) setState(() => _editFutureSessions = val);
+                      },
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 32),
                 Row(

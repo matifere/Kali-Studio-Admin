@@ -9,7 +9,6 @@ class ScheduleHeader extends StatelessWidget {
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
   final VoidCallback? onCreateTurno;
-  final VoidCallback? onCreateTemplate;
   final bool showInstructorFilter;
   final bool showDropdownFilters;
   final String? selectedInstructor;
@@ -24,7 +23,6 @@ class ScheduleHeader extends StatelessWidget {
     required this.onPreviousWeek,
     required this.onNextWeek,
     this.onCreateTurno,
-    this.onCreateTemplate,
     this.showInstructorFilter = true,
     this.showDropdownFilters = true,
     required this.selectedInstructor,
@@ -214,23 +212,6 @@ class ScheduleHeader extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
         : const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
     return [
-      if (onCreateTemplate != null)
-        OutlinedButton.icon(
-          onPressed: onCreateTemplate,
-          icon: Icon(Icons.settings_outlined,
-              size: compact ? 18 : 20,
-              color: KaliColors.espresso.withValues(alpha: 0.7)),
-          label: Text(
-            compact ? 'Plantillas' : 'Administrar Plantillas',
-            style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7),
-                weight: FontWeight.w600, size: 13),
-          ),
-          style: OutlinedButton.styleFrom(
-            padding: pad,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
-          ),
-        ),
       if (onCreateTurno != null)
         ElevatedButton.icon(
           onPressed: onCreateTurno,

@@ -346,12 +346,13 @@ class TurnoDetailPanel extends StatelessWidget {
                     TextButton(
                         onPressed: () => Navigator.of(ctx).pop(0),
                         child: const Text('Volver')),
-                    TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(2),
-                        style:
-                            TextButton.styleFrom(foregroundColor: Colors.red),
-                        child: const Text('Esta y futuras',
-                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    if (turno.groupId != null)
+                      TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(2),
+                          style:
+                              TextButton.styleFrom(foregroundColor: Colors.red),
+                          child: const Text('Esta y futuras',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                     TextButton(
                         onPressed: () => Navigator.of(ctx).pop(1),
                         style:

@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/activity/activity_bloc.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/models/schedule_template.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'dart:math';
 
 part 'turnos_event.dart';
 part 'turnos_state.dart';
@@ -74,7 +75,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final instructorFilter = state.selectedInstructor;
 
       const sessionSelect =
-          '*, schedule_templates(name, description, start_time, end_time, capacity, instructor_name), '
+          '*, '
           'reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
 
       var query = client
@@ -127,6 +128,15 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     add(TurnosLoadRequested(startOfWeek));
   }
 
+  String _generateUuid() {
+    final random = Random();
+    final list = List<int>.generate(16, (i) => random.nextInt(256));
+    list[6] = (list[6] & 0x0f) | 0x40;
+    list[8] = (list[8] & 0x3f) | 0x80;
+    final hex = list.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
+  }
+
   Future<void> _onTurnoCreated(
     TurnoCreated event,
     Emitter<TurnosState> emit,
@@ -135,11 +145,12 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       final instId = _cachedInstId;
 
       final insertData = <Map<String, dynamic>>[];
+      final String groupId = _generateUuid();
 
-      for (final template in event.templates) {
-        var baseDate =
-            state.currentWeekStart.add(Duration(days: template.dayIndex));
-        final parts = template.startTime.split(':');
+      for (final dayIndex in event.daysOfWeek) {
+        var baseDate = state.currentWeekStart.add(Duration(days: dayIndex));
+        
+        final parts = event.startTime.split(':');
         var startDateTime = DateTime(baseDate.year, baseDate.month,
             baseDate.day, int.parse(parts[0]), int.parse(parts[1]));
 
@@ -153,7 +164,13 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           final dateIso = DateFormat('yyyy-MM-dd').format(d);
 
           insertData.add({
-            'template_id': template.id,
+            'group_id': groupId,
+            'name': event.name,
+            'description': event.description,
+            'instructor_name': event.instructorName,
+            'capacity': event.capacity,
+            'start_time': event.startTime,
+            'end_time': event.endTime,
             'date': dateIso,
             'status': 'scheduled',
             if (instId != null) 'institution_id': instId,
@@ -161,20 +178,18 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         }
       }
 
-      await Supabase.instance.client.from('class_sessions').upsert(insertData,
-          onConflict: 'template_id,date', ignoreDuplicates: true);
+      await Supabase.instance.client.from('class_sessions').insert(insertData);
 
-      final firstTemp = event.templates.first;
       _activityBloc?.add(ActivityLogged(ActivityEntry(
-        title: 'Turnos creados en lote',
+        title: 'Clase grupal creada',
         subtitle:
-            '${firstTemp.name} agendado en ${event.templates.length} días para ${event.recurrenceWeeks} semanas.',
+            '${event.name} agendado para ${event.recurrenceWeeks} semanas.',
         category: ActivityCategory.turno,
         timestamp: DateTime.now(),
       )));
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
-      emit(state.copyWith(error: 'Error al crear el turno: $e'));
+      emit(state.copyWith(error: 'Error al crear la clase: $e'));
     }
   }
 
@@ -208,7 +223,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
         await Supabase.instance.client
             .from('class_sessions')
             .delete()
-            .eq('template_id', event.session.templateId!)
+            .eq('group_id', event.session.groupId!)
             .gte('date', dateIso)
             .lte('date', endOfYearIso);
 
@@ -245,16 +260,32 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   ) async {
     final t = event.turno;
     try {
-      final dateIso = DateFormat('yyyy-MM-dd').format(t.date);
-      await Supabase.instance.client.from('class_sessions').update({
-        'name': t.name,
-        'description': t.description,
-        'date': dateIso,
-        'start_time': t.startTime.substring(0, 5),
-        'end_time': t.endTime.substring(0, 5),
-        'capacity': t.capacity,
-        'instructor_name': t.instructorName,
-      }).eq('id', t.id);
+      if (event.editFutureSessions && t.groupId != null) {
+        final dateIso = DateFormat('yyyy-MM-dd').format(t.date);
+        final endOfYearIso = '${t.date.year}-12-31';
+
+        await Supabase.instance.client.from('class_sessions').update({
+          'name': t.name,
+          'description': t.description,
+          'start_time': t.startTime.substring(0, 5),
+          'end_time': t.endTime.substring(0, 5),
+          'capacity': t.capacity,
+          'instructor_name': t.instructorName,
+        }).eq('group_id', t.groupId!)
+          .gte('date', dateIso)
+          .lte('date', endOfYearIso);
+      } else {
+        final dateIso = DateFormat('yyyy-MM-dd').format(t.date);
+        await Supabase.instance.client.from('class_sessions').update({
+          'name': t.name,
+          'description': t.description,
+          'date': dateIso,
+          'start_time': t.startTime.substring(0, 5),
+          'end_time': t.endTime.substring(0, 5),
+          'capacity': t.capacity,
+          'instructor_name': t.instructorName,
+        }).eq('id', t.id);
+      }
 
       emit(state.copyWith(clearSelection: true));
       add(TurnosLoadRequested(state.currentWeekStart));
@@ -287,7 +318,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
       });
 
       // 2. Si marcamos recurrencia, buscamos las clases futuras con el mismo template
-      if (event.enrollmentType != EnrollmentType.single && event.session.templateId != null) {
+      if (event.enrollmentType != EnrollmentType.single && event.session.groupId != null) {
         final startIso = DateFormat('yyyy-MM-dd').format(event.session.date
             .add(const Duration(days: 1))); // From tomorrow onwards
 
@@ -311,7 +342,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
           final futureSessionsResponse = await db
               .from('class_sessions')
               .select('id, date')
-              .eq('template_id', event.session.templateId!)
+              .eq('group_id', event.session.groupId!)
               .gte('date', startIso)
               .order('date', ascending: true)
               .limit(limitCount);

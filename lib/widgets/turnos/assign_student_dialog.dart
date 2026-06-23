@@ -197,11 +197,11 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            if (widget.session.templateId != null) ...[
+            if (widget.session.groupId != null) ...[
               Text('Opciones de inscripción recurrentes', style: KaliText.body(KaliColors.espresso, size: 14, weight: FontWeight.w600)),
               const SizedBox(height: 8),
               DropdownButtonFormField<EnrollmentType>(
-                value: _enrollmentType,
+                initialValue: _enrollmentType,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(

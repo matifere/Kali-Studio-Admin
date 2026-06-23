@@ -14,13 +14,24 @@ class TurnosWeekChanged extends TurnosEvent {
   TurnosWeekChanged(this.newWeekStart);
 }
 
-/// El usuario creó nuevos turnos a partir de plantillas agrupadas.
 class TurnoCreated extends TurnosEvent {
-  final List<ScheduleTemplate> templates;
+  final String name;
+  final String? description;
+  final String? instructorName;
+  final int capacity;
+  final String startTime;
+  final String endTime;
+  final List<int> daysOfWeek;
   final int recurrenceWeeks;
 
   TurnoCreated({
-    required this.templates, 
+    required this.name,
+    this.description,
+    this.instructorName,
+    required this.capacity,
+    required this.startTime,
+    required this.endTime,
+    required this.daysOfWeek,
     this.recurrenceWeeks = 1,
   });
 }
@@ -47,7 +58,9 @@ class TurnoDeleted extends TurnosEvent {
 /// El usuario ha guardado la modificación de un turno.
 class TurnoEdited extends TurnosEvent {
   final ClassSession turno;
-  TurnoEdited(this.turno);
+  final bool editFutureSessions;
+
+  TurnoEdited(this.turno, {this.editFutureSessions = false});
 }
 
 enum EnrollmentType {

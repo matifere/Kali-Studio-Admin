@@ -7,7 +7,7 @@ void main() {
   group('ClassSession.fromJson', () {
     Map<String, dynamic> base() => {
           'id': 'session-1',
-          'template_id': null,
+          'group_id': null,
           'name': 'Reformer Pilates',
           'description': 'Clase de reformer',
           'date': '2024-03-04', // Monday
@@ -28,7 +28,7 @@ void main() {
       expect(s.capacity, 8);
       expect(s.status, 'scheduled');
       expect(s.instructorName, 'Ana García');
-      expect(s.templateId, isNull);
+      expect(s.groupId, isNull);
     });
 
     test('enrolled counts only non-cancelled reservations', () {

@@ -107,7 +107,7 @@ class Student {
         if (session == null) continue;
 
         final date = session['date'];
-        final startTime = session['start_time'] ?? session['schedule_templates']?['start_time'];
+        final startTime = session['start_time'];
         if (date == null || startTime == null) continue;
 
         final start = DateTime.tryParse('$date $startTime');
@@ -115,7 +115,7 @@ class Student {
 
         if (bestStart == null || start.isBefore(bestStart)) {
           bestStart = start;
-          final sessionName = session['name'] ?? session['schedule_templates']?['name'] ?? session['template_id'] ?? 'Clase';
+          final sessionName = session['name'] ?? 'Clase';
           shiftClassName = sessionName;
           nextShiftDate = _formatShift(start, date, startTime);
         }

@@ -6,8 +6,7 @@ import 'package:argrity/widgets/turnos/schedule_header.dart';
 import 'package:argrity/widgets/turnos/weekly_schedule.dart';
 import 'package:argrity/widgets/turnos/schedule_bottom_bar.dart';
 import 'package:argrity/widgets/turnos/turno_detail_panel.dart';
-import 'package:argrity/widgets/turnos/create_turno_dialog.dart';
-import 'package:argrity/widgets/turnos/manage_templates_dialog.dart';
+import 'package:argrity/widgets/turnos/create_class_group_dialog.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/services/profile_cache.dart';
 
@@ -34,15 +33,8 @@ class _TurnosScreenState extends State<TurnosScreen> {
       context: context,
       builder: (_) => BlocProvider.value(
         value: context.read<TurnosBloc>(),
-        child: const CreateTurnoDialog(),
+        child: const CreateClassGroupDialog(),
       ),
-    );
-  }
-
-  void _showManageTemplatesDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const ManageTemplatesDialog(),
     );
   }
 
@@ -120,7 +112,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
                               context.read<TurnosBloc>().add(TurnosWeekChanged(next));
                             },
                             onCreateTurno: _isProfesor ? null : _showCreateDialog,
-                            onCreateTemplate: _isProfesor ? null : _showManageTemplatesDialog,
                           ),
                           Expanded(
                             child: Container(
