@@ -57,10 +57,16 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
           .select('user_id, status, plans(max_reservations_per_month)')
           .inFilter('status', ['active', 'pending']);
 
-      // Map subscriptions by user_id
-      final Map<String, dynamic> userSubs = {};
+      // Map subscriptions by user_id and sum their max_reservations
+      final Map<String, int> userMaxRes = {};
+      final Set<String> usersWithPlan = {};
       for (var sub in (subsRes as List<dynamic>)) {
-        userSubs[sub['user_id']] = sub;
+        final uid = sub['user_id'] as String;
+        usersWithPlan.add(uid);
+        final plansData = sub['plans'];
+        if (plansData != null && plansData['max_reservations_per_month'] != null) {
+          userMaxRes[uid] = (userMaxRes[uid] ?? 0) + (plansData['max_reservations_per_month'] as int);
+        }
       }
 
       // 3. Fetch reservations for the month
@@ -85,19 +91,17 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
           .where((p) => !enrolledIds.contains(p['id']))
           .map((p) {
             final uid = p['id'] as String;
-            final sub = userSubs[uid];
             String? disabledReason;
             int maxRes = 0;
             int currRes = userReservations[uid] ?? 0;
 
-            if (sub == null) {
+            if (!usersWithPlan.contains(uid)) {
               disabledReason = 'Sin plan activo';
             } else {
-              final plansData = sub['plans'];
-              maxRes = (plansData != null && plansData['max_reservations_per_month'] != null)
-                  ? plansData['max_reservations_per_month'] as int
-                  : 0;
-              // El admin puede inscribir más allá del límite mensual del alumno.
+              maxRes = userMaxRes[uid] ?? 0;
+              if (maxRes > 0 && currRes >= maxRes) {
+                disabledReason = 'Límite mensual alcanzado';
+              }
             }
 
             p['disabledReason'] = disabledReason;

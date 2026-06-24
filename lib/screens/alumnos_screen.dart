@@ -7,8 +7,7 @@ import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:argrity/widgets/alumnos/student_directory.dart';
-import 'package:argrity/widgets/kali_text_field.dart';
-import 'package:argrity/services/auth_service.dart';
+import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
 import 'package:argrity/services/profile_cache.dart';
 
 /// Pantalla de gestión de alumnos.
@@ -151,7 +150,7 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => const _AddStudentDialog(),
+              builder: (context) => const StudentFormDialog(),
             );
           },
           icon: const Icon(Icons.add, color: KaliColors.warmWhite, size: 18),
@@ -175,176 +174,3 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
   }
 }
 
-class _AddStudentDialog extends StatefulWidget {
-  const _AddStudentDialog();
-
-  @override
-  State<_AddStudentDialog> createState() => _AddStudentDialogState();
-}
-
-class _AddStudentDialogState extends State<_AddStudentDialog> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
-    final pass = _passwordController.text;
-
-    if (name.isEmpty || email.isEmpty || pass.isEmpty) {
-      if (mounted) setState(() => _errorMessage = 'Revisa todos los campos');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final authService = SupaAuthClass();
-    final result = await authService.registrarAlumno(email, pass, name);
-
-    if (result == 'Ok') {
-      if (mounted) {
-        final bloc = context.read<AlumnosBloc>();
-        final messenger = ScaffoldMessenger.of(context);
-        Navigator.of(context).pop();
-        bloc.add(AlumnosLoadRequested());
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Alumno "$name" registrado correctamente.'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = result;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: KaliColors.warmWhite,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Añadir Nuevo Alumno',
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w600,
-                    color: KaliColors.espresso,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Se registrará con rol de usuario cliente.',
-                  style:
-                      KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
-                ),
-                const SizedBox(height: 32),
-                KaliTextField(
-                  controller: _nameController,
-                  label: 'Nombre completo',
-                  hint: 'Ej. María Pérez',
-                ),
-                const SizedBox(height: 16),
-                KaliTextField(
-                  controller: _emailController,
-                  label: 'Correo Electrónico',
-                  hint: 'correo@ejemplo.com',
-                ),
-                const SizedBox(height: 16),
-                KaliTextField(
-                  controller: _passwordController,
-                  label: 'Contraseña temporal',
-                  hint: 'Mínimo 6 caracteres',
-                  obscureText: true,
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: KaliText.body(const Color(0xFFD4685C)),
-                  ),
-                ],
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
-                      child: Text(
-                        'Cancelar',
-                        style: KaliText.body(KaliColors.espresso),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    MouseRegion(
-                      cursor: _isLoading
-                          ? SystemMouseCursors.basic
-                          : SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: _isLoading ? null : _submit,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: _isLoading
-                                ? KaliColors.espresso.withValues(alpha: 0.6)
-                                : KaliColors.espresso,
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    color: KaliColors.warmWhite,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Registrar Alumno',
-                                  style: KaliText.body(KaliColors.warmWhite,
-                                      weight: FontWeight.w600, size: 13),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

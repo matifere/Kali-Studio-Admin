@@ -323,50 +323,76 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
             .add(const Duration(days: 1))); // From tomorrow onwards
 
         // Fetch max reservations limit for the user
-        final subRes = await db
+        final subResList = await db
             .from('subscriptions')
             .select('plans(max_reservations_per_month)')
             .eq('user_id', event.userId)
-            .inFilter('status', ['active', 'pending']).maybeSingle();
+            .inFilter('status', ['active', 'pending']);
 
         int maxRes = 0;
-        if (subRes != null &&
-            subRes['plans'] != null &&
-            subRes['plans']['max_reservations_per_month'] != null) {
-          maxRes = subRes['plans']['max_reservations_per_month'] as int;
+        for (final subRes in (subResList as List<dynamic>)) {
+          if (subRes['plans'] != null &&
+              subRes['plans']['max_reservations_per_month'] != null) {
+            maxRes += subRes['plans']['max_reservations_per_month'] as int;
+          }
         }
 
         // Only project if maxRes > 0
         if (maxRes > 0) {
-          final limitCount = event.enrollmentType == EnrollmentType.month ? 3 : 52;
+          final String endIso;
+          if (event.enrollmentType == EnrollmentType.month) {
+            final lastDayOfMonth = DateTime(event.session.date.year, event.session.date.month + 1, 0);
+            endIso = DateFormat('yyyy-MM-dd').format(lastDayOfMonth);
+          } else {
+            endIso = '${event.session.date.year}-12-31';
+          }
+
           final futureSessionsResponse = await db
               .from('class_sessions')
               .select('id, date')
               .eq('group_id', event.session.groupId!)
               .gte('date', startIso)
-              .order('date', ascending: true)
-              .limit(limitCount);
+              .lte('date', endIso)
+              .order('date', ascending: true);
 
           final futureSessions = futureSessionsResponse as List<dynamic>;
 
           if (futureSessions.isNotEmpty) {
-            // Fetch user's existing future reservations to count per month
-            final futureRes = await db
+            final currentMonthStart = DateTime(event.session.date.year, event.session.date.month, 1);
+            final currentMonthStartIso = DateFormat('yyyy-MM-dd').format(currentMonthStart);
+
+            // Fetch user's existing reservations to count per month correctly
+            final existingRes = await db
                 .from('reservations')
-                .select('class_sessions!inner(date)')
+                .select('session_id, class_sessions!inner(date)')
                 .eq('user_id', event.userId)
-                .gte('class_sessions.date', startIso);
+                .gte('class_sessions.date', currentMonthStartIso);
 
             DateTime startOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
 
             final Map<DateTime, int> resCount = {};
-            for (var r in futureRes as List<dynamic>) {
+            final Set<String> enrolledSessionIds = {};
+
+            for (var r in existingRes as List<dynamic>) {
               final d = DateTime.parse(r['class_sessions']['date']);
               final som = startOfMonth(d);
               resCount[som] = (resCount[som] ?? 0) + 1;
+              if (r['session_id'] != null) {
+                enrolledSessionIds.add(r['session_id'] as String);
+              }
             }
 
+            // Account for the current session we just added
+            final currentSom = startOfMonth(event.session.date);
+            resCount[currentSom] = (resCount[currentSom] ?? 0) + 1;
+            enrolledSessionIds.add(event.session.id);
+
             for (final row in futureSessions) {
+              final sessionId = row['id'] as String;
+              if (enrolledSessionIds.contains(sessionId)) {
+                continue;
+              }
+
               final sessionDate = DateTime.parse(row['date']);
               final som = startOfMonth(sessionDate);
               final currCount = resCount[som] ?? 0;
@@ -374,10 +400,11 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
               if (currCount < maxRes) {
                 inserts.add({
                   'user_id': event.userId,
-                  'session_id': row['id'],
+                  'session_id': sessionId,
                   'status': 'confirmed',
                 });
                 resCount[som] = currCount + 1;
+                enrolledSessionIds.add(sessionId);
               }
             }
           }

@@ -1,0 +1,422 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
+import 'package:argrity/models/student.dart';
+import 'package:argrity/theme/kali_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:argrity/services/auth_service.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+
+class StudentFormDialog extends StatefulWidget {
+  final Student? student;
+
+  const StudentFormDialog({super.key, this.student});
+
+  @override
+  State<StudentFormDialog> createState() => _StudentFormDialogState();
+}
+
+class _StudentFormDialogState extends State<StudentFormDialog> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _patologiaController;
+  late List<String> _patologias;
+  late bool _isActive;
+  
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  bool get _isEditMode => widget.student != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: _isEditMode ? widget.student!.name : '');
+    _emailController = TextEditingController(text: _isEditMode ? widget.student!.email : '');
+    _passwordController = TextEditingController();
+    _patologiaController = TextEditingController();
+    _patologias = _isEditMode ? List.from(widget.student!.patologias) : [];
+    _isActive = _isEditMode ? widget.student!.isActive : true;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _patologiaController.dispose();
+    super.dispose();
+  }
+
+  void _addPatologia() {
+    final newPatologia = _patologiaController.text.trim();
+    if (newPatologia.isNotEmpty && !_patologias.contains(newPatologia)) {
+      setState(() {
+        _patologias.add(newPatologia);
+        _patologiaController.clear();
+      });
+    }
+  }
+
+  void _removePatologia(String patologia) {
+    setState(() => _patologias.remove(patologia));
+  }
+
+  Future<void> _submit() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final pass = _passwordController.text;
+
+    if (name.isEmpty) {
+      if (mounted) setState(() => _errorMessage = 'El nombre no puede estar vacío');
+      return;
+    }
+
+    if (!_isEditMode && (email.isEmpty || pass.isEmpty)) {
+      if (mounted) setState(() => _errorMessage = 'Revisa todos los campos');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      if (_isEditMode) {
+        final result = await Supabase.instance.client.from('profiles').update({
+          'full_name': name,
+          'patologias': _patologias,
+          'is_active': _isActive,
+        }).eq('id', widget.student!.id).select('id');
+
+        if (result.isEmpty) {
+          throw Exception('No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
+        }
+
+        if (mounted) {
+          context.read<AlumnosBloc>().add(AlumnosLoadRequested());
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Alumno actualizado con éxito')),
+          );
+        }
+      } else {
+        final authService = SupaAuthClass();
+        final result = await authService.registrarAlumno(email, pass, name);
+
+        if (result == 'Ok') {
+          if (mounted) {
+            context.read<AlumnosBloc>().add(AlumnosLoadRequested());
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Alumno "$name" registrado correctamente.'),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _errorMessage = result;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = _isEditMode ? 'No se pudo actualizar el alumno. Intentá nuevamente.' : 'Error al registrar: $e';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: KaliColors.warmWhite,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isEditMode ? 'Editar Alumno' : 'Añadir Nuevo Alumno',
+                      style: _isEditMode 
+                          ? KaliText.headingItalic(KaliColors.espresso, size: 24)
+                          : GoogleFonts.cormorantGaramond(fontSize: 32, fontWeight: FontWeight.w600, color: KaliColors.espresso),
+                    ),
+                    IconButton(
+                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, color: KaliColors.espresso),
+                    ),
+                  ],
+                ),
+                if (!_isEditMode) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Se registrará con rol de usuario cliente.',
+                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                  ),
+                ],
+                const SizedBox(height: 24),
+
+                // Nombre
+                const _FieldLabel('Nombre Completo'),
+                const SizedBox(height: 6),
+                _buildTextField(_nameController, hint: 'Ej. María Pérez'),
+                const SizedBox(height: 16),
+
+                // Correo Electrónico
+                const _FieldLabel('Correo Electrónico'),
+                const SizedBox(height: 6),
+                _buildTextField(_emailController, hint: 'correo@ejemplo.com', readOnly: _isEditMode),
+                const SizedBox(height: 16),
+
+                // Contraseña (Solo en creación)
+                if (!_isEditMode) ...[
+                  const _FieldLabel('Contraseña temporal'),
+                  const SizedBox(height: 6),
+                  _buildTextField(_passwordController, hint: 'Mínimo 6 caracteres', obscureText: true),
+                  const SizedBox(height: 16),
+                ],
+
+                // Estado activo y patologías (Solo en edición)
+                if (_isEditMode) ...[
+                  // Estado activo
+                  const _FieldLabel('Estado'),
+                  const SizedBox(height: 6),
+                  _ActiveToggle(
+                    value: _isActive,
+                    onChanged: (v) => setState(() => _isActive = v),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Patologías
+                  const _FieldLabel('Patologías'),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          _patologiaController,
+                          hint: 'Añadir patología...',
+                          onSubmitted: (_) => _addPatologia(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: _addPatologia,
+                        icon: const Icon(Icons.add_circle, color: KaliColors.clayDark, size: 30),
+                      ),
+                    ],
+                  ),
+                  if (_patologias.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _patologias.map((p) => Chip(
+                        label: Text(p, style: KaliText.body(KaliColors.espresso, size: 13)),
+                        deleteIcon: const Icon(Icons.close, size: 15),
+                        onDeleted: () => _removePatologia(p),
+                        backgroundColor: KaliColors.sand,
+                        side: BorderSide(color: KaliColors.clayDark.withValues(alpha: 0.3)),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                      )).toList(),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                ],
+
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: KaliText.body(const Color(0xFFD4685C)),
+                  ),
+                ],
+                const SizedBox(height: 32),
+
+                // Guardar / Cancelar
+                if (_isEditMode)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: KaliColors.clayDark,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text('Guardar Cambios', style: KaliText.body(Colors.white)),
+                    ),
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                        child: Text(
+                          'Cancelar',
+                          style: KaliText.body(KaliColors.espresso),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      MouseRegion(
+                        cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: _isLoading ? null : _submit,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: _isLoading ? KaliColors.espresso.withValues(alpha: 0.6) : KaliColors.espresso,
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      color: KaliColors.warmWhite,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    'Registrar Alumno',
+                                    style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller, {
+    String hint = '',
+    bool readOnly = false,
+    bool obscureText = false,
+    void Function(String)? onSubmitted,
+  }) {
+    return TextField(
+      controller: controller,
+      readOnly: readOnly,
+      obscureText: obscureText,
+      onSubmitted: onSubmitted,
+      style: KaliText.body(
+        readOnly
+            ? KaliColors.espresso.withValues(alpha: 0.45)
+            : KaliColors.espresso,
+        size: 14,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: KaliText.body(KaliColors.espresso.withValues(alpha: 0.35), size: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.15)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: KaliColors.espresso),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String text;
+  const _FieldLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 13),
+    );
+  }
+}
+
+class _ActiveToggle extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _ActiveToggle({required this.value, required this.onChanged});
+
+  static const _activeColor = Color(0xFF5C9E6C);
+  static const _inactiveColor = Color(0xFFD4685C);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: (value ? _activeColor : _inactiveColor).withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: (value ? _activeColor : _inactiveColor).withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              value ? Icons.check_circle_outline : Icons.cancel_outlined,
+              size: 18,
+              color: value ? _activeColor : _inactiveColor,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              value ? 'Activo' : 'Inactivo',
+              style: KaliText.body(
+                value ? _activeColor : _inactiveColor,
+                weight: FontWeight.w600,
+                size: 14,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Switch(
+              value: value,
+              onChanged: onChanged,
+              activeThumbColor: _activeColor,
+              inactiveThumbColor: _inactiveColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

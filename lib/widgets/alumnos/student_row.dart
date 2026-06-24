@@ -7,7 +7,7 @@ import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/alumnos/student_profile_dialog.dart';
-import 'package:argrity/widgets/alumnos/edit_student_dialog.dart';
+import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Fila de la tabla que representa a un alumno.
@@ -215,7 +215,7 @@ class _StudentRowState extends State<StudentRow> {
                     onTap: () {
                       showDialog(
                         context: context,
-                        builder: (context) => EditStudentDialog(student: s),
+                        builder: (context) => StudentFormDialog(student: s),
                       );
                     },
                   ),
