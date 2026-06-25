@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/activity/activity_bloc.dart';
 import 'package:argrity/models/student.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:argrity/repositories/alumnos_repository.dart';
 
 part 'alumnos_event.dart';
 part 'alumnos_state.dart';
@@ -13,9 +13,11 @@ part 'alumnos_state.dart';
 /// a estados — sin [FutureBuilder] ni [setState].
 class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
   final ActivityBloc? _activityBloc;
+  final AlumnosRepository _repository;
 
-  AlumnosBloc({ActivityBloc? activityBloc})
+  AlumnosBloc({ActivityBloc? activityBloc, required AlumnosRepository repository})
       : _activityBloc = activityBloc,
+        _repository = repository,
         super(AlumnosInitial()) {
     on<AlumnosLoadRequested>(_onLoadRequested);
     on<AlumnosPageChanged>(_onPageChanged);
@@ -37,29 +39,8 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
     }
 
     try {
-      final client = Supabase.instance.client;
-
-      // Solo las columnas que usa Student.fromJson: traer '*' con todos los
-      // joins multiplicaba el payload (historial completo de reservas con
-      // sesiones enteras por alumno).
-      const selectQuery = '''
-        id, avatar_url, full_name, email, is_active, created_at, patologias,
-        subscriptions!subscriptions_user_id_fkey(status, end_date, plans(name)),
-        reservations!reservations_user_id_fkey(status, class_sessions(name, date, start_time))
-      ''';
-
       final instId = ProfileCache.institutionId;
-      var profileQuery = client
-          .from('profiles')
-          .select(selectQuery)
-          .eq('role', 'client');
-      if (instId != null) {
-        profileQuery = profileQuery.eq('institution_id', instId);
-      }
-      final response = await profileQuery;
-
-      final students =
-          response.map<Student>((data) => Student.fromJson(data)).toList();
+      final students = await _repository.getStudents(instId);
 
       if (prevState is AlumnosLoaded) {
         final prevIds = {for (final s in prevState.students) s.id};

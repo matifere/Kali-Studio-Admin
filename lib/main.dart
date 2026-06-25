@@ -20,6 +20,9 @@ import 'package:argrity/screens/new_password_screen.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:argrity/widgets/kali_splash.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
+import 'package:argrity/repositories/alumnos_repository.dart';
+import 'package:argrity/repositories/turnos_repository.dart';
+import 'package:argrity/repositories/pagos_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme/kali_theme.dart';
@@ -88,12 +91,24 @@ class _KaliAppState extends State<KaliApp> {
   @override
   void initState() {
     super.initState();
+    final supabaseClient = Supabase.instance.client;
+    
+    final alumnosRepo = AlumnosRepository(client: supabaseClient);
+    final turnosRepo = TurnosRepository(client: supabaseClient);
+    final pagosRepo = PagosRepository(client: supabaseClient);
+
     _authBloc = AuthBloc();
     _navigationBloc = NavigationBloc();
     _activityBloc = ActivityBloc();
-    _alumnosBloc = AlumnosBloc(activityBloc: _activityBloc);
-    _turnosBloc = TurnosBloc(activityBloc: _activityBloc);
-    _pagosBloc = PagosBloc()..add(PagosLoadRequested());
+    _alumnosBloc = AlumnosBloc(
+      activityBloc: _activityBloc,
+      repository: alumnosRepo,
+    );
+    _turnosBloc = TurnosBloc(
+      activityBloc: _activityBloc,
+      repository: turnosRepo,
+    );
+    _pagosBloc = PagosBloc(repository: pagosRepo)..add(PagosLoadRequested());
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
   }

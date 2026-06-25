@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:argrity/repositories/pagos_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Needed only for auth checks
 
 part 'pagos_event.dart';
 part 'pagos_state.dart';
@@ -11,7 +12,11 @@ part 'pagos_state.dart';
 /// Actualmente usa datos mock. Cuando se conecte a Supabase,
 /// solo hay que cambiar el contenido de [_onLoadRequested].
 class PagosBloc extends Bloc<PagosEvent, PagosState> {
-  PagosBloc() : super(PagosInitial()) {
+  final PagosRepository _repository;
+
+  PagosBloc({required PagosRepository repository})
+      : _repository = repository,
+        super(PagosInitial()) {
     on<PagosLoadRequested>(_onLoadRequested);
     on<PagosPageChanged>(_onPageChanged);
     on<PagosSubscriptionStatusChanged>(_onSubscriptionStatusChanged);
@@ -31,34 +36,7 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     emit(PagosLoading());
     try {
       final instId = ProfileCache.institutionId;
-
-      // Incluimos institution_id en el join de profiles para poder filtrar
-      // por tenant después de recibir la respuesta (las suscripciones no tienen
-      // institution_id propio; la pertenencia se determina vía el perfil del alumno).
-      final response = await Supabase.instance.client
-          .from('subscriptions')
-          .select(
-            'id, user_id, status, start_date, end_date, plan_id, '
-            'profiles:profiles!subscriptions_user_id_fkey(id, full_name, avatar_url, institution_id), '
-            'plans(id, name, price, currency)',
-          );
-
-      // Filtro client-side por institución como defensa en profundidad
-      // (el filtro definitivo debe ser RLS en Supabase).
-      final tenantRows = instId != null
-          ? response.where((row) {
-              final p = row['profiles'];
-              if (p is Map) return p['institution_id'] == instId;
-              if (p is List && p.isNotEmpty) {
-                return p.first['institution_id'] == instId;
-              }
-              return false;
-            }).toList()
-          : response;
-
-      final subscriptions = tenantRows
-          .map<Subscription>((row) => Subscription.fromJson(row))
-          .toList();
+      final subscriptions = await _repository.getSubscriptions(instId);
 
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -74,11 +52,7 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
       }).toList();
 
       if (expiredIds.isNotEmpty) {
-        Supabase.instance.client
-            .from('subscriptions')
-            .update({'status': 'expired'})
-            .inFilter('id', expiredIds)
-            .catchError((_) {});
+        await _repository.markSubscriptionsExpired(expiredIds);
       }
 
       emit(PagosLoaded(payments: updatedSubscriptions));
@@ -106,10 +80,8 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     final current = state;
     if (current is PagosLoaded) {
       try {
-        await Supabase.instance.client
-            .from('subscriptions')
-            .update({'status': event.newStatus})
-            .eq('id', event.subscriptionId);
+        await _repository.updateSubscriptionStatus(
+            event.subscriptionId, event.newStatus);
 
         final updatedList = current.payments.map((sub) {
           if (sub.id == event.subscriptionId) {

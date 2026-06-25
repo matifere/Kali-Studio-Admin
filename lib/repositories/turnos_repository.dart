@@ -1,0 +1,263 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:argrity/models/class_session.dart';
+import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'dart:math';
+
+class TurnosRepository {
+  final SupabaseClient _client;
+
+  TurnosRepository({required SupabaseClient client}) : _client = client;
+
+  Future<List<ClassSession>> getSessions({
+    required DateTime start,
+    required DateTime end,
+    required String? instId,
+    String? instructorFilter,
+  }) async {
+    final startIso = DateFormat('yyyy-MM-dd').format(start);
+    final endIso = DateFormat('yyyy-MM-dd').format(end);
+
+    const sessionSelect =
+        '*, '
+        'reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
+
+    var query = _client
+        .from('class_sessions')
+        .select(sessionSelect)
+        .gte('date', startIso)
+        .lte('date', endIso);
+
+    if (instId != null) {
+      query = query.eq('institution_id', instId);
+    }
+
+    final response = instructorFilter != null
+        ? await query.eq('instructor_name', instructorFilter)
+        : await query;
+
+    return response
+        .map<ClassSession>((data) => ClassSession.fromJson(data))
+        .toList();
+  }
+
+  String _generateUuid() {
+    final random = Random();
+    final list = List<int>.generate(16, (i) => random.nextInt(256));
+    list[6] = (list[6] & 0x0f) | 0x40;
+    list[8] = (list[8] & 0x3f) | 0x80;
+    final hex = list.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
+  }
+
+  Future<void> createSessions({
+    required List<int> daysOfWeek,
+    required DateTime currentWeekStart,
+    required String startTime,
+    required String endTime,
+    required int recurrenceWeeks,
+    required String name,
+    required String? description,
+    required String? instructorName,
+    required int capacity,
+    required String? instId,
+  }) async {
+    final insertData = <Map<String, dynamic>>[];
+    final String groupId = _generateUuid();
+
+    for (final dayIndex in daysOfWeek) {
+      var baseDate = currentWeekStart.add(Duration(days: dayIndex));
+
+      final parts = startTime.split(':');
+      var startDateTime = DateTime(baseDate.year, baseDate.month, baseDate.day,
+          int.parse(parts[0]), int.parse(parts[1]));
+
+      // Si la hora en la semana actual ya pasó, agendar desde la próxima semana
+      if (startDateTime.isBefore(DateTime.now())) {
+        baseDate = baseDate.add(const Duration(days: 7));
+      }
+
+      for (int i = 0; i < recurrenceWeeks; i++) {
+        final d = baseDate.add(Duration(days: i * 7));
+        final dateIso = DateFormat('yyyy-MM-dd').format(d);
+
+        insertData.add({
+          'group_id': groupId,
+          'name': name,
+          'description': description,
+          'instructor_name': instructorName,
+          'capacity': capacity,
+          'start_time': startTime,
+          'end_time': endTime,
+          'date': dateIso,
+          'status': 'scheduled',
+          if (instId != null) 'institution_id': instId,
+        });
+      }
+    }
+
+    if (insertData.isNotEmpty) {
+      await _client.from('class_sessions').insert(insertData);
+    }
+  }
+
+  Future<void> deleteSession(String sessionId) async {
+    await _client.from('class_sessions').delete().eq('id', sessionId);
+  }
+
+  Future<void> deleteSessions(String groupId, DateTime fromDate) async {
+    final dateIso = DateFormat('yyyy-MM-dd').format(fromDate);
+    final endOfYearIso = '${fromDate.year}-12-31';
+
+    await _client
+        .from('class_sessions')
+        .delete()
+        .eq('group_id', groupId)
+        .gte('date', dateIso)
+        .lte('date', endOfYearIso);
+  }
+
+  Future<void> updateSession(String sessionId, Map<String, dynamic> data) async {
+    await _client.from('class_sessions').update(data).eq('id', sessionId);
+  }
+
+  Future<void> updateSessions(
+      String groupId, DateTime fromDate, Map<String, dynamic> data) async {
+    final dateIso = DateFormat('yyyy-MM-dd').format(fromDate);
+    final endOfYearIso = '${fromDate.year}-12-31';
+
+    await _client
+        .from('class_sessions')
+        .update(data)
+        .eq('group_id', groupId)
+        .gte('date', dateIso)
+        .lte('date', endOfYearIso);
+  }
+
+  Future<void> assignStudent({
+    required String userId,
+    required ClassSession session,
+    required EnrollmentType enrollmentType,
+  }) async {
+    final inserts = <Map<String, dynamic>>[];
+
+    // 1. Inscripción actual focalizada
+    inserts.add({
+      'user_id': userId,
+      'session_id': session.id,
+      'status': 'confirmed',
+    });
+
+    // 2. Si marcamos recurrencia, buscamos las clases futuras con el mismo template
+    if (enrollmentType != EnrollmentType.single && session.groupId != null) {
+      final startIso = DateFormat('yyyy-MM-dd')
+          .format(session.date.add(const Duration(days: 1))); // From tomorrow onwards
+
+      // Fetch max reservations limit for the user
+      final subResList = await _client
+          .from('subscriptions')
+          .select('plans(max_reservations_per_month)')
+          .eq('user_id', userId)
+          .inFilter('status', ['active', 'pending']);
+
+      int maxRes = 0;
+      for (final subRes in (subResList as List<dynamic>)) {
+        if (subRes['plans'] != null &&
+            subRes['plans']['max_reservations_per_month'] != null) {
+          maxRes += subRes['plans']['max_reservations_per_month'] as int;
+        }
+      }
+
+      // Only project if maxRes > 0
+      if (maxRes > 0) {
+        final String endIso;
+        if (enrollmentType == EnrollmentType.month) {
+          final lastDayOfMonth =
+              DateTime(session.date.year, session.date.month + 1, 0);
+          endIso = DateFormat('yyyy-MM-dd').format(lastDayOfMonth);
+        } else {
+          endIso = '${session.date.year}-12-31';
+        }
+
+        final futureSessionsResponse = await _client
+            .from('class_sessions')
+            .select('id, date')
+            .eq('group_id', session.groupId!)
+            .gte('date', startIso)
+            .lte('date', endIso)
+            .order('date', ascending: true);
+
+        final futureSessions = futureSessionsResponse as List<dynamic>;
+
+        if (futureSessions.isNotEmpty) {
+          final currentMonthStart =
+              DateTime(session.date.year, session.date.month, 1);
+          final currentMonthStartIso =
+              DateFormat('yyyy-MM-dd').format(currentMonthStart);
+
+          // Fetch user's existing reservations to count per month correctly
+          final existingRes = await _client
+              .from('reservations')
+              .select('session_id, class_sessions!inner(date)')
+              .eq('user_id', userId)
+              .gte('class_sessions.date', currentMonthStartIso);
+
+          DateTime startOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
+
+          final Map<DateTime, int> resCount = {};
+          final Set<String> enrolledSessionIds = {};
+
+          for (var r in existingRes as List<dynamic>) {
+            final d = DateTime.parse(r['class_sessions']['date']);
+            final som = startOfMonth(d);
+            resCount[som] = (resCount[som] ?? 0) + 1;
+            if (r['session_id'] != null) {
+              enrolledSessionIds.add(r['session_id'] as String);
+            }
+          }
+
+          // Account for the current session we just added
+          final currentSom = startOfMonth(session.date);
+          resCount[currentSom] = (resCount[currentSom] ?? 0) + 1;
+          enrolledSessionIds.add(session.id);
+
+          for (final row in futureSessions) {
+            final sessionId = row['id'] as String;
+            if (enrolledSessionIds.contains(sessionId)) {
+              continue;
+            }
+
+            final sessionDate = DateTime.parse(row['date']);
+            final som = startOfMonth(sessionDate);
+            final currCount = resCount[som] ?? 0;
+
+            if (currCount < maxRes) {
+              inserts.add({
+                'user_id': userId,
+                'session_id': sessionId,
+                'status': 'confirmed',
+              });
+              resCount[som] = currCount + 1;
+              enrolledSessionIds.add(sessionId);
+            }
+          }
+        }
+      }
+    }
+
+    if (inserts.isNotEmpty) {
+      await _client.from('reservations').insert(inserts);
+    }
+  }
+
+  Future<void> removeStudent(String reservationId) async {
+    await _client.from('reservations').delete().eq('id', reservationId);
+  }
+
+  Future<void> toggleAttendance(
+      String reservationId, String nextStatus) async {
+    await _client
+        .from('reservations')
+        .update({'status': nextStatus}).eq('id', reservationId);
+  }
+}
