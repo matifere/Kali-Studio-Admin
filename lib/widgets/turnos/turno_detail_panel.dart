@@ -22,8 +22,9 @@ class TurnoDetailPanel extends StatelessWidget {
 
   bool get _canModifyStudents {
     if (ProfileCache.isAdmin) {
-      if (turno.instructorName == null || ProfileCache.fullName == null)
+      if (turno.instructorName == null || ProfileCache.fullName == null) {
         return false;
+      }
       return turno.instructorName == ProfileCache.fullName;
     }
     return true; // Sudo u otros roles pueden modificar siempre
