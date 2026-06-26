@@ -68,6 +68,7 @@ class _InstitutionSelectionScreenState
         institutionId: instId as String?,
         fullName: ProfileCache.fullName,
       );
+      ProfileCache.updateIsActive(false);
 
       if (mounted) {
         // No apagamos _isLoading: mantenemos el indicador hasta que la
