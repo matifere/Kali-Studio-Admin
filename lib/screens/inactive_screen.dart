@@ -15,6 +15,7 @@ class _InactiveScreenState extends State<InactiveScreen> {
   @override
   Widget build(BuildContext context) {
     final isSudo = ProfileCache.role == 'sudo';
+    final isProfileDisabled = ProfileCache.isProfileDisabled;
 
     return Scaffold(
       backgroundColor: KaliColors.background,
@@ -22,10 +23,34 @@ class _InactiveScreenState extends State<InactiveScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
-            child: isSudo ? _buildSudoView() : _buildClientView(),
+            child: isProfileDisabled
+                ? _buildDisabledView()
+                : (isSudo ? _buildSudoView() : _buildClientView()),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDisabledView() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 24,
+      children: [
+        const Icon(Icons.block_rounded,
+            size: 80, color: KaliColors.espresso),
+        Text('Cuenta Deshabilitada', style: KaliText.heading(KaliColors.espresso)),
+        Text(
+          'Tu cuenta ha sido deshabilitada.\nPor favor, contactá a soporte técnico.',
+          textAlign: TextAlign.center,
+          style: KaliText.body(KaliColors.clayDark),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: () => Supabase.instance.client.auth.signOut(),
+          child: const Text('Cerrar Sesión'),
+        ),
+      ],
     );
   }
 

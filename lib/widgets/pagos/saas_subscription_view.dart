@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SaasSubscriptionView extends StatefulWidget {
   const SaasSubscriptionView({super.key});
@@ -107,14 +108,30 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         throw Exception('Institución no encontrada.');
       }
 
-      await Supabase.instance.client.rpc('bypass_saas_subscription', params: {
-        'p_plan_id': plan['id'],
-      });
+      final response = await Supabase.instance.client.functions.invoke(
+        'create-saas-subscription',
+        body: {
+          'institution_id': institutionId,
+          'saas_plan_id': plan['id'],
+        },
+      );
+
+      if (response.status != 200) {
+        throw Exception(
+            response.data['error'] ?? 'Error desconocido al crear la suscripción.');
+      }
+
+      final initPoint = response.data['init_point'] as String?;
+      if (initPoint != null && initPoint.isNotEmpty) {
+        final url = Uri.parse(initPoint);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        } else {
+          throw Exception('No se pudo abrir el enlace de pago.');
+        }
+      }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Suscripción activada exitosamente.')),
-        );
         await _fetchData();
       }
     } on FunctionException catch (e) {

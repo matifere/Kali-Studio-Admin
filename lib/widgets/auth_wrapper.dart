@@ -52,6 +52,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
           if (data.isNotEmpty && mounted && _subscriptionChecked) {
             final profile = data.first;
             final profileIsActive = profile['is_active'] as bool? ?? true;
+            ProfileCache.updateIsProfileDisabled(!profileIsActive);
 
             // Re-verificar la validez de la suscripción antes de decidir
             // si el usuario puede acceder al dashboard.
@@ -136,6 +137,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
           institutionId: data['institution_id'] as String?,
           fullName: data['full_name'] as String?,
         );
+        ProfileCache.updateIsProfileDisabled(!(data['is_active'] as bool? ?? true));
       }
 
       final isSubValid = await _isSubscriptionValid();
