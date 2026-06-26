@@ -29,6 +29,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   /// para evitar la race condition que causa bypass del paywall.
   bool _subscriptionChecked = false;
   StreamSubscription<List<Map<String, dynamic>>>? _profileSub;
+  StreamSubscription<List<Map<String, dynamic>>>? _subscriptionSub;
 
   @override
   void initState() {
@@ -62,6 +63,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
             }
           }
         });
+
+    final institutionId = ProfileCache.institutionId;
+    if (institutionId != null && ProfileCache.role == 'sudo') {
+      _subscriptionSub = Supabase.instance.client
+          .from('tenant_subscriptions')
+          .stream(primaryKey: ['id'])
+          .eq('institution_id', institutionId)
+          .listen((_) async {
+        if (mounted && _subscriptionChecked) {
+          await _checkProfile();
+        }
+      });
+    }
   }
 
   /// Verifica si la suscripción de la institución es válida.
@@ -97,6 +111,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void dispose() {
     _profileSub?.cancel();
+    _subscriptionSub?.cancel();
     super.dispose();
   }
 
