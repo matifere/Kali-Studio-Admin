@@ -184,12 +184,19 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         // Volvemos a cargar las suscripciones para reflejar el estado 'cancelled'
         await _fetchData();
       }
+    } on FunctionException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Error del servidor: ${e.details ?? e.reasonPhrase ?? "Desconocido"}')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Ocurrió un error inesperado. Intentá nuevamente.')),
+          SnackBar(
+              content: Text('Ocurrió un error: ${e.toString()}')),
         );
       }
     } finally {

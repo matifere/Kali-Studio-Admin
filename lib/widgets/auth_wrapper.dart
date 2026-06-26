@@ -95,7 +95,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       if (subData == null) return false;
 
       final status = subData['status'] as String?;
-      if (status == 'active' || status == 'authorized' || status == 'pending') {
+      if (status == 'active' || status == 'authorized') {
         return true;
       } else if (status == 'cancelled' && subData['current_period_end'] != null) {
         final end = DateTime.tryParse(subData['current_period_end'].toString());

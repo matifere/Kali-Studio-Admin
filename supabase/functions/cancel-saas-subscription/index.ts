@@ -60,32 +60,34 @@ export async function handleRequest(
       .eq("institution_id", institution_id)
       .maybeSingle();
 
-    if (!sub || sub.status !== "active" || !sub.mp_preapproval_id) {
+    if (!sub || sub.status !== "active") {
       throw new Error("No hay una suscripción activa para cancelar");
     }
 
-    // Cancelar en MP
-    const cancelRes = await fetchFn(
-      `https://api.mercadopago.com/preapproval/${sub.mp_preapproval_id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: "cancelled" }),
-      }
-    );
+    if (sub.mp_preapproval_id) {
+      // Cancelar en MP
+      const cancelRes = await fetchFn(
+        `https://api.mercadopago.com/preapproval/${sub.mp_preapproval_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "cancelled" }),
+        }
+      );
 
-    if (!cancelRes.ok) {
-      const errorText = await cancelRes.text();
-      console.error(`Error cancelando en MP: ${cancelRes.status} ${errorText}`);
-      // No lanzamos error si MP falla (e.g. 400 Bad Request por ser de prueba o ya cancelada),
-      // forzamos la cancelación local para que la app no quede bloqueada.
-      console.warn(`Forzando cancelación local en Supabase debido a error de MercadoPago.`);
-    } else {
-      const cancelData = await cancelRes.json();
-      console.log(`[cancel-saas-subscription] Suscripción ${sub.mp_preapproval_id} cancelada en MP`);
+      if (!cancelRes.ok) {
+        const errorText = await cancelRes.text();
+        console.error(`Error cancelando en MP: ${cancelRes.status} ${errorText}`);
+        // No lanzamos error si MP falla (e.g. 400 Bad Request por ser de prueba o ya cancelada),
+        // forzamos la cancelación local para que la app no quede bloqueada.
+        console.warn(`Forzando cancelación local en Supabase debido a error de MercadoPago.`);
+      } else {
+        const cancelData = await cancelRes.json();
+        console.log(`[cancel-saas-subscription] Suscripción ${sub.mp_preapproval_id} cancelada en MP`);
+      }
     }
 
     // Actualización proactiva para que la UI reaccione instantáneamente
