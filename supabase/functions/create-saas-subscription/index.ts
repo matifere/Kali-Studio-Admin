@@ -78,7 +78,12 @@ Deno.serve(async (req) => {
     //
     // El institution_id se pasa en el back_url para que el webhook pueda
     // identificar qué institución completó la suscripción.
-    const webhookUrl = `${SUPABASE_URL}/functions/v1/mp-webhook`;
+    // MercadoPago no acepta URLs locales o HTTP. Usamos un dominio válido como fallback en local.
+    let baseUrl = Deno.env.get("SUPABASE_PUBLIC_URL") || SUPABASE_URL;
+    if (!baseUrl.startsWith("https://")) {
+      baseUrl = "https://dbturnos.argity.com";
+    }
+    const webhookUrl = `${baseUrl}/functions/v1/mp-webhook`;
     const backUrl = `${webhookUrl}?institution_id=${encodeURIComponent(institution_id)}&saas_plan_id=${encodeURIComponent(saas_plan_id)}`;
 
     const mpRes = await fetch("https://api.mercadopago.com/preapproval_plan", {
