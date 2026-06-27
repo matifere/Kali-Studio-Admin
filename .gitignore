@@ -10,6 +10,7 @@
 .history
 .agents/
 code_audit_report.md
+remote_exec.py
 
 
 # Flutter repo-specific

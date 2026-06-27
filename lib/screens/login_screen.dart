@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://argity.com',
+        redirectTo: 'https://admins.argity.com',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
