@@ -55,9 +55,25 @@ Future<void> main() async {
   const buildUrl = String.fromEnvironment('SUPABASE_URL');
   const buildAnon = String.fromEnvironment('SUPABASE_ANON');
 
-  final String url = buildUrl.isNotEmpty ? buildUrl : (dotenv.env['URL'] ?? '');
+  final String url = buildUrl.isNotEmpty ? buildUrl : (dotenv.isInitialized ? (dotenv.env['URL'] ?? '') : '');
   final String anon =
-      buildAnon.isNotEmpty ? buildAnon : (dotenv.env['ANON'] ?? '');
+      buildAnon.isNotEmpty ? buildAnon : (dotenv.isInitialized ? (dotenv.env['ANON'] ?? '') : '');
+
+  if (url.isEmpty || anon.isEmpty) {
+    runApp(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text(
+              'Error crítico: Faltan configurar las variables de entorno SUPABASE_URL y SUPABASE_ANON en el build.',
+              style: TextStyle(color: Colors.red, fontSize: 16),
+            ),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
 
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(url: url, anonKey: anon);
