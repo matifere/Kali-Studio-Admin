@@ -23,6 +23,34 @@ class PagosSubscriptionStatusChanged extends PagosEvent {
   });
 }
 
+/// El usuario editó la asignación de un plan (plan y/o fechas).
+class PagosSubscriptionEdited extends PagosEvent {
+  final String subscriptionId;
+  final String planId;
+  final String planName;
+  final double price;
+  final String currency;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  PagosSubscriptionEdited({
+    required this.subscriptionId,
+    required this.planId,
+    required this.planName,
+    required this.price,
+    required this.currency,
+    required this.startDate,
+    required this.endDate,
+  });
+}
+
+/// El usuario eliminó por completo la asignación de un plan.
+class PagosSubscriptionDeleted extends PagosEvent {
+  final String subscriptionId;
+
+  PagosSubscriptionDeleted(this.subscriptionId);
+}
+
 /// El usuario cambió los filtros de estado.
 class PagosFiltersChanged extends PagosEvent {
   final Set<String> selectedStatuses;

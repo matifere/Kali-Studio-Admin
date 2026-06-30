@@ -44,4 +44,41 @@ class PagosRepository {
         .from('subscriptions')
         .update({'status': newStatus}).eq('id', subscriptionId);
   }
+
+  /// Edita la asignación: cambia el plan y/o las fechas de la suscripción y
+  /// mantiene el pago asociado en sync con el precio/moneda del nuevo plan.
+  Future<void> updateSubscription({
+    required String subscriptionId,
+    required String planId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    await _client.from('subscriptions').update({
+      'plan_id': planId,
+      'start_date': startDate.toIso8601String().split('T')[0],
+      'end_date': endDate.toIso8601String().split('T')[0],
+    }).eq('id', subscriptionId);
+
+    final plan = await _client
+        .from('plans')
+        .select('price, currency')
+        .eq('id', planId)
+        .single();
+
+    await _client.from('payments').update({
+      'amount': plan['price'],
+      'currency': plan['currency'] ?? 'ARS',
+    }).eq('subscription_id', subscriptionId);
+  }
+
+  /// Elimina por completo la asignación: borra primero los pagos asociados
+  /// (la FK payments.subscription_id no es CASCADE) y luego la suscripción.
+  Future<void> deleteSubscription(String subscriptionId) async {
+    await _client
+        .from('payments')
+        .delete()
+        .eq('subscription_id', subscriptionId);
+
+    await _client.from('subscriptions').delete().eq('id', subscriptionId);
+  }
 }

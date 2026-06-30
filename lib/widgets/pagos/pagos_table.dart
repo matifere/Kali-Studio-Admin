@@ -44,7 +44,7 @@ class PagosTable extends StatelessWidget {
                   else ...[
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        const double minWidth = 680.0;
+                        const double minWidth = 780.0;
                         final tableRows = Column(
                           children: [
                             _buildColumnHeaders(),
@@ -94,11 +94,15 @@ class PagosTable extends StatelessWidget {
         children: [
           Expanded(flex: 4, child: Text('ALUMNO', style: style)),
           Expanded(flex: 3, child: Text('PLAN', style: style)),
-          Expanded(flex: 3, child: Text('FECHAS', style: style)),
+          Expanded(flex: 2, child: Text('FECHAS', style: style)),
           Expanded(flex: 2, child: Text('ESTADO', style: style)),
           Expanded(
             flex: 2,
             child: Text('PRECIO', style: style, textAlign: TextAlign.right),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('ACCIONES', style: style, textAlign: TextAlign.right),
           ),
         ],
       ),

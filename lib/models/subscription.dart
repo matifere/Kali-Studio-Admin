@@ -4,6 +4,7 @@ class Subscription {
   final String id;
   final String studentName;
   final String? avatarUrl;
+  final String? planId;
   final String planName;
   final double price;
   final String currency;
@@ -15,6 +16,7 @@ class Subscription {
     required this.id,
     required this.studentName,
     this.avatarUrl,
+    this.planId,
     required this.planName,
     required this.price,
     required this.currency,
@@ -27,6 +29,7 @@ class Subscription {
     String? id,
     String? studentName,
     String? avatarUrl,
+    String? planId,
     String? planName,
     double? price,
     String? currency,
@@ -38,6 +41,7 @@ class Subscription {
       id: id ?? this.id,
       studentName: studentName ?? this.studentName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      planId: planId ?? this.planId,
       planName: planName ?? this.planName,
       price: price ?? this.price,
       currency: currency ?? this.currency,
@@ -57,6 +61,7 @@ class Subscription {
       id: json['id'] ?? '',
       studentName: profile['full_name'] ?? 'Desconocido',
       avatarUrl: profile['avatar_url'],
+      planId: json['plan_id'] ?? plan['id'],
       planName: plan['name'] ?? 'Sin plan',
       price: (plan['price'] as num?)?.toDouble() ?? 0.0,
       currency: plan['currency'] ?? 'ARS',

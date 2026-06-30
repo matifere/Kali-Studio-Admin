@@ -5,6 +5,8 @@ import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
+import 'package:argrity/widgets/common/kali_icon_button.dart';
+import 'package:argrity/widgets/pagos/edit_subscription_dialog.dart';
 
 /// Fila de la tabla de suscripciones.
 class SubscriptionRow extends StatefulWidget {
@@ -88,7 +90,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
 
             // Fechas
             Expanded(
-              flex: 3,
+              flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -131,10 +133,71 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                 textAlign: TextAlign.right,
               ),
             ),
+
+            // Acciones
+            Expanded(
+              flex: 2,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  KaliIconButton.action(
+                    Icons.edit_outlined,
+                    tooltip: 'Editar asignación',
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<PagosBloc>(),
+                        child: EditSubscriptionDialog(subscription: s),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  KaliIconButton.action(
+                    Icons.delete_outline_rounded,
+                    tooltip: 'Eliminar asignación',
+                    color: const Color(0xFFD4685C),
+                    onTap: () => _confirmDelete(context, s),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, Subscription s) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Eliminar asignación', style: KaliText.heading(KaliColors.espresso, size: 20)),
+        content: Text(
+          '¿Eliminar el plan "${s.planName}" asignado a ${s.studentName}? '
+          'Se borrará también el pago asociado. Esta acción no se puede deshacer.',
+          style: KaliText.body(KaliColors.espresso),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Eliminar',
+                style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<PagosBloc>().add(PagosSubscriptionDeleted(s.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Asignación de "${s.planName}" eliminada')),
+      );
+    }
   }
 }
 

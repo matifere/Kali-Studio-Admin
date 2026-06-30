@@ -20,6 +20,8 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
     on<PagosLoadRequested>(_onLoadRequested);
     on<PagosPageChanged>(_onPageChanged);
     on<PagosSubscriptionStatusChanged>(_onSubscriptionStatusChanged);
+    on<PagosSubscriptionEdited>(_onSubscriptionEdited);
+    on<PagosSubscriptionDeleted>(_onSubscriptionDeleted);
     on<PagosFiltersChanged>(_onFiltersChanged);
     on<PagosSearchChanged>(_onSearchChanged);
   }
@@ -97,6 +99,60 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
       } catch (_) {
         // El estado local ya refleja el cambio; si falla el server, la próxima carga lo corregirá
       }
+    }
+  }
+
+  // ── Edición de la asignación (plan y/o fechas) ──────────────────────────────
+  Future<void> _onSubscriptionEdited(
+    PagosSubscriptionEdited event,
+    Emitter<PagosState> emit,
+  ) async {
+    final current = state;
+    if (current is! PagosLoaded) return;
+    try {
+      await _repository.updateSubscription(
+        subscriptionId: event.subscriptionId,
+        planId: event.planId,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      );
+
+      final updatedList = current.payments.map((sub) {
+        if (sub.id == event.subscriptionId) {
+          return sub.copyWith(
+            planName: event.planName,
+            price: event.price,
+            currency: event.currency,
+            startDate: event.startDate,
+            endDate: event.endDate,
+          );
+        }
+        return sub;
+      }).toList();
+
+      emit(current.copyWith(payments: updatedList));
+    } catch (_) {
+      // Si falla el server, la próxima carga corrige el estado local.
+    }
+  }
+
+  // ── Eliminación de la asignación ────────────────────────────────────────────
+  Future<void> _onSubscriptionDeleted(
+    PagosSubscriptionDeleted event,
+    Emitter<PagosState> emit,
+  ) async {
+    final current = state;
+    if (current is! PagosLoaded) return;
+    try {
+      await _repository.deleteSubscription(event.subscriptionId);
+
+      final updatedList = current.payments
+          .where((sub) => sub.id != event.subscriptionId)
+          .toList();
+
+      emit(current.copyWith(payments: updatedList));
+    } catch (_) {
+      // Si falla el server, la próxima carga corrige el estado local.
     }
   }
 
