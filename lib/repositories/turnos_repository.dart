@@ -134,6 +134,39 @@ class TurnosRepository {
         .lte('date', endOfYearIso);
   }
 
+  /// Devuelve las sesiones futuras (desde el día siguiente a [session.date]
+  /// hasta [untilDate] inclusive) de la misma serie recurrente: por group_id
+  /// si el turno está agrupado, o por plantilla (nombre + horario + institución)
+  /// cuando no lo está. Así la proyección funciona también para turnos sueltos.
+  Future<List<Map<String, dynamic>>> getFutureSeriesSessions({
+    required ClassSession session,
+    required DateTime untilDate,
+  }) async {
+    final startIso = DateFormat('yyyy-MM-dd')
+        .format(session.date.add(const Duration(days: 1)));
+    final endIso = DateFormat('yyyy-MM-dd').format(untilDate);
+
+    var query = _client
+        .from('class_sessions')
+        .select('id, date')
+        .gte('date', startIso)
+        .lte('date', endIso);
+
+    if (session.groupId != null) {
+      query = query.eq('group_id', session.groupId!);
+    } else {
+      query = query
+          .eq('name', session.name)
+          .eq('start_time', session.startTime);
+      if (session.institutionId != null) {
+        query = query.eq('institution_id', session.institutionId!);
+      }
+    }
+
+    final res = await query.order('date', ascending: true);
+    return List<Map<String, dynamic>>.from(res);
+  }
+
   Future<void> assignStudent({
     required String userId,
     required ClassSession session,
@@ -148,11 +181,11 @@ class TurnosRepository {
       'status': 'confirmed',
     });
 
-    // 2. Si marcamos recurrencia, buscamos las clases futuras con el mismo template
-    if (enrollmentType != EnrollmentType.single && session.groupId != null) {
-      final startIso = DateFormat('yyyy-MM-dd')
-          .format(session.date.add(const Duration(days: 1))); // From tomorrow onwards
-
+    // 2. Si marcamos recurrencia, proyectamos sobre las clases futuras de la
+    //    misma serie, desde el día siguiente a este turno hasta fin de mes (o
+    //    de año), inscribiendo mientras al alumno le quede cupo mensual de
+    //    reservas según su plan.
+    if (enrollmentType != EnrollmentType.single) {
       // Fetch max reservations limit for the user
       final subResList = await _client
           .from('subscriptions')
@@ -170,24 +203,17 @@ class TurnosRepository {
 
       // Only project if maxRes > 0
       if (maxRes > 0) {
-        final String endIso;
+        final DateTime untilDate;
         if (enrollmentType == EnrollmentType.month) {
-          final lastDayOfMonth =
-              DateTime(session.date.year, session.date.month + 1, 0);
-          endIso = DateFormat('yyyy-MM-dd').format(lastDayOfMonth);
+          untilDate = DateTime(session.date.year, session.date.month + 1, 0);
         } else {
-          endIso = '${session.date.year}-12-31';
+          untilDate = DateTime(session.date.year, 12, 31);
         }
 
-        final futureSessionsResponse = await _client
-            .from('class_sessions')
-            .select('id, date')
-            .eq('group_id', session.groupId!)
-            .gte('date', startIso)
-            .lte('date', endIso)
-            .order('date', ascending: true);
-
-        final futureSessions = futureSessionsResponse as List<dynamic>;
+        final futureSessions = await getFutureSeriesSessions(
+          session: session,
+          untilDate: untilDate,
+        );
 
         if (futureSessions.isNotEmpty) {
           final currentMonthStart =

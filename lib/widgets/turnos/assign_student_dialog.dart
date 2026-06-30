@@ -21,6 +21,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   bool _isLoading = true;
   String? _error;
   EnrollmentType _enrollmentType = EnrollmentType.single;
+  bool _canProject = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -83,6 +84,28 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
         userReservations[uid] = (userReservations[uid] ?? 0) + 1;
       }
 
+      // 4b. ¿Hay más sesiones de esta misma serie en lo que resta del mes?
+      //     Si las hay, ofrecemos proyectar la inscripción; si no, no aparece.
+      final seriesStartIso =
+          sessionDate.add(const Duration(days: 1)).toIso8601String().split('T')[0];
+      var seriesQuery = client
+          .from('class_sessions')
+          .select('id')
+          .gte('date', seriesStartIso)
+          .lte('date', endIso);
+      if (widget.session.groupId != null) {
+        seriesQuery = seriesQuery.eq('group_id', widget.session.groupId!);
+      } else {
+        seriesQuery = seriesQuery
+            .eq('name', widget.session.name)
+            .eq('start_time', widget.session.startTime);
+        if (widget.session.institutionId != null) {
+          seriesQuery = seriesQuery.eq('institution_id', widget.session.institutionId!);
+        }
+      }
+      final seriesRes = await seriesQuery.limit(1);
+      final canProject = (seriesRes as List).isNotEmpty;
+
       // 4. Filtrar los que ya están anotados en esta sesión
       final enrolledIds = widget.session.enrolledStudents.map((e) => e.userId).toSet();
 
@@ -115,6 +138,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
         setState(() {
           _profiles = available;
           _filteredProfiles = available;
+          _canProject = canProject;
           _isLoading = false;
         });
       }
@@ -145,13 +169,43 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   void _assign(String userId) {
     context.read<TurnosBloc>().add(
       TurnoStudentAssigned(
-        userId: userId, 
+        userId: userId,
         session: widget.session,
         enrollmentType: _enrollmentType,
       )
     );
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alumno inscripto correctamente')));
+  }
+
+  /// Permite al admin forzar la inscripción de un alumno que no cumple los
+  /// requisitos (sin plan activo o con el límite mensual alcanzado).
+  Future<void> _confirmOverride(String userId, String name, String reason) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Inscribir sin créditos', style: KaliText.heading(KaliColors.espresso, size: 20)),
+        content: Text(
+          '$name no cumple los requisitos ($reason). '
+          '¿Inscribirlo de todas formas? Como admin podés forzar la inscripción.',
+          style: KaliText.body(KaliColors.espresso),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Inscribir igual', style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      _assign(userId);
+    }
   }
 
   @override
@@ -201,7 +255,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            if (widget.session.groupId != null) ...[
+            if (_canProject || widget.session.groupId != null) ...[
               Text('Opciones de inscripción recurrentes', style: KaliText.body(KaliColors.espresso, size: 14, weight: FontWeight.w600)),
               const SizedBox(height: 8),
               DropdownButtonFormField<EnrollmentType>(
@@ -282,8 +336,13 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                                     ),
                                   ),
                             trailing: TextButton(
-                              onPressed: disabledReason != null ? null : () => _assign(p['id']),
-                              child: Text(disabledReason != null ? 'No elegible' : 'Inscribir'),
+                              onPressed: disabledReason != null
+                                  ? () => _confirmOverride(p['id'], name, disabledReason)
+                                  : () => _assign(p['id']),
+                              style: disabledReason != null
+                                  ? TextButton.styleFrom(foregroundColor: Colors.orange[800])
+                                  : null,
+                              child: Text(disabledReason != null ? 'Inscribir igual' : 'Inscribir'),
                             ),
                           );
                         },

@@ -31,6 +31,7 @@ class TurnoReservation {
 class ClassSession {
   final String id;
   final String? groupId;
+  final String? institutionId;
   final String name;
   final String? description;
   final DateTime date;
@@ -46,6 +47,7 @@ class ClassSession {
   const ClassSession({
     required this.id,
     this.groupId,
+    this.institutionId,
     required this.name,
     this.description,
     required this.date,
@@ -71,6 +73,7 @@ class ClassSession {
     return ClassSession(
       id: json['id'],
       groupId: json['group_id'],
+      institutionId: json['institution_id'],
       name: json['name'] ?? 'Sin Nombre',
       description: json['description'],
       date: DateTime.parse(json['date']),
