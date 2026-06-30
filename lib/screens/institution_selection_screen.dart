@@ -17,19 +17,28 @@ class InstitutionSelectionScreen extends StatefulWidget {
 class _InstitutionSelectionScreenState
     extends State<InstitutionSelectionScreen> {
   final TextEditingController _createNameCtrl = TextEditingController();
+  final TextEditingController _createAliasCtrl = TextEditingController();
+  final TextEditingController _createPhoneCtrl = TextEditingController();
+  final TextEditingController _createAdressCtrl = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _createNameCtrl.dispose();
+    _createAliasCtrl.dispose();
+    _createPhoneCtrl.dispose();
+    _createAdressCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _handleCreate() async {
     final name = _createNameCtrl.text.trim();
-    if (name.isEmpty) {
+    final alias = _createAliasCtrl.text.trim();
+    final phone = _createPhoneCtrl.text.trim();
+    final adress = _createAdressCtrl.text.trim();
+    if (name.isEmpty || alias.isEmpty || phone.isEmpty || adress.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Ingresa un nombre para la institución')));
+          content: Text('Todos los campos tienen que ser completados')));
       return;
     }
 
@@ -40,26 +49,16 @@ class _InstitutionSelectionScreenState
 
       final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
-      // Usamos una función RPC para evitar el problema de RLS
-      await Supabase.instance.client.rpc('create_institution', params: {
+      // Usamos la función RPC que inserta la institución, actualiza el rol
+      // y nos devuelve directamente el ID creado, evitando consultas redundantes.
+      final instId =
+          await Supabase.instance.client.rpc('create_institution', params: {
         'inst_name': name,
         'inst_slug': slug,
+        'payment_alias': alias,
+        'phone': phone,
+        'address': adress,
       });
-
-      // Buscamos la institución recién creada
-      final instRes = await Supabase.instance.client
-          .from('institutions')
-          .select('id')
-          .eq('slug', slug)
-          .single();
-
-      final instId = instRes['id'];
-
-      // Actualizamos el perfil del usuario actual para asignarlo a la institución
-      await Supabase.instance.client.from('profiles').update({
-        'institution_id': instId,
-        'role': 'sudo',
-      }).eq('id', user.id);
 
       // Refrescamos el caché para que AuthWrapper enrute con datos actualizados
       // y no vuelva a mostrar esta pantalla mientras re-verifica el perfil.
@@ -138,12 +137,34 @@ class _InstitutionSelectionScreenState
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
-                    KaliTextField(
-                      label: 'NOMBRE DE LA INSTITUCIÓN',
-                      hint: 'Ej. MiInst',
-                      controller: _createNameCtrl,
+                    Column(
+                      spacing: 16,
+                      children: [
+                        KaliTextField(
+                          label: 'NOMBRE DE LA INSTITUCIÓN',
+                          hint: 'Ej. MiInst',
+                          controller: _createNameCtrl,
+                        ),
+                        KaliTextField(
+                          label: 'ALIAS',
+                          hint: 'Ej. mi.alias.mp',
+                          controller: _createAliasCtrl,
+                        ),
+                        KaliTextField(
+                          label: 'CELULAR',
+                          hint: 'Ej. +54911001122',
+                          controller: _createPhoneCtrl,
+                        ),
+                        KaliTextField(
+                          label: 'DIRECCION',
+                          hint: 'Ej. Mi Calle 123',
+                          controller: _createAdressCtrl,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(
+                      height: 48,
+                    ),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
