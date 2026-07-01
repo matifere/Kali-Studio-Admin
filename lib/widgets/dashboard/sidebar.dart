@@ -75,6 +75,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                 _buildMenuItem(Icons.payment_outlined, 'Pagos'),
               const Spacer(),
               _buildBottomMenuItem(Icons.help_outline, 'SOPORTE', kaliColors),
+              _buildSettingsMenu(kaliColors),
             ],
           ),
         ));
@@ -130,6 +131,60 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             Text(
               title,
               style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsMenu(KaliColorsExtension kaliColors) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent, // Remove border lines
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+      ),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+        collapsedIconColor: kaliColors.espresso.withValues(alpha: 0.5),
+        iconColor: kaliColors.espresso.withValues(alpha: 0.5),
+        title: Row(
+          children: [
+            Icon(Icons.settings_outlined,
+                color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
+            const SizedBox(width: 12),
+            Text(
+              'CONFIGURACIÓN',
+              style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
+            ),
+          ],
+        ),
+        children: [
+          _buildSubMenuItem('Cuenta', kaliColors),
+          _buildSubMenuItem('Suscripción', kaliColors),
+          _buildSubMenuItem('Tema', kaliColors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubMenuItem(String title, KaliColorsExtension kaliColors) {
+    final isActive = currentPage == title;
+    return InkWell(
+      onTap: () => widget.onNavigate(title),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 40, top: 8, bottom: 8, right: 8),
+        child: Row(
+          children: [
+            Text(
+              title,
+              style: KaliText.body(
+                isActive
+                    ? kaliColors.espresso
+                    : kaliColors.espresso.withValues(alpha: 0.6),
+                weight: isActive ? FontWeight.bold : FontWeight.w500,
+              ),
             ),
           ],
         ),
