@@ -17,10 +17,16 @@ activar_pago.sh
 desactivar_pago.sh
 scratch.dart
 
-# Scripts and OpenAPI dumps
-local_openapi.json
-prod_openapi.json
-scripts/
+# Scripts peligrosos (dumps de DB, SSH, RLS — NO subir)
+scripts/drop_templates_ssh.py
+scripts/fix_month_ssh.py
+scripts/fix_trigger_ssh.py
+scripts/optimize_rls.sql
+scripts/refactor_schema.sql
+scripts/run_bypass_ssh.py
+scripts/run_ssh.py
+scripts/test_subscription_expiry.sh
+# deploy_cloudflare.sh SÍ se trackea (lo usa Cloudflare Pages)
 
 
 # Flutter repo-specific
