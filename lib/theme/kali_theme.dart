@@ -92,6 +92,4 @@ class KaliTheme {
       extensions: [colors],
     );
   }
-
-  static ThemeData get theme => buildTheme(KaliColorsExtension.defaultTheme());
 }
