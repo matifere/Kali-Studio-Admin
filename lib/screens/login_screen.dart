@@ -29,36 +29,102 @@ class _LoginScreenState extends State<LoginScreen> {
     final emailCtrl = TextEditingController(text: emailControl.text.trim());
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Restablecer contraseña'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-                'Ingresá tu email y te enviamos un link para crear una nueva contraseña.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'tu@email.com',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+      builder: (ctx) => Dialog(
+        backgroundColor: KaliColors.warmWhite,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: KaliColors.sand,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_reset_rounded,
+                    color: KaliColors.clayDark,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  '¿Olvidaste tu contraseña?',
+                  style: KaliText.heading(KaliColors.espresso, size: 22),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Ingresá tu email y te enviamos un link para crear una nueva contraseña.',
+                  style: KaliText.body(KaliColors.clayDark, size: 14),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  style: KaliText.body(KaliColors.espresso),
+                  decoration: InputDecoration(
+                    hintText: 'tu@email.com',
+                    hintStyle: KaliText.body(KaliColors.clay),
+                    prefixIcon:
+                        const Icon(Icons.mail_outline, color: KaliColors.clay),
+                    filled: true,
+                    fillColor: KaliColors.sand,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: KaliColors.clay, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: Text(
+                        'Cancelar',
+                        style: KaliText.body(KaliColors.clayDark),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text('Enviar link'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Enviar'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -203,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: Text(
-                                    'olvide mi contraseña',
+                                    '¿Olvidé mi contraseña?',
                                     style:
                                         KaliText.caption(KaliColors.clayDark),
                                   ),
