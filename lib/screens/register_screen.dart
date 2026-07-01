@@ -172,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: isLoading ? null : () => _handleRegister(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kaliColors.espresso,
-                  foregroundColor: kaliColors.warmWhite,
+                  foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(27),

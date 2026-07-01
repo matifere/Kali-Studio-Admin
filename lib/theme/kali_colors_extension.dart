@@ -114,4 +114,11 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
       background: Color.lerp(background, other.background, t)!,
     );
   }
+
+  /// Retorna un color legible (oscuro o claro) dependiendo de la luminancia del fondo
+  Color getContrastColor(Color backgroundColor) {
+    // Si la luminancia es mayor a 0.5 (color claro), retornamos espresso (oscuro).
+    // De lo contrario, retornamos warmWhite (claro).
+    return backgroundColor.computeLuminance() > 0.5 ? espresso : warmWhite;
+  }
 }

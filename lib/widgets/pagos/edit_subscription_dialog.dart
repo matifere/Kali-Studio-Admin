@@ -225,13 +225,14 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                           onPressed: _isSaving ? null : _submit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kaliColors.espresso,
+                            foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: Text('Guardar Cambios',
-                              style: KaliText.body(Colors.white, weight: FontWeight.w600)),
+                              style: KaliText.body(kaliColors.getContrastColor(kaliColors.espresso), weight: FontWeight.w600)),
                         ),
                       ],
                     ),

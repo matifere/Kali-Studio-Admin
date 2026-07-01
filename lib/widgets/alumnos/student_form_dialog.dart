@@ -266,11 +266,12 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                       onPressed: _isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kaliColors.clayDark,
+                        foregroundColor: kaliColors.getContrastColor(kaliColors.clayDark),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text('Guardar Cambios', style: KaliText.body(Colors.white)),
+                          ? CircularProgressIndicator(color: kaliColors.getContrastColor(kaliColors.clayDark))
+                          : Text('Guardar Cambios', style: KaliText.body(kaliColors.getContrastColor(kaliColors.clayDark))),
                     ),
                   )
                 else

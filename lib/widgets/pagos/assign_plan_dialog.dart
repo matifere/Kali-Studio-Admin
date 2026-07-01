@@ -231,19 +231,20 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                             onPressed: _isSaving ? null : _submit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: kaliColors.espresso,
+                              foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: _isSaving
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                        color: Colors.white, strokeWidth: 2))
+                                        color: kaliColors.getContrastColor(kaliColors.espresso), strokeWidth: 2))
                                 : Text('Asignar Plan',
-                                    style: KaliText.body(Colors.white,
+                                    style: KaliText.body(kaliColors.getContrastColor(kaliColors.espresso),
                                         weight: FontWeight.w600)),
                           ),
                         ],
