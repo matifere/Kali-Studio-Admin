@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 
@@ -9,6 +10,7 @@ class AlumnosStatCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<AlumnosBloc, AlumnosState>(
       builder: (context, state) {
         String? activeCount;
@@ -95,6 +97,7 @@ class AlumnosStatCards extends StatelessWidget {
                     ),
                   ],
                 ),
+                kaliColors: kaliColors,
               ),
               _PlanCarousel(
                 countByPlan: countByPlan,
@@ -107,8 +110,9 @@ class AlumnosStatCards extends StatelessWidget {
                 badge: Text(
                   'En los próximos 7 días',
                   style:
-                      KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                      KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                 ),
+                kaliColors: kaliColors,
               ),
             ];
 
@@ -144,6 +148,7 @@ class AlumnosStatCards extends StatelessWidget {
     required String title,
     required String? value,
     required Widget badge,
+    required KaliColorsExtension kaliColors,
   }) {
     return Container(
       padding: const EdgeInsets.all(28),
@@ -163,12 +168,12 @@ class AlumnosStatCards extends StatelessWidget {
         children: [
           Text(title,
               style:
-                  KaliText.label(KaliColors.espresso.withValues(alpha: 0.5))),
+                  KaliText.label(kaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
           value != null
               ? Text(
                   value,
-                  style: KaliText.display(KaliColors.espresso).copyWith(
+                  style: KaliText.display(kaliColors.espresso).copyWith(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.normal,
@@ -307,6 +312,7 @@ class _ClayPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -323,7 +329,7 @@ class _ClayPlanCard extends StatelessWidget {
                 child: Text(
                   planName.toUpperCase(),
                   style: KaliText.label(
-                      KaliColors.espresso.withValues(alpha: 0.7)),
+                      kaliColors.espresso.withValues(alpha: 0.7)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -339,8 +345,8 @@ class _ClayPlanCard extends StatelessWidget {
                       height: 6,
                       decoration: BoxDecoration(
                         color: i == currentPage
-                            ? KaliColors.espresso
-                            : KaliColors.espresso.withValues(alpha: 0.25),
+                            ? kaliColors.espresso
+                            : kaliColors.espresso.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -352,7 +358,7 @@ class _ClayPlanCard extends StatelessWidget {
           count != null
               ? Text(
                   count.toString(),
-                  style: KaliText.display(KaliColors.espresso).copyWith(
+                  style: KaliText.display(kaliColors.espresso).copyWith(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.normal,
@@ -365,7 +371,7 @@ class _ClayPlanCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             count == 1 ? 'alumno con este plan' : 'alumnos con este plan',
-            style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+            style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
           ),
         ],
       ),
@@ -389,6 +395,7 @@ class _NavArrowState extends State<_NavArrow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (e) {
@@ -405,14 +412,14 @@ class _NavArrowState extends State<_NavArrow> {
           height: 28,
           decoration: BoxDecoration(
             color: _hovered
-                ? KaliColors.espresso.withValues(alpha: 0.15)
-                : KaliColors.espresso.withValues(alpha: 0.08),
+                ? kaliColors.espresso.withValues(alpha: 0.15)
+                : kaliColors.espresso.withValues(alpha: 0.08),
             shape: BoxShape.circle,
           ),
           child: Icon(
             widget.icon,
             size: 18,
-            color: KaliColors.espresso.withValues(alpha: 0.7),
+            color: kaliColors.espresso.withValues(alpha: 0.7),
           ),
         ),
       ),

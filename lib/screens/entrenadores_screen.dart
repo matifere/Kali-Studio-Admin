@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/entrenadores/entrenadores_table.dart';
 
@@ -9,6 +10,7 @@ class EntrenadoresScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
 
     return Column(
@@ -28,14 +30,14 @@ class EntrenadoresScreen extends StatelessWidget {
                   style: GoogleFonts.cormorantGaramond(
                     fontSize: isSmall ? 36 : 46,
                     fontWeight: FontWeight.w600,
-                    color: KaliColors.espresso,
+                    color: kaliColors.espresso,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Gestioná el equipo de entrenadores.',
                   style: KaliText.body(
-                    KaliColors.espresso.withValues(alpha: 0.6),
+                    kaliColors.espresso.withValues(alpha: 0.6),
                     size: 14,
                   ),
                 ),

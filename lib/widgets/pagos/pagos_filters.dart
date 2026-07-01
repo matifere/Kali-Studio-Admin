@@ -7,6 +7,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/pagos/assign_plan_dialog.dart';
 
 /// Barra de filtros y acciones de la sección de pagos.
@@ -25,6 +26,7 @@ class PagosFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<PagosBloc, PagosState>(
       builder: (context, state) {
         Set<String> selectedStatuses = {};
@@ -52,7 +54,7 @@ class PagosFilters extends StatelessWidget {
                       Text(
                         'BUSCAR USUARIO',
                         style: KaliText.label(
-                          KaliColors.espresso.withValues(alpha: 0.45),
+                          kaliColors.espresso.withValues(alpha: 0.45),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -62,17 +64,17 @@ class PagosFilters extends StatelessWidget {
                           onChanged: (value) {
                             context.read<PagosBloc>().add(PagosSearchChanged(value));
                           },
-                          style: KaliText.body(KaliColors.espresso, size: 14),
+                          style: KaliText.body(kaliColors.espresso, size: 14),
                           decoration: InputDecoration(
                             hintText: 'Ej. Juan Pérez',
                             hintStyle: KaliText.body(
-                              KaliColors.espresso.withValues(alpha: 0.4),
+                              kaliColors.espresso.withValues(alpha: 0.4),
                               size: 14,
                             ),
                             prefixIcon: Icon(
                               Icons.search,
                               size: 18,
-                              color: KaliColors.espresso.withValues(alpha: 0.4),
+                              color: kaliColors.espresso.withValues(alpha: 0.4),
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                             filled: true,
@@ -80,19 +82,19 @@ class PagosFilters extends StatelessWidget {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
-                                color: KaliColors.espresso.withValues(alpha: 0.1),
+                                color: kaliColors.espresso.withValues(alpha: 0.1),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
-                                color: KaliColors.espresso.withValues(alpha: 0.1),
+                                color: kaliColors.espresso.withValues(alpha: 0.1),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(
-                                color: KaliColors.espresso,
+                              borderSide: BorderSide(
+                                color: kaliColors.espresso,
                               ),
                             ),
                           ),
@@ -108,7 +110,7 @@ class PagosFilters extends StatelessWidget {
                     Text(
                       'ESTADO',
                       style: KaliText.label(
-                        KaliColors.espresso.withValues(alpha: 0.45),
+                        kaliColors.espresso.withValues(alpha: 0.45),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -141,10 +143,10 @@ class PagosFilters extends StatelessWidget {
                             onPressed: () {
                               context.read<PagosBloc>().add(PagosFiltersChanged(const {}));
                             },
-                            icon: Icon(Icons.clear, size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
+                            icon: Icon(Icons.clear, size: 16, color: kaliColors.espresso.withValues(alpha: 0.5)),
                             label: Text(
                               'Limpiar',
-                              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
+                              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
                             ),
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -250,24 +252,25 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return FilterChip(
       label: Text(
         label,
         style: KaliText.body(
-          isSelected ? Colors.white : KaliColors.espresso,
+          isSelected ? Colors.white : kaliColors.espresso,
           weight: FontWeight.w500,
           size: 13,
         ),
       ),
       selected: isSelected,
       onSelected: onToggle,
-      selectedColor: KaliColors.espresso,
+      selectedColor: kaliColors.espresso,
       backgroundColor: Colors.white,
       checkmarkColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: isSelected ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.1),
+          color: isSelected ? kaliColors.espresso : kaliColors.espresso.withValues(alpha: 0.1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -292,6 +295,7 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
       onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
@@ -301,21 +305,21 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: _hovered ? KaliColors.sand : Colors.white,
+            color: _hovered ? kaliColors.sand : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: KaliColors.espresso.withValues(alpha: 0.15),
+              color: kaliColors.espresso.withValues(alpha: 0.15),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, size: 16, color: KaliColors.espresso),
+              Icon(widget.icon, size: 16, color: kaliColors.espresso),
               const SizedBox(width: 8),
               Text(
                 widget.label,
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w600,
                   size: 13,
                 ),
@@ -345,6 +349,7 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
       onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
@@ -354,12 +359,12 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: _hovered ? KaliColors.espressoL : KaliColors.espresso,
+            color: _hovered ? kaliColors.espressoL : kaliColors.espresso,
             borderRadius: BorderRadius.circular(10),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                      color: KaliColors.espresso.withValues(alpha: 0.2),
+                      color: kaliColors.espresso.withValues(alpha: 0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -369,12 +374,12 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, size: 16, color: KaliColors.warmWhite),
+              Icon(widget.icon, size: 16, color: kaliColors.warmWhite),
               const SizedBox(width: 8),
               Text(
                 widget.label,
                 style: KaliText.body(
-                  KaliColors.warmWhite,
+                  kaliColors.warmWhite,
                   weight: FontWeight.w600,
                   size: 13,
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/pagos/pagos_stat_cards.dart';
 import 'package:argrity/widgets/pagos/pagos_filters.dart';
@@ -27,6 +28,7 @@ class _PagosScreenState extends State<PagosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
 
     return DefaultTabController(
@@ -49,14 +51,14 @@ class _PagosScreenState extends State<PagosScreen> {
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: isSmall ? 36 : 46,
                       fontWeight: FontWeight.w600,
-                      color: KaliColors.espresso,
+                      color: kaliColors.espresso,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Historial de cobros y transacciones.',
                     style: KaliText.body(
-                      KaliColors.espresso.withValues(alpha: 0.6),
+                      kaliColors.espresso.withValues(alpha: 0.6),
                       size: 14,
                     ),
                   ),
@@ -64,24 +66,24 @@ class _PagosScreenState extends State<PagosScreen> {
 
                   // TabBar
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: KaliColors.clay, width: 2),
+                        bottom: BorderSide(color: kaliColors.clay, width: 2),
                       ),
                     ),
                     child: TabBar(
                       isScrollable: true,
                       tabAlignment: TabAlignment.start,
-                      indicatorColor: KaliColors.espresso,
+                      indicatorColor: kaliColors.espresso,
                       indicatorWeight: 3,
-                      labelColor: KaliColors.espresso,
-                      unselectedLabelColor: KaliColors.clayDark,
-                      labelStyle: KaliText.body(KaliColors.espresso,
+                      labelColor: kaliColors.espresso,
+                      unselectedLabelColor: kaliColors.clayDark,
+                      labelStyle: KaliText.body(kaliColors.espresso,
                           weight: FontWeight.bold),
-                      unselectedLabelStyle: KaliText.body(KaliColors.clayDark,
+                      unselectedLabelStyle: KaliText.body(kaliColors.clayDark,
                           weight: FontWeight.w500),
                       overlayColor: const WidgetStatePropertyAll(Color(
-                          0x4DF4EBE1)), // KaliColors.sand.withValues(alpha: 0.3)
+                          0x4DF4EBE1)), // kaliColors.sand.withValues(alpha: 0.3)
                       tabs: const [
                         Tab(text: 'Alumnos'),
                         Tab(text: 'Suscripción de Software'),

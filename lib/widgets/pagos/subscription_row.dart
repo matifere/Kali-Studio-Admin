@@ -35,7 +35,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered
-            ? KaliColors.sand.withValues(alpha: 0.4)
+            ? kaliColors.sand.withValues(alpha: 0.4)
             : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         child: Row(
@@ -58,7 +58,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                       child: Text(
                         s.studentInitials,
                         style: KaliText.body(
-                          KaliColors.espresso,
+                          kaliColors.espresso,
                           weight: FontWeight.w700,
                           size: 11,
                         ),
@@ -69,7 +69,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                     child: Text(
                       s.studentName,
                       style: KaliText.body(
-                        KaliColors.espresso,
+                        kaliColors.espresso,
                         weight: FontWeight.w600,
                         size: 14,
                       ),
@@ -86,7 +86,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               child: Text(
                 s.planName,
                 style: KaliText.body(
-                  KaliColors.espresso.withValues(alpha: 0.8),
+                  kaliColors.espresso.withValues(alpha: 0.8),
                   size: 13,
                   weight: FontWeight.w500,
                 ),
@@ -103,7 +103,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   Text(
                     s.startDateFormatted,
                     style: KaliText.body(
-                      KaliColors.espresso.withValues(alpha: 0.6),
+                      kaliColors.espresso.withValues(alpha: 0.6),
                       size: 12,
                     ),
                   ),
@@ -111,7 +111,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   Text(
                     s.endDateFormatted,
                     style: KaliText.body(
-                      KaliColors.espresso.withValues(alpha: 0.45),
+                      kaliColors.espresso.withValues(alpha: 0.45),
                       size: 11,
                     ),
                   ),
@@ -131,7 +131,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               child: Text(
                 s.amountFormatted,
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w700,
                   size: 15,
                 ),
@@ -173,20 +173,21 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
   }
 
   Future<void> _confirmDelete(BuildContext context, Subscription s) async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Eliminar asignación', style: KaliText.heading(KaliColors.espresso, size: 20)),
+        title: Text('Eliminar asignación', style: KaliText.heading(kaliColors.espresso, size: 20)),
         content: Text(
           '¿Eliminar el plan "${s.planName}" asignado a ${s.studentName}? '
           'Se borrará también el pago asociado. Esta acción no se puede deshacer.',
-          style: KaliText.body(KaliColors.espresso),
+          style: KaliText.body(kaliColors.espresso),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),

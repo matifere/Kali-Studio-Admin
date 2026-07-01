@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Tarjetas de estadísticas de la sección de pagos.
 class PagosStatCards extends StatelessWidget {
@@ -91,6 +92,7 @@ class _RevenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final currentMonthName = _getMonthName(DateTime.now().month);
     return Container(
       padding: const EdgeInsets.all(28),
@@ -111,13 +113,13 @@ class _RevenueCard extends StatelessWidget {
           Text(
             'INGRESOS MENSUALES ($currentMonthName)',
             style: KaliText.label(
-              KaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '\$${revenue.toStringAsFixed(2)}',
-            style: KaliText.display(KaliColors.espresso).copyWith(
+            style: KaliText.display(kaliColors.espresso).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
               fontStyle: FontStyle.normal,
@@ -152,6 +154,7 @@ class _OutstandingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -171,13 +174,13 @@ class _OutstandingCard extends StatelessWidget {
           Text(
             'PENDIENTE',
             style: KaliText.label(
-              KaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '\$${amount.toStringAsFixed(2)}',
-            style: KaliText.display(KaliColors.espresso).copyWith(
+            style: KaliText.display(kaliColors.espresso).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
               fontStyle: FontStyle.normal,
@@ -187,7 +190,7 @@ class _OutstandingCard extends StatelessWidget {
           Text(
             '$count facturas pendientes',
             style: KaliText.body(
-              KaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -204,10 +207,11 @@ class _PaidSessionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: KaliColors.espresso,
+        color: kaliColors.espresso,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -216,13 +220,13 @@ class _PaidSessionsCard extends StatelessWidget {
           Text(
             'SESIONES PAGADAS',
             style: KaliText.label(
-              KaliColors.warmWhite.withValues(alpha: 0.6),
+              kaliColors.warmWhite.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '${(percentage * 100).toStringAsFixed(0)}%',
-            style: KaliText.display(KaliColors.warmWhite).copyWith(
+            style: KaliText.display(kaliColors.warmWhite).copyWith(
               fontSize: 44,
               fontWeight: FontWeight.bold,
               fontStyle: FontStyle.normal,
@@ -235,7 +239,7 @@ class _PaidSessionsCard extends StatelessWidget {
               value: percentage,
               backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(KaliColors.sand),
+                  AlwaysStoppedAnimation<Color>(kaliColors.sand),
               minHeight: 4,
             ),
           ),

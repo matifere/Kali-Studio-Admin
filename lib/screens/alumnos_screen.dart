@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:argrity/widgets/alumnos/student_directory.dart';
@@ -33,6 +34,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
 
     return Column(
@@ -56,7 +58,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                         style: GoogleFonts.cormorantGaramond(
                           fontSize: 36,
                           fontWeight: FontWeight.w600,
-                          color: KaliColors.espresso,
+                          color: kaliColors.espresso,
                         ),
                       ),
                       if (!_isProfesor) ...[
@@ -78,14 +80,14 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                             style: GoogleFonts.cormorantGaramond(
                               fontSize: 46,
                               fontWeight: FontWeight.w600,
-                              color: KaliColors.espresso,
+                              color: kaliColors.espresso,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Gestiona tu comunidad.',
                             style: KaliText.body(
-                              KaliColors.espresso.withValues(alpha: 0.6),
+                              kaliColors.espresso.withValues(alpha: 0.6),
                               size: 14,
                             ),
                           ),
@@ -122,6 +124,7 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       onEnter: (e) {
         if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
@@ -133,12 +136,12 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: _hovered ? KaliColors.espressoL : KaliColors.espresso,
+          color: _hovered ? kaliColors.espressoL : kaliColors.espresso,
           borderRadius: BorderRadius.circular(28),
           boxShadow: _hovered
               ? [
                   BoxShadow(
-                    color: KaliColors.espresso.withValues(alpha: 0.25),
+                    color: kaliColors.espresso.withValues(alpha: 0.25),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   )
@@ -153,11 +156,11 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
               builder: (context) => const StudentFormDialog(),
             );
           },
-          icon: const Icon(Icons.add, color: KaliColors.warmWhite, size: 18),
+          icon: Icon(Icons.add, color: kaliColors.warmWhite, size: 18),
           label: Text(
             'Añadir Alumno',
             style: KaliText.body(
-              KaliColors.warmWhite,
+              kaliColors.warmWhite,
               weight: FontWeight.w600,
               size: 13,
             ),

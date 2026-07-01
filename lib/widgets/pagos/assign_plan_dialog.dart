@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AssignPlanDialog extends StatefulWidget {
@@ -136,6 +137,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
@@ -156,12 +158,12 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                     children: [
                       Text(
                         'Asignar Plan',
-                        style: KaliText.heading(KaliColors.espresso, size: 24),
+                        style: KaliText.heading(kaliColors.espresso, size: 24),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Asigna un plan a un estudiante. Se activa inmediatamente por 30 días.',
-                        style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                        style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
                       ),
                       const SizedBox(height: 24),
                       if (_error != null)
@@ -171,17 +173,17 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                         ),
 
                       // Seleccionar Alumno
-                      Text('Alumno', style: KaliText.label(KaliColors.espresso)),
+                      Text('Alumno', style: KaliText.label(kaliColors.espresso)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         initialValue: _selectedStudentId,
-                        decoration: _inputDecoration('Selecciona un alumno'),
+                        decoration: _inputDecoration('Selecciona un alumno', kaliColors),
                         items: _students.map((s) {
                           return DropdownMenuItem<String>(
                             value: s['id'] as String,
                             child: Text(
                               s['full_name'] ?? 'Sin nombre',
-                              style: KaliText.body(KaliColors.espresso),
+                              style: KaliText.body(kaliColors.espresso),
                             ),
                           );
                         }).toList(),
@@ -193,11 +195,11 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                       const SizedBox(height: 16),
 
                       // Seleccionar Plan
-                      Text('Plan', style: KaliText.label(KaliColors.espresso)),
+                      Text('Plan', style: KaliText.label(kaliColors.espresso)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         initialValue: _selectedPlanId,
-                        decoration: _inputDecoration('Selecciona un plan'),
+                        decoration: _inputDecoration('Selecciona un plan', kaliColors),
                         items: _plans.map((p) {
                           final name = p['name'] ?? 'Sin nombre';
                           final price = (p['price'] as num?)?.toDouble() ?? 0.0;
@@ -206,7 +208,7 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                             value: p['id'] as String,
                             child: Text(
                               '$name - \$${price.toStringAsFixed(2)} $currency',
-                              style: KaliText.body(KaliColors.espresso),
+                              style: KaliText.body(kaliColors.espresso),
                             ),
                           );
                         }).toList(),
@@ -222,13 +224,13 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
                         children: [
                           TextButton(
                             onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+                            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
                           ),
                           const SizedBox(width: 16),
                           ElevatedButton(
                             onPressed: _isSaving ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: KaliColors.espresso,
+                              backgroundColor: kaliColors.espresso,
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -254,16 +256,16 @@ class _AssignPlanDialogState extends State<AssignPlanDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
     return InputDecoration(
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );

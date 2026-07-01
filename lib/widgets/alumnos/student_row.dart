@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/models/student.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/alumnos/student_profile_dialog.dart';
@@ -23,19 +24,20 @@ class _StudentRowState extends State<StudentRow> {
   bool _hovered = false;
 
   Future<void> _confirmDelete(BuildContext context) async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Eliminar alumno', style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 18)),
+        title: Text('Eliminar alumno', style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 18)),
         content: Text(
           '¿Seguro que querés eliminar a ${widget.student.name}? Esta acción no se puede deshacer.',
-          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7)),
+          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso)),
+            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -121,6 +123,7 @@ class _StudentRowState extends State<StudentRow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final s = widget.student;
 
     return MouseRegion(
@@ -129,7 +132,7 @@ class _StudentRowState extends State<StudentRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.bounceInOut,
-        color: _hovered ? KaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         child: Row(
           children: [
@@ -146,13 +149,13 @@ class _StudentRowState extends State<StudentRow> {
                       children: [
                         Text(
                           s.name,
-                          style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 14),
+                          style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           s.email,
-                          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -243,10 +246,11 @@ class _PatologiasCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     if (patologias.isEmpty) {
       return Text(
         'Ninguna',
-        style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.35), size: 13),
+        style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.35), size: 13),
       );
     }
 
@@ -275,21 +279,22 @@ class _PatologiaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: muted
-            ? KaliColors.espresso.withValues(alpha: 0.06)
-            : KaliColors.sand,
+            ? kaliColors.espresso.withValues(alpha: 0.06)
+            : kaliColors.sand,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: KaliColors.espresso.withValues(alpha: muted ? 0.1 : 0.15),
+          color: kaliColors.espresso.withValues(alpha: muted ? 0.1 : 0.15),
         ),
       ),
       child: Text(
         label,
         style: KaliText.label(
-          KaliColors.espresso.withValues(alpha: muted ? 0.45 : 0.75),
+          kaliColors.espresso.withValues(alpha: muted ? 0.45 : 0.75),
         ),
         overflow: TextOverflow.ellipsis,
       ),
@@ -304,8 +309,9 @@ class _AttendanceCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final hasAttended = count > 0;
-    final color = hasAttended ? const Color(0xFF5C9E6C) : KaliColors.espresso.withValues(alpha: 0.3);
+    final color = hasAttended ? const Color(0xFF5C9E6C) : kaliColors.espresso.withValues(alpha: 0.3);
     return Row(
       children: [
         Icon(Icons.check_circle_outline_rounded, size: 14, color: color),
@@ -374,6 +380,7 @@ class _ShiftInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -381,8 +388,8 @@ class _ShiftInfo extends StatelessWidget {
           nextShift,
           style: KaliText.body(
             reactivate
-                ? KaliColors.espresso.withValues(alpha: 0.4)
-                : KaliColors.espresso,
+                ? kaliColors.espresso.withValues(alpha: 0.4)
+                : kaliColors.espresso,
             weight: FontWeight.w500,
           ),
         ),
@@ -392,7 +399,7 @@ class _ShiftInfo extends StatelessWidget {
           style: KaliText.label(
             reactivate
                 ? const Color(0xFFD4685C)
-                : KaliColors.espresso.withValues(alpha: 0.45),
+                : kaliColors.espresso.withValues(alpha: 0.45),
           ),
         ),
       ],

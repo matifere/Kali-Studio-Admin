@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/entrenadores/add_trainer_button.dart';
 import 'package:argrity/widgets/entrenadores/trainer_row.dart';
@@ -60,23 +61,24 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
   }
 
   Future<void> _deleteTrainer(Map<String, dynamic> trainer) async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Eliminar entrenador',
-          style: KaliText.body(KaliColors.espresso,
+          style: KaliText.body(kaliColors.espresso,
               weight: FontWeight.w600, size: 18),
         ),
         content: Text(
           '¿Seguro que querés eliminar a ${trainer['full_name']}? Esta acción no se puede deshacer.',
-          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.7)),
+          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso)),
+            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -125,6 +127,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -140,7 +143,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(kaliColors),
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(40),
@@ -161,13 +164,13 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
                     Icon(
                       Icons.person_outline,
                       size: 40,
-                      color: KaliColors.espresso.withValues(alpha: 0.2),
+                      color: kaliColors.espresso.withValues(alpha: 0.2),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Aún no hay entrenadores registrados.',
                       style: KaliText.body(
-                          KaliColors.espresso.withValues(alpha: 0.5)),
+                          kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -179,7 +182,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
                 const double minWidth = 600.0;
                 final tableRows = Column(
                   children: [
-                    _buildColumnHeaders(),
+                    _buildColumnHeaders(kaliColors),
                     ..._trainers.map((t) => TrainerRow(
                           trainer: t,
                           onDelete: () => _deleteTrainer(t),
@@ -202,7 +205,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(KaliColorsExtension kaliColors) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 20, 0),
       child: Row(
@@ -210,7 +213,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
           Expanded(
             child: Text(
               'Entrenadores del Estudio',
-              style: KaliText.headingItalic(KaliColors.espresso, size: 22),
+              style: KaliText.headingItalic(kaliColors.espresso, size: 22),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -227,8 +230,8 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
     );
   }
 
-  Widget _buildColumnHeaders() {
-    final style = KaliText.label(KaliColors.espresso.withValues(alpha: 0.45));
+  Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
+    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
       child: Row(

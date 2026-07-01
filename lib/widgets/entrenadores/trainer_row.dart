@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 
 class TrainerRow extends StatefulWidget {
@@ -26,6 +27,7 @@ class _TrainerRowState extends State<TrainerRow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final name = widget.trainer['full_name'] as String? ?? 'Sin nombre';
     final email = widget.trainer['email'] as String? ?? '—';
     final isActive = widget.trainer['is_active'] as bool? ?? true;
@@ -41,7 +43,7 @@ class _TrainerRowState extends State<TrainerRow> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        color: _hovered ? KaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
           children: [
@@ -52,11 +54,11 @@ class _TrainerRowState extends State<TrainerRow> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundColor: KaliColors.clay.withValues(alpha: 0.35),
+                    backgroundColor: kaliColors.clay.withValues(alpha: 0.35),
                     child: Text(
                       _initials,
                       style: KaliText.body(
-                        KaliColors.espresso,
+                        kaliColors.espresso,
                         weight: FontWeight.w700,
                         size: 13,
                       ),
@@ -66,7 +68,7 @@ class _TrainerRowState extends State<TrainerRow> {
                   Expanded(
                     child: Text(
                       name,
-                      style: KaliText.body(KaliColors.espresso,
+                      style: KaliText.body(kaliColors.espresso,
                           weight: FontWeight.w600, size: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -81,7 +83,7 @@ class _TrainerRowState extends State<TrainerRow> {
               child: Text(
                 email,
                 style: KaliText.body(
-                    KaliColors.espresso.withValues(alpha: 0.55),
+                    kaliColors.espresso.withValues(alpha: 0.55),
                     size: 13),
                 overflow: TextOverflow.ellipsis,
               ),

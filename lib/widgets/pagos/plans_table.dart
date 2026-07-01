@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/pagos/plan_form_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -62,20 +63,21 @@ class _PlansTableState extends State<PlansTable> {
     if (!mounted) return;
 
     if (hasSubscriptions) {
+      final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
       // No se puede eliminar — ofrecer desactivar
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('No se puede eliminar', style: KaliText.heading(KaliColors.espresso, size: 20)),
+          title: Text('No se puede eliminar', style: KaliText.heading(kaliColors.espresso, size: 20)),
           content: Text(
             'El plan "$planName" tiene suscripciones asociadas y no puede eliminarse.\n\n¿Querés desactivarlo? No aparecerá al asignar nuevos planes pero las suscripciones existentes se mantienen.',
-            style: KaliText.body(KaliColors.espresso),
+            style: KaliText.body(kaliColors.espresso),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+              child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -106,20 +108,21 @@ class _PlansTableState extends State<PlansTable> {
         }
       }
     } else {
+      final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
       // Sin suscripciones — eliminar normalmente
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('Eliminar Plan', style: KaliText.heading(KaliColors.espresso, size: 20)),
+          title: Text('Eliminar Plan', style: KaliText.heading(kaliColors.espresso, size: 20)),
           content: Text(
             '¿Estás seguro de que deseas eliminar el plan "$planName"? Esta acción no se puede deshacer.',
-            style: KaliText.body(KaliColors.espresso),
+            style: KaliText.body(kaliColors.espresso),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+              child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -154,6 +157,7 @@ class _PlansTableState extends State<PlansTable> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -169,7 +173,7 @@ class _PlansTableState extends State<PlansTable> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(kaliColors),
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(40.0),
@@ -181,7 +185,7 @@ class _PlansTableState extends State<PlansTable> {
                 padding: const EdgeInsets.all(40.0),
                 child: Text(
                   _error!,
-                  style: KaliText.body(KaliColors.espresso),
+                  style: KaliText.body(kaliColors.espresso),
                 ),
               ),
             )
@@ -191,7 +195,7 @@ class _PlansTableState extends State<PlansTable> {
               child: Center(
                 child: Text(
                   'Aún no hay planes creados.',
-                  style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ),
             )
@@ -201,7 +205,7 @@ class _PlansTableState extends State<PlansTable> {
                 const double minWidth = 700.0;
                 final tableRows = Column(
                   children: [
-                    _buildColumnHeaders(),
+                    _buildColumnHeaders(kaliColors),
                     ..._plans.map((p) => _PlanRow(
                           plan: p,
                           onEdit: () {
@@ -233,7 +237,7 @@ class _PlansTableState extends State<PlansTable> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(KaliColorsExtension kaliColors) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 20, 0),
       child: Row(
@@ -241,7 +245,7 @@ class _PlansTableState extends State<PlansTable> {
         children: [
           Text(
             'Planes del Estudio',
-            style: KaliText.headingItalic(KaliColors.espresso, size: 22),
+            style: KaliText.headingItalic(kaliColors.espresso, size: 22),
           ),
           Row(
             children: [
@@ -259,8 +263,8 @@ class _PlansTableState extends State<PlansTable> {
     );
   }
 
-  Widget _buildColumnHeaders() {
-    final style = KaliText.label(KaliColors.espresso.withValues(alpha: 0.45));
+  Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
+    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
@@ -290,6 +294,7 @@ class _CreatePlanButtonState extends State<_CreatePlanButton> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
       onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
@@ -305,17 +310,17 @@ class _CreatePlanButtonState extends State<_CreatePlanButton> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: _hovered ? KaliColors.espressoL : KaliColors.espresso,
+            color: _hovered ? kaliColors.espressoL : kaliColors.espresso,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.add, size: 15, color: KaliColors.warmWhite),
+              Icon(Icons.add, size: 15, color: kaliColors.warmWhite),
               const SizedBox(width: 6),
               Text(
                 'Crear Plan',
-                style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600, size: 13),
               ),
             ],
           ),
@@ -345,6 +350,7 @@ class _PlanRowState extends State<_PlanRow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final p = widget.plan;
     final String name = p['name'] ?? '';
     final String? description = p['description'];
@@ -360,7 +366,7 @@ class _PlanRowState extends State<_PlanRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeIn,
-        color: _hovered ? KaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
           children: [
@@ -373,7 +379,7 @@ class _PlanRowState extends State<_PlanRow> {
                   Text(
                     name,
                     style: KaliText.body(
-                      KaliColors.espresso,
+                      kaliColors.espresso,
                       weight: FontWeight.w600,
                       size: 14,
                     ),
@@ -383,7 +389,7 @@ class _PlanRowState extends State<_PlanRow> {
                     Text(
                       description,
                       style: KaliText.body(
-                        KaliColors.espresso.withValues(alpha: 0.5),
+                        kaliColors.espresso.withValues(alpha: 0.5),
                         size: 12,
                       ),
                     ),
@@ -398,7 +404,7 @@ class _PlanRowState extends State<_PlanRow> {
               child: Text(
                 '\$${price.toStringAsFixed(2)} $currency',
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w500,
                 ),
               ),
@@ -410,7 +416,7 @@ class _PlanRowState extends State<_PlanRow> {
               child: Text(
                 '$maxReservations clases / mes',
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w400,
                 ),
               ),

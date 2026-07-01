@@ -25,7 +25,6 @@ import 'package:argrity/repositories/turnos_repository.dart';
 import 'package:argrity/repositories/pagos_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'theme/kali_theme.dart';
 import 'cubits/theme/theme_cubit.dart';
 
 Future<void> main() async {
@@ -56,9 +55,12 @@ Future<void> main() async {
   const buildUrl = String.fromEnvironment('SUPABASE_URL');
   const buildAnon = String.fromEnvironment('SUPABASE_ANON');
 
-  final String url = buildUrl.isNotEmpty ? buildUrl : (dotenv.isInitialized ? (dotenv.env['URL'] ?? '') : '');
-  final String anon =
-      buildAnon.isNotEmpty ? buildAnon : (dotenv.isInitialized ? (dotenv.env['ANON'] ?? '') : '');
+  final String url = buildUrl.isNotEmpty
+      ? buildUrl
+      : (dotenv.isInitialized ? (dotenv.env['URL'] ?? '') : '');
+  final String anon = buildAnon.isNotEmpty
+      ? buildAnon
+      : (dotenv.isInitialized ? (dotenv.env['ANON'] ?? '') : '');
 
   if (url.isEmpty || anon.isEmpty) {
     runApp(
@@ -110,7 +112,7 @@ class _KaliAppState extends State<KaliApp> {
   void initState() {
     super.initState();
     final supabaseClient = Supabase.instance.client;
-    
+
     final alumnosRepo = AlumnosRepository(client: supabaseClient);
     final turnosRepo = TurnosRepository(client: supabaseClient);
     final pagosRepo = PagosRepository(client: supabaseClient);
@@ -234,24 +236,22 @@ class _KaliAppViewState extends State<_KaliAppView> {
     // toda la navegación la maneja _navigatorKey dinámicamente.
     Widget home = const KaliSplash();
 
-    return BlocBuilder<ThemeCubit, ThemeData>(
-      builder: (context, themeData) {
-        return MaterialApp(
-          navigatorKey: _navigatorKey,
-          title: 'Argity',
-          theme: themeData,
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('es', 'ES'),
-          ],
-          home: home,
-        );
-      }
-    );
+    return BlocBuilder<ThemeCubit, ThemeData>(builder: (context, themeData) {
+      return MaterialApp(
+        navigatorKey: _navigatorKey,
+        title: 'Argity',
+        theme: themeData,
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('es', 'ES'),
+        ],
+        home: home,
+      );
+    });
   }
 }

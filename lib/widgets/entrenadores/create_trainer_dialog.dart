@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/services/auth_service.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 
 class CreateTrainerDialog extends StatefulWidget {
@@ -72,9 +73,10 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: KaliColors.warmWhite,
+      backgroundColor: kaliColors.warmWhite,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
         child: SingleChildScrollView(
@@ -95,14 +97,14 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                       style: GoogleFonts.cormorantGaramond(
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
-                        color: KaliColors.espresso,
+                        color: kaliColors.espresso,
                       ),
                     ),
                   ),
                   IconButton(
                     onPressed:
                         _isLoading ? null : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: KaliColors.espresso),
+                    icon: Icon(Icons.close, color: kaliColors.espresso),
                   ),
                 ],
               ),
@@ -110,7 +112,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
               Text(
                 'Se registrará con acceso de entrenador (rol admin).',
                 style:
-                    KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                    KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 28),
 
@@ -156,7 +158,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                     child: Text(
                       'Cancelar',
                       style: KaliText.body(
-                          KaliColors.espresso.withValues(alpha: 0.6)),
+                          kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -172,23 +174,23 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                             horizontal: 24, vertical: 16),
                         decoration: BoxDecoration(
                           color: _isLoading
-                              ? KaliColors.espresso.withValues(alpha: 0.6)
-                              : KaliColors.espresso,
+                              ? kaliColors.espresso.withValues(alpha: 0.6)
+                              : kaliColors.espresso,
                           borderRadius: BorderRadius.circular(28),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
-                                  color: KaliColors.warmWhite,
+                                  color: kaliColors.warmWhite,
                                   strokeWidth: 2,
                                 ),
                               )
                             : Text(
                                 'Registrar Entrenador',
                                 style: KaliText.body(
-                                  KaliColors.warmWhite,
+                                  kaliColors.warmWhite,
                                   weight: FontWeight.w600,
                                   size: 13,
                                 ),
