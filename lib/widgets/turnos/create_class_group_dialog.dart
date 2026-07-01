@@ -170,6 +170,18 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
+                  Text('Descripción (Opcional)', style: KaliText.label(KaliColors.espresso)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _descriptionController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Ej. Nivel intermedio, traer mat propia',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   Row(
                     children: [
                       Expanded(
