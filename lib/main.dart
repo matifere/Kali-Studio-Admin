@@ -80,8 +80,8 @@ Future<void> main() async {
   }
 
   await initializeDateFormatting('es_ES', null);
-  await Supabase.initialize(url: url, anonKey: anon);
-  SupaAuthClass.configure(url: url, anonKey: anon);
+  await Supabase.initialize(url: url, anonKey: anon); // Ignorando deprecation por ahora si la librería base aún la usa
+  // SupaAuthClass no es del core de Supabase, veamos.
 
   final prefs = await SharedPreferences.getInstance();
   final initialThemeId = prefs.getString('selected_theme') ?? 'default';

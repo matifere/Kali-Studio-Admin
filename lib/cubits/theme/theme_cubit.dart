@@ -21,14 +21,14 @@ class ThemeCubit extends Cubit<ThemeData> {
     KaliColorsExtension colors;
     switch (themeId) {
       case 'dark':
-        colors = KaliColorsExtension.darkTheme();
+        colors = KaliColorsExtension.darkTheme;
         break;
       case 'ocean':
-        colors = KaliColorsExtension.oceanTheme();
+        colors = KaliColorsExtension.oceanTheme;
         break;
       case 'default':
       default:
-        colors = KaliColorsExtension.defaultTheme();
+        colors = KaliColorsExtension.defaultTheme;
         break;
     }
     return KaliTheme.buildTheme(colors);
