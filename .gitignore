@@ -17,6 +17,11 @@ activar_pago.sh
 desactivar_pago.sh
 scratch.dart
 
+# Scripts and OpenAPI dumps
+local_openapi.json
+prod_openapi.json
+scripts/
+
 
 # Flutter repo-specific
 /bin/cache/

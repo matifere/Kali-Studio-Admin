@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'kali_colors_extension.dart';
 
 // ─── Paleta de colores ────────────────────────────────────────────────────────
 class KaliColors {
@@ -87,5 +88,19 @@ class KaliTheme {
           elevation: 0,
           centerTitle: true,
         ),
+        extensions: const [
+          KaliColorsExtension(
+            espresso: KaliColors.espresso,
+            espressoL: KaliColors.espressoL,
+            clay: KaliColors.clay,
+            clayDark: KaliColors.clayDark,
+            sand: KaliColors.sand,
+            sand2: KaliColors.sand2,
+            sage: KaliColors.sage,
+            sageLight: KaliColors.sageLight,
+            warmWhite: KaliColors.warmWhite,
+            background: KaliColors.background,
+          )
+        ],
       );
 }

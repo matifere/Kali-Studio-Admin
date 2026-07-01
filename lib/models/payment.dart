@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Modelo puro, sin dependencias de UI
 
 /// Estado de un pago.
 enum PaymentStatus {
@@ -17,7 +17,6 @@ enum PaymentMethod {
 /// Modelo de datos de un pago/transacción.
 class Payment {
   final String studentInitials;
-  final Color avatarColor;
   final String studentName;
   final String reference;
   final String date;
@@ -27,7 +26,6 @@ class Payment {
 
   const Payment({
     required this.studentInitials,
-    required this.avatarColor,
     required this.studentName,
     required this.reference,
     required this.date,
@@ -57,30 +55,6 @@ class Payment {
         return 'PENDIENTE';
       case PaymentStatus.overdue:
         return 'VENCIDO';
-    }
-  }
-
-  /// Color del badge de estado.
-  Color get statusColor {
-    switch (status) {
-      case PaymentStatus.completed:
-        return const Color(0xFF5C9E6C);
-      case PaymentStatus.pending:
-        return const Color(0xFFD4A836);
-      case PaymentStatus.overdue:
-        return const Color(0xFFD4685C);
-    }
-  }
-
-  /// Color de fondo del badge de estado.
-  Color get statusBgColor {
-    switch (status) {
-      case PaymentStatus.completed:
-        return const Color(0xFFE8F5E9);
-      case PaymentStatus.pending:
-        return const Color(0xFFFFF8E1);
-      case PaymentStatus.overdue:
-        return const Color(0xFFFDECEA);
     }
   }
 

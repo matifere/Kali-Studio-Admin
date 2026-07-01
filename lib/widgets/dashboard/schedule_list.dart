@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Card del cronograma del día de hoy en el panel principal.
 ///
@@ -29,6 +30,7 @@ class _DashboardScheduleListState extends State<DashboardScheduleList> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<TurnosBloc, TurnosState>(
       builder: (context, state) {
         // Filtrar solo las sesiones de hoy
@@ -46,7 +48,7 @@ class _DashboardScheduleListState extends State<DashboardScheduleList> {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: KaliColors.sand,
+            color: kaliColors.sand,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -58,12 +60,12 @@ class _DashboardScheduleListState extends State<DashboardScheduleList> {
                 children: [
                   Text(
                     'Cronograma de Hoy',
-                    style: KaliText.headingItalic(KaliColors.espresso, size: 28)
+                    style: KaliText.headingItalic(kaliColors.espresso, size: 28)
                         .copyWith(fontWeight: FontWeight.w600),
                   ),
                   Text(
                     DateFormat('EEEE d MMM', 'es_ES').format(today),
-                    style: KaliText.label(KaliColors.espresso),
+                    style: KaliText.label(kaliColors.espresso),
                   ),
                 ],
               ),
@@ -119,6 +121,7 @@ class _SessionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final timeParts = session.startTime.split(':');
     final hour = int.parse(timeParts[0]);
     final timeStr = '${hour.toString().padLeft(2, '0')}:${timeParts[1]}';
@@ -129,7 +132,7 @@ class _SessionItem extends StatelessWidget {
         ? const Color(0xFFD4685C)
         : isActive
             ? const Color(0xFF5C9E6C)
-            : KaliColors.clayDark;
+            : kaliColors.clayDark;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
@@ -137,7 +140,7 @@ class _SessionItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isActive ? KaliColors.espresso : Colors.white,
+          color: isActive ? kaliColors.espresso : Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -159,7 +162,7 @@ class _SessionItem extends StatelessWidget {
                   Text(
                     timeStr,
                     style: KaliText.heading(
-                      isActive ? KaliColors.warmWhite : KaliColors.espresso,
+                      isActive ? kaliColors.warmWhite : kaliColors.espresso,
                       size: 18,
                     ).copyWith(fontWeight: FontWeight.w700),
                   ),
@@ -167,8 +170,8 @@ class _SessionItem extends StatelessWidget {
                     period,
                     style: KaliText.label(
                       isActive
-                          ? KaliColors.warmWhite.withValues(alpha: 0.7)
-                          : KaliColors.clayDark,
+                          ? kaliColors.warmWhite.withValues(alpha: 0.7)
+                          : kaliColors.clayDark,
                     ),
                   ),
                 ],
@@ -182,7 +185,7 @@ class _SessionItem extends StatelessWidget {
                 height: 40,
                 margin: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: KaliColors.clay,
+                  color: kaliColors.clay,
                   borderRadius: BorderRadius.circular(1.5),
                 ),
               )
@@ -197,7 +200,7 @@ class _SessionItem extends StatelessWidget {
                   Text(
                     session.name,
                     style: KaliText.body(
-                      isActive ? KaliColors.warmWhite : KaliColors.espresso,
+                      isActive ? kaliColors.warmWhite : kaliColors.espresso,
                       weight: FontWeight.w700,
                       size: 14,
                     ),
@@ -209,8 +212,8 @@ class _SessionItem extends StatelessWidget {
                       'Instructor: ${session.instructorName}',
                       style: KaliText.body(
                         isActive
-                            ? KaliColors.warmWhite.withValues(alpha: 0.75)
-                            : KaliColors.clayDark,
+                            ? kaliColors.warmWhite.withValues(alpha: 0.75)
+                            : kaliColors.clayDark,
                         size: 12,
                       ),
                     ),
@@ -228,7 +231,7 @@ class _SessionItem extends StatelessWidget {
                     Text(
                       session.occupancyText,
                       style: KaliText.body(
-                        isActive ? KaliColors.warmWhite : KaliColors.espresso,
+                        isActive ? kaliColors.warmWhite : kaliColors.espresso,
                         weight: FontWeight.w700,
                         size: 13,
                       ),
@@ -238,7 +241,7 @@ class _SessionItem extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: isActive ? KaliColors.clay : occupancyColor,
+                        color: isActive ? kaliColors.clay : occupancyColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -251,8 +254,8 @@ class _SessionItem extends StatelessWidget {
                       : '${((session.enrolled / session.capacity) * 100).round()}% OCUPACIÓN',
                   style: KaliText.label(
                     isActive
-                        ? KaliColors.warmWhite.withValues(alpha: 0.75)
-                        : KaliColors.espresso,
+                        ? kaliColors.warmWhite.withValues(alpha: 0.75)
+                        : kaliColors.espresso,
                   ),
                 ),
               ],
@@ -270,6 +273,7 @@ class _EmptyToday extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
@@ -278,12 +282,12 @@ class _EmptyToday extends StatelessWidget {
             Icon(
               Icons.event_available_rounded,
               size: 36,
-              color: KaliColors.espresso.withValues(alpha: 0.25),
+              color: kaliColors.espresso.withValues(alpha: 0.25),
             ),
             const SizedBox(height: 12),
             Text(
               'No hay clases programadas para hoy',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.55)),
+              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.55)),
             ),
           ],
         ),

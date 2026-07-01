@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/models/turno.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Tarjeta visual de un turno dentro del calendario semanal.
 ///
@@ -23,10 +24,27 @@ class _TurnoCardState extends State<TurnoCard> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final t = widget.turno;
-    final bg = t.backgroundColor;
-    final fg = t.foregroundColor;
+    
+    Color bg;
+    Color fg;
     final isPrivate = t.uiTurnoType == TurnoType.privateSpecial;
+
+    switch (t.uiTurnoType) {
+      case TurnoType.reformerPilates:
+        bg = kaliColors.clayDark;
+        fg = kaliColors.espresso;
+        break;
+      case TurnoType.matPilates:
+        bg = kaliColors.sand2;
+        fg = kaliColors.espresso;
+        break;
+      case TurnoType.privateSpecial:
+        bg = kaliColors.espresso;
+        fg = kaliColors.warmWhite;
+        break;
+    }
 
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
@@ -42,8 +60,8 @@ class _TurnoCardState extends State<TurnoCard> {
             border: _hovered
                 ? Border.all(
                     color: isPrivate
-                        ? KaliColors.clay
-                        : KaliColors.espresso.withValues(alpha: 0.2),
+                        ? kaliColors.clay
+                        : kaliColors.espresso.withValues(alpha: 0.2),
                     width: 1.5,
                   )
                 : Border.all(color: Colors.transparent, width: 1.5),

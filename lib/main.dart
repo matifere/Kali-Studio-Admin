@@ -26,6 +26,7 @@ import 'package:argrity/repositories/pagos_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme/kali_theme.dart';
+import 'cubits/theme/theme_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,6 +104,7 @@ class _KaliAppState extends State<KaliApp> {
   late final PagosBloc _pagosBloc;
   late final DashboardBloc _dashboardBloc;
   late final NotificationsCubit _notificationsCubit;
+  late final ThemeCubit _themeCubit;
 
   @override
   void initState() {
@@ -127,6 +129,7 @@ class _KaliAppState extends State<KaliApp> {
     _pagosBloc = PagosBloc(repository: pagosRepo)..add(PagosLoadRequested());
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
+    _themeCubit = ThemeCubit();
   }
 
   @override
@@ -139,6 +142,7 @@ class _KaliAppState extends State<KaliApp> {
     _pagosBloc.close();
     _dashboardBloc.close();
     _notificationsCubit.close();
+    _themeCubit.close();
     super.dispose();
   }
 
@@ -154,6 +158,7 @@ class _KaliAppState extends State<KaliApp> {
         BlocProvider.value(value: _pagosBloc),
         BlocProvider.value(value: _dashboardBloc),
         BlocProvider.value(value: _notificationsCubit),
+        BlocProvider.value(value: _themeCubit),
       ],
       child: const _KaliAppView(),
     );
@@ -229,20 +234,24 @@ class _KaliAppViewState extends State<_KaliAppView> {
     // toda la navegación la maneja _navigatorKey dinámicamente.
     Widget home = const KaliSplash();
 
-    return MaterialApp(
-      navigatorKey: _navigatorKey,
-      title: 'Argity',
-      theme: KaliTheme.theme,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('es', 'ES'),
-      ],
-      home: home,
+    return BlocBuilder<ThemeCubit, ThemeData>(
+      builder: (context, themeData) {
+        return MaterialApp(
+          navigatorKey: _navigatorKey,
+          title: 'Argity',
+          theme: themeData,
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('es', 'ES'),
+          ],
+          home: home,
+        );
+      }
     );
   }
 }

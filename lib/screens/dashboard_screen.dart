@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/sidebar.dart';
 import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/dashboard/stat_cards.dart';
@@ -33,12 +34,13 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isMobile = MediaQuery.of(context).size.width < 1100;
 
     return BlocBuilder<NavigationBloc, NavigationState>(
       builder: (context, navState) {
         return Scaffold(
-          backgroundColor: KaliColors.warmWhite,
+          backgroundColor: kaliColors.warmWhite,
           drawer: isMobile
               ? Drawer(
                   child: DashboardSidebar(
@@ -99,6 +101,7 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
 
     return Column(
@@ -118,14 +121,14 @@ class _DashboardHomeState extends State<_DashboardHome> {
                   style: GoogleFonts.cormorantGaramond(
                     fontSize: isSmall ? 32 : 40,
                     fontWeight: FontWeight.w600,
-                    color: KaliColors.espresso,
+                    color: kaliColors.espresso,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Esto es lo que está pasando hoy.',
                   style: KaliText.body(
-                    KaliColors.espresso.withValues(alpha: 0.6),
+                    kaliColors.espresso.withValues(alpha: 0.6),
                     size: 16,
                   ),
                 ),

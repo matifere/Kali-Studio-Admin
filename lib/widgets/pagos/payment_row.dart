@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/models/payment.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Fila de la tabla de pagos.
 class PaymentRow extends StatefulWidget {
@@ -17,7 +18,11 @@ class _PaymentRowState extends State<PaymentRow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final p = widget.payment;
+
+    final avatarColors = [kaliColors.clay, kaliColors.sand, kaliColors.sage];
+    final avatarColor = avatarColors[p.studentName.length % avatarColors.length];
 
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
@@ -37,12 +42,12 @@ class _PaymentRowState extends State<PaymentRow> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundColor: p.avatarColor,
+                    backgroundColor: avatarColor,
                     child: Text(
                       p.studentInitials,
                       style: KaliText.body(
-                        KaliColors.espresso,
-                        weight: FontWeight.w700,
+                        kaliColors.espresso,
+                        weight: FontWeight.w600,
                         size: 11,
                       ),
                     ),
@@ -66,7 +71,7 @@ class _PaymentRowState extends State<PaymentRow> {
               child: Text(
                 p.reference,
                 style: KaliText.body(
-                  KaliColors.espresso.withValues(alpha: 0.6),
+                  kaliColors.espresso.withValues(alpha: 0.6),
                   size: 13,
                 ),
               ),
@@ -78,7 +83,7 @@ class _PaymentRowState extends State<PaymentRow> {
               child: Text(
                 p.date,
                 style: KaliText.body(
-                  KaliColors.espresso.withValues(alpha: 0.6),
+                  kaliColors.espresso.withValues(alpha: 0.6),
                   size: 13,
                 ),
               ),
@@ -90,7 +95,7 @@ class _PaymentRowState extends State<PaymentRow> {
               child: Text(
                 p.methodLabel,
                 style: KaliText.body(
-                  KaliColors.espresso.withValues(alpha: 0.7),
+                  kaliColors.espresso.withValues(alpha: 0.7),
                   size: 13,
                 ),
               ),
@@ -108,7 +113,7 @@ class _PaymentRowState extends State<PaymentRow> {
               child: Text(
                 p.amountFormatted,
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w700,
                   size: 15,
                 ),
@@ -129,17 +134,36 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    
+    Color statusBgColor;
+    Color statusColor;
+    switch (payment.status) {
+      case PaymentStatus.completed:
+        statusBgColor = kaliColors.sageLight;
+        statusColor = kaliColors.sage;
+        break;
+      case PaymentStatus.pending:
+        statusBgColor = kaliColors.sand2;
+        statusColor = kaliColors.clayDark;
+        break;
+      case PaymentStatus.overdue:
+        statusBgColor = const Color(0xFFFAEBEB);
+        statusColor = const Color(0xFFD4685C);
+        break;
+    }
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: payment.statusBgColor,
+          color: statusBgColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           payment.statusLabel,
-          style: KaliText.label(payment.statusColor)
+          style: KaliText.label(statusColor)
               .copyWith(fontSize: 8, letterSpacing: 1.0),
         ),
       ),

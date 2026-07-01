@@ -225,36 +225,5 @@ void main() {
     });
   });
 
-  group('Student.avatarColor', () {
-    test('returns one of the defined colors', () {
-      const allowedColors = [Colors.grey, Colors.brown, Colors.white];
-      final s = Student(
-        id: 'x',
-        name: 'Test',
-        email: 'a@b.com',
-        plan: 'Plan',
-        isActive: true,
-        nextShift: '',
-        shiftClass: '',
-        createdAt: DateTime(2024),
-        patologias: [],
-      );
-      expect(allowedColors, contains(s.avatarColor));
-    });
 
-    test('color is deterministic for same name', () {
-      Student make(String n) => Student(
-            id: 'x',
-            name: n,
-            email: 'a@b.com',
-            plan: 'Plan',
-            isActive: true,
-            nextShift: '',
-            shiftClass: '',
-            createdAt: DateTime(2024),
-            patologias: [],
-          );
-      expect(make('Ana').avatarColor, equals(make('Ana').avatarColor));
-    });
-  });
 }

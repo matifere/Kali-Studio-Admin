@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Mocks puros sin UI
 import 'package:argrity/models/turno.dart';
 
 /// Semana de ejemplo: 23–27 de Octubre 2023.
@@ -14,9 +14,9 @@ const List<Turno> kMockTurnos = [
     capacity: 6,
     type: TurnoType.reformerPilates,
     attendees: [
-      TurnoAttendee(initials: 'LM', avatarColor: Color(0xFFB5C9B0), name: 'Lucía Mendez'),
-      TurnoAttendee(initials: 'JP', avatarColor: Color(0xFF9EAFC2), name: 'Julián Perez'),
-      TurnoAttendee(initials: 'SB', avatarColor: Color(0xFFD4B896), name: 'Sonia Blanco'),
+      TurnoAttendee(initials: 'LM', name: 'Lucía Mendez'),
+      TurnoAttendee(initials: 'JP', name: 'Julián Perez'),
+      TurnoAttendee(initials: 'SB', name: 'Sonia Blanco'),
     ],
   ),
   Turno(

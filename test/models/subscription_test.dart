@@ -92,22 +92,7 @@ void main() {
     test('unknown → uppercased value', () => expect(make('custom').statusLabel, 'CUSTOM'));
   });
 
-  group('Subscription.statusColor', () {
-    Subscription make(String status) => Subscription.fromJson({
-          'id': 'x',
-          'status': status,
-          'profiles': {'full_name': 'Test'},
-          'plans': {'name': 'Plan', 'price': 0, 'currency': 'ARS'},
-          'start_date': '2024-01-01',
-          'end_date': '2024-01-31',
-        });
 
-    test('active is green', () => expect(make('active').statusColor, const Color(0xFF5C9E6C)));
-    test('pending is yellow', () => expect(make('pending').statusColor, const Color(0xFFD4A836)));
-    test('expired is red', () => expect(make('expired').statusColor, const Color(0xFFD4685C)));
-    test('cancelled is red', () => expect(make('cancelled').statusColor, const Color(0xFFD4685C)));
-    test('unknown is grey', () => expect(make('unknown').statusColor, Colors.grey));
-  });
 
   group('Subscription.studentInitials', () {
     Subscription make(String name) => Subscription(

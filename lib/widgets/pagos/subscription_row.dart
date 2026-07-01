@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/pagos/edit_subscription_dialog.dart';
@@ -22,7 +23,11 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final s = widget.subscription;
+
+    final avatarColors = [kaliColors.clay, kaliColors.sand, kaliColors.sage];
+    final avatarColor = avatarColors[s.studentName.length % avatarColors.length];
 
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
@@ -43,13 +48,13 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   if (s.avatarUrl != null && s.avatarUrl!.isNotEmpty && AvatarProvider.fromUrl(s.avatarUrl) != null)
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: s.avatarColor,
+                      backgroundColor: avatarColor,
                       backgroundImage: AvatarProvider.fromUrl(s.avatarUrl),
                     )
                   else
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: s.avatarColor,
+                      backgroundColor: avatarColor,
                       child: Text(
                         s.studentInitials,
                         style: KaliText.body(
@@ -208,6 +213,29 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    
+    Color statusBgColor;
+    Color statusColor;
+    switch (subscription.status) {
+      case 'active':
+        statusBgColor = kaliColors.sageLight;
+        statusColor = kaliColors.sage;
+        break;
+      case 'pending':
+        statusBgColor = kaliColors.sand2;
+        statusColor = kaliColors.clayDark;
+        break;
+      case 'expired':
+      case 'cancelled':
+        statusBgColor = const Color(0xFFFAEBEB);
+        statusColor = const Color(0xFFD4685C);
+        break;
+      default:
+        statusBgColor = kaliColors.sand2;
+        statusColor = kaliColors.clayDark;
+    }
+
     return Align(
       alignment: Alignment.centerLeft,
       child: PopupMenuButton<String>(
@@ -233,7 +261,7 @@ class _StatusBadge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: subscription.statusBgColor,
+            color: statusBgColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -241,14 +269,14 @@ class _StatusBadge extends StatelessWidget {
             children: [
               Text(
                 subscription.statusLabel,
-                style: KaliText.label(subscription.statusColor)
+                style: KaliText.label(statusColor)
                     .copyWith(fontSize: 8, letterSpacing: 1.0),
               ),
               const SizedBox(width: 4),
               Icon(
                 Icons.arrow_drop_down_rounded,
                 size: 14,
-                color: subscription.statusColor,
+                color: statusColor,
               ),
             ],
           ),

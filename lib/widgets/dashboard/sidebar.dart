@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DashboardSidebar extends StatefulWidget {
@@ -37,8 +38,9 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Material(
-        color: KaliColors.sand,
+        color: kaliColors.sand,
         child: Container(
           width: 240,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -58,7 +60,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                     const SizedBox(width: 8),
                     Text(
                       'argity',
-                      style: KaliText.heading(KaliColors.espresso, size: 18),
+                      style: KaliText.heading(kaliColors.espresso, size: 18),
                     ),
                   ],
                 ),
@@ -72,13 +74,14 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
               if (_role != 'admin')
                 _buildMenuItem(Icons.payment_outlined, 'Pagos'),
               const Spacer(),
-              _buildBottomMenuItem(Icons.help_outline, 'SOPORTE'),
+              _buildBottomMenuItem(Icons.help_outline, 'SOPORTE', kaliColors),
             ],
           ),
         ));
   }
 
   Widget _buildMenuItem(IconData icon, String title) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final isActive = currentPage == title;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -89,15 +92,15 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         leading: Icon(
           icon,
           color: isActive
-              ? KaliColors.espresso
-              : KaliColors.espresso.withValues(alpha: 0.6),
+              ? kaliColors.espresso
+              : kaliColors.espresso.withValues(alpha: 0.6),
         ),
         title: Text(
           title,
           style: KaliText.body(
             isActive
-                ? KaliColors.espresso
-                : KaliColors.espresso.withValues(alpha: 0.6),
+                ? kaliColors.espresso
+                : kaliColors.espresso.withValues(alpha: 0.6),
             weight: isActive ? FontWeight.bold : FontWeight.w500,
           ),
         ),
@@ -107,7 +110,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
     );
   }
 
-  Widget _buildBottomMenuItem(IconData icon, String title) {
+  Widget _buildBottomMenuItem(IconData icon, String title, KaliColorsExtension kaliColors) {
     return InkWell(
       onTap: () async {
         final url = Uri.parse('https://argity.com');
@@ -122,11 +125,11 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         child: Row(
           children: [
             Icon(icon,
-                color: KaliColors.espresso.withValues(alpha: 0.5), size: 18),
+                color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
             const SizedBox(width: 12),
             Text(
               title,
-              style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.5)),
+              style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
             ),
           ],
         ),

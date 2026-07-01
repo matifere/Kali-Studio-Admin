@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/edit_profile_dialog.dart';
 import 'package:argrity/widgets/dashboard/user_profile_button.dart';
 
@@ -39,13 +40,14 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
       ),
     );
     if (success == true && ctx.mounted) {
+      final kaliColors = Theme.of(ctx).extension<KaliColorsExtension>()!;
       setState(() {});
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
           content: const Text(
             'Perfil actualizado. Si cambiaste el correo, confirmá el cambio desde tu bandeja de entrada.',
           ),
-          backgroundColor: KaliColors.espresso,
+          backgroundColor: kaliColors.espresso,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -81,6 +83,7 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
         }
       },
       builder: (ctx, state) {
+        final kaliColors = Theme.of(ctx).extension<KaliColorsExtension>()!;
         final user = Supabase.instance.client.auth.currentUser;
         final metadata = user?.userMetadata ?? {};
         final fullName = metadata['full_name'] as String? ?? 'Usuario Admin';
@@ -101,7 +104,7 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
             children: [
               if (isMobile)
                 IconButton(
-                  icon: const Icon(Icons.menu, color: KaliColors.espresso),
+                  icon: Icon(Icons.menu, color: kaliColors.espresso),
                   onPressed: () {
                     Scaffold.of(ctx).openDrawer();
                   },
@@ -117,7 +120,7 @@ class _DashboardTopNavBarState extends State<DashboardTopNavBar> {
                 const SizedBox(width: 10),
                 Text(
                   'argity',
-                  style: KaliText.heading(KaliColors.espresso, size: 20),
+                  style: KaliText.heading(kaliColors.espresso, size: 20),
                 ),
               ],
               const Spacer(),

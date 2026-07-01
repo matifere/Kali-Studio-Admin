@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Modelo puro, sin dependencias de UI
 
 class Subscription {
   final String id;
@@ -82,10 +82,7 @@ class Subscription {
     return parts[0].substring(0, 1) + parts[1].substring(0, 1);
   }
 
-  Color get avatarColor {
-    List<Color> colores = [Colors.grey, Colors.brown, Colors.white];
-    return colores[studentName.length % colores.length];
-  }
+  // UI: avatarColor was removed. Calculate in UI.
 
   String get statusLabel {
     switch (status) {
@@ -102,33 +99,7 @@ class Subscription {
     }
   }
 
-  Color get statusColor {
-    switch (status) {
-      case 'active':
-        return const Color(0xFF5C9E6C);
-      case 'pending':
-        return const Color(0xFFD4A836);
-      case 'expired':
-      case 'cancelled':
-        return const Color(0xFFD4685C);
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color get statusBgColor {
-    switch (status) {
-      case 'active':
-        return const Color(0xFFE8F5E9);
-      case 'pending':
-        return const Color(0xFFFFF8E1);
-      case 'expired':
-      case 'cancelled':
-        return const Color(0xFFFDECEA);
-      default:
-        return Colors.grey.withValues(alpha: 0.2);
-    }
-  }
+  // UI: statusColor and statusBgColor were removed. Calculate in UI.
 
   String get startDateFormatted =>
       '${startDate.day.toString().padLeft(2, '0')} ${_monthAbbr(startDate.month)} ${startDate.year}';

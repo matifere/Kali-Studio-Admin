@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Modelo sin dependencias de flutter/material
 import 'package:intl/intl.dart';
 
 /// Modelo de datos de un alumno.
@@ -39,10 +39,7 @@ class Student {
     return parts[0].substring(0, 1) + parts[1].substring(0, 1);
   }
 
-  Color get avatarColor {
-    List<Color> colores = [Colors.grey, Colors.brown, Colors.white];
-    return colores[name.length % colores.length];
-  }
+  // UI: avatarColor was removed. Calculate in UI.
 
   /// Copia con el estado activo cambiado (para actualizaciones optimistas).
   Student copyWith({bool? isActive}) => Student(

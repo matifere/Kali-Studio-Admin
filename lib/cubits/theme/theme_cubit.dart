@@ -1,6 +1,6 @@
+import 'package:argrity/theme/kali_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import '../theme/kali_theme.dart';
 
 class ThemeCubit extends Cubit<ThemeData> {
   ThemeCubit() : super(KaliTheme.theme);

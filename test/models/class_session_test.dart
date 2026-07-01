@@ -203,32 +203,7 @@ void main() {
     });
   });
 
-  group('ClassSession.backgroundColor', () {
-    ClassSession makeNamed(String name) => ClassSession.fromJson({
-          'id': 'x',
-          'name': name,
-          'date': '2024-03-04',
-          'start_time': '09:00',
-          'end_time': '10:00',
-          'capacity': 5,
-          'status': 'scheduled',
-          'reservations': null,
-        });
 
-    test('returns a Color', () {
-      expect(makeNamed('Reformer Pilates').backgroundColor, isA<Color>());
-    });
-
-    test('same class name always returns same color', () {
-      final c1 = makeNamed('Reformer Pilates').backgroundColor;
-      final c2 = makeNamed('Reformer Pilates').backgroundColor;
-      expect(c1, equals(c2));
-    });
-
-    test('foregroundColor is a Color', () {
-      expect(makeNamed('Mat Pilates').foregroundColor, isA<Color>());
-    });
-  });
 
   group('TurnoReservation.fromJson', () {
     test('extracts studentName from profiles', () {

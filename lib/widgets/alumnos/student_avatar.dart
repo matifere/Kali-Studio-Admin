@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/student.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 
 /// Avatar circular de un alumno.
@@ -19,23 +20,27 @@ class StudentAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    final avatarColors = [kaliColors.clay, kaliColors.sand, kaliColors.sage];
+    final avatarColor = avatarColors[student.name.length % avatarColors.length];
+
     if (student.avatarImage != null && student.avatarImage!.isNotEmpty) {
       final provider = AvatarProvider.fromUrl(student.avatarImage);
       if (provider != null) {
         return CircleAvatar(
           radius: radius,
-          backgroundColor: student.avatarColor,
+          backgroundColor: avatarColor,
           backgroundImage: provider,
         );
       }
     }
     return CircleAvatar(
       radius: radius,
-      backgroundColor: student.avatarColor,
+      backgroundColor: avatarColor,
       child: Text(
         student.initials,
         style: KaliText.body(
-          KaliColors.espresso,
+          kaliColors.espresso,
           weight: FontWeight.w700,
           size: radius * 0.6,
         ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// Modelo puro, sin dependencias de UI
 
 /// Tipo de clase para determinar el color de la tarjeta.
 enum TurnoType {
@@ -54,39 +54,16 @@ class Turno {
   /// Si está lleno.
   bool get isFull => enrolled >= capacity;
 
-  /// Color de fondo de la tarjeta basado en tipo.
-  Color get backgroundColor {
-    switch (type) {
-      case TurnoType.reformerPilates:
-        return const Color(0xFFF5D9B8); // Clay/peach cálido
-      case TurnoType.matPilates:
-        return const Color(0xFFEDE6D8); // Sand suave
-      case TurnoType.privateSpecial:
-        return const Color(0xFF2C1F14); // Espresso oscuro
-    }
-  }
-
-  /// Color de texto basado en tipo.
-  Color get foregroundColor {
-    switch (type) {
-      case TurnoType.reformerPilates:
-      case TurnoType.matPilates:
-        return const Color(0xFF2C1F14); // Espresso
-      case TurnoType.privateSpecial:
-        return const Color(0xFFFAF7F2); // Warm white
-    }
-  }
+  // UI colors (backgroundColor, foregroundColor) were removed to UI layer.
 }
 
 /// Asistente de un turno.
 class TurnoAttendee {
   final String initials;
-  final Color avatarColor;
   final String name;
 
   const TurnoAttendee({
     required this.initials,
-    required this.avatarColor,
     required this.name,
   });
 }
