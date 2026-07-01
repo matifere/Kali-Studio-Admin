@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/day_column.dart';
 import 'package:argrity/widgets/turnos/time_labels_column.dart';
 
@@ -52,23 +53,24 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Column(
       children: [
-        _buildDayPicker(),
-        Expanded(child: _buildDayBody()),
+        _buildDayPicker(kaliColors),
+        Expanded(child: _buildDayBody(kaliColors)),
       ],
     );
   }
 
   // ── Selector de días (Lun … Dom) ───────────────────────────────────────────
-  Widget _buildDayPicker() {
+  Widget _buildDayPicker(KaliColorsExtension kaliColors) {
     final now = DateTime.now();
     return Container(
       padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: KaliColors.espresso.withValues(alpha: 0.06),
+            color: kaliColors.espresso.withValues(alpha: 0.06),
           ),
         ),
       ),
@@ -92,8 +94,8 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                     dayName,
                     style: KaliText.label(
                       isSelected
-                          ? KaliColors.espresso
-                          : KaliColors.espresso.withValues(alpha: 0.45),
+                          ? kaliColors.espresso
+                          : kaliColors.espresso.withValues(alpha: 0.45),
                     ).copyWith(fontSize: 11, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 4),
@@ -102,9 +104,9 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                     height: 30,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? KaliColors.espresso
+                          ? kaliColors.espresso
                           : (isToday
-                              ? KaliColors.sand
+                              ? kaliColors.sand
                               : Colors.transparent),
                       shape: BoxShape.circle,
                     ),
@@ -113,8 +115,8 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                       '${dayDate.day}',
                       style: KaliText.body(
                         isSelected
-                            ? KaliColors.warmWhite
-                            : KaliColors.espresso,
+                            ? kaliColors.warmWhite
+                            : kaliColors.espresso,
                         weight:
                             isSelected || isToday ? FontWeight.w700 : FontWeight.w400,
                         size: 14,
@@ -131,7 +133,7 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
   }
 
   // ── Cuerpo: horas + columna del día seleccionado ───────────────────────────
-  Widget _buildDayBody() {
+  Widget _buildDayBody(KaliColorsExtension kaliColors) {
     final now = DateTime.now();
     final dayDate = widget.currentWeekStart.add(Duration(days: _selectedDay));
     final isToday = dayDate.year == now.year &&
@@ -156,6 +158,7 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
               startHour: widget.startHour,
               totalSlots: widget.totalSlots,
               slotsPerHour: widget.slotsPerHour,
+              kaliColors: kaliColors,
             ),
             Expanded(
               child: DayColumn(
@@ -188,7 +191,7 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                     child: Text(
                       'No hay turnos este día',
                       style: KaliText.body(
-                        KaliColors.espresso.withValues(alpha: 0.4),
+                        kaliColors.espresso.withValues(alpha: 0.4),
                       ),
                     ),
                   ),

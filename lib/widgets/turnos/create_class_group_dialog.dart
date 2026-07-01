@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -141,6 +142,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
@@ -157,16 +159,16 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                 children: [
                   Text(
                     'Crear Turnos (Grupo)',
-                    style: KaliText.heading(KaliColors.espresso, size: 24),
+                    style: KaliText.heading(kaliColors.espresso, size: 24),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Agendando a partir de la semana del ${DateFormat("dd MMM", "es_ES").format(context.read<TurnosBloc>().state.currentWeekStart)}.',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                   const SizedBox(height: 24),
                   
-                  Text('Nombre de la Clase', style: KaliText.label(KaliColors.espresso)),
+                  Text('Nombre de la Clase', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
@@ -178,7 +180,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Descripción (Opcional)', style: KaliText.label(KaliColors.espresso)),
+                  Text('Descripción (Opcional)', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _descriptionController,
@@ -196,7 +198,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Instructor (Opcional)', style: KaliText.label(KaliColors.espresso)),
+                            Text('Instructor (Opcional)', style: KaliText.label(kaliColors.espresso)),
                             const SizedBox(height: 8),
                             _isLoadingInstructors
                                 ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
@@ -223,7 +225,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Capacidad', style: KaliText.label(KaliColors.espresso)),
+                            Text('Capacidad', style: KaliText.label(kaliColors.espresso)),
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _capacityController,
@@ -245,7 +247,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Horario', style: KaliText.label(KaliColors.espresso)),
+                  Text('Horario', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -278,7 +280,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Días de la semana', style: KaliText.label(KaliColors.espresso)),
+                  Text('Días de la semana', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -304,14 +306,14 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   const SizedBox(height: 16),
 
                   // Frecuencia
-                  Text('Duración', style: KaliText.label(KaliColors.espresso)),
+                  Text('Duración', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<_RecurrenceOption>(
                     initialValue: _recurrenceOption,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
@@ -340,13 +342,13 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+                        child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: KaliColors.espresso,
+                          backgroundColor: kaliColors.espresso,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

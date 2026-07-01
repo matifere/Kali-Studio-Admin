@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/student.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_plan_badge.dart';
 
@@ -11,6 +12,7 @@ class StudentProfileDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -39,13 +41,13 @@ class StudentProfileDialog extends StatelessWidget {
                           children: [
                             Text(
                               student.name,
-                              style: KaliText.headingItalic(KaliColors.espresso, size: 24),
+                              style: KaliText.headingItalic(kaliColors.espresso, size: 24),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               student.email,
-                              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
@@ -56,7 +58,7 @@ class StudentProfileDialog extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close, color: KaliColors.espresso),
+                  icon: Icon(Icons.close, color: kaliColors.espresso),
                 ),
               ],
             ),
@@ -83,26 +85,26 @@ class StudentProfileDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            _buildInfoRow('Próximo Turno', student.nextShift),
+            _buildInfoRow('Próximo Turno', student.nextShift, kaliColors),
             const SizedBox(height: 12),
-            _buildInfoRow('Clase Asignada', student.shiftClass),
+            _buildInfoRow('Clase Asignada', student.shiftClass, kaliColors),
             const SizedBox(height: 12),
-            _buildInfoRow('Fecha de Ingreso', student.createdAt.toIso8601String().split('T')[0]),
+            _buildInfoRow('Fecha de Ingreso', student.createdAt.toIso8601String().split('T')[0], kaliColors),
             const SizedBox(height: 24),
             Text(
               'Patologías',
-              style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600),
+              style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             student.patologias.isNotEmpty
                 ? Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: student.patologias.map((p) => _buildPatologiaChip(p)).toList(),
+                    children: student.patologias.map((p) => _buildPatologiaChip(p, kaliColors)).toList(),
                   )
                 : Text(
                     'No hay patologías registradas.',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                   ),
           ],
         )),
@@ -110,33 +112,33 @@ class StudentProfileDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, KaliColorsExtension kaliColors) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5)),
+          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
         ),
         Text(
           value,
-          style: KaliText.body(KaliColors.espresso, weight: FontWeight.w500),
+          style: KaliText.body(kaliColors.espresso, weight: FontWeight.w500),
         ),
       ],
     );
   }
 
-  Widget _buildPatologiaChip(String patologia) {
+  Widget _buildPatologiaChip(String patologia, KaliColorsExtension kaliColors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: KaliColors.sand,
+        color: kaliColors.sand,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KaliColors.clayDark.withValues(alpha: 0.3)),
+        border: Border.all(color: kaliColors.clayDark.withValues(alpha: 0.3)),
       ),
       child: Text(
         patologia,
-        style: KaliText.label(KaliColors.espresso),
+        style: KaliText.label(kaliColors.espresso),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -181,24 +182,25 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   /// Permite al admin forzar la inscripción de un alumno que no cumple los
   /// requisitos (sin plan activo o con el límite mensual alcanzado).
   Future<void> _confirmOverride(String userId, String name, String reason) async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Inscribir sin créditos', style: KaliText.heading(KaliColors.espresso, size: 20)),
+        title: Text('Inscribir sin créditos', style: KaliText.heading(kaliColors.espresso, size: 20)),
         content: Text(
           '$name no cumple los requisitos ($reason). '
           '¿Inscribirlo de todas formas? Como admin podés forzar la inscripción.',
-          style: KaliText.body(KaliColors.espresso),
+          style: KaliText.body(kaliColors.espresso),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Inscribir igual', style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+            child: Text('Inscribir igual', style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600)),
           ),
         ],
       ),
@@ -210,6 +212,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
@@ -224,7 +227,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               children: [
                 Text(
                   'Inscribir Alumno',
-                  style: KaliText.heading(KaliColors.espresso, size: 24),
+                  style: KaliText.heading(kaliColors.espresso, size: 24),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -235,7 +238,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
             const SizedBox(height: 8),
             Text(
               'Asignar a: ${widget.session.name}',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -246,17 +249,17 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                  borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                  borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             if (_canProject || widget.session.groupId != null) ...[
-              Text('Opciones de inscripción recurrentes', style: KaliText.body(KaliColors.espresso, size: 14, weight: FontWeight.w600)),
+              Text('Opciones de inscripción recurrentes', style: KaliText.body(kaliColors.espresso, size: 14, weight: FontWeight.w600)),
               const SizedBox(height: 8),
               DropdownButtonFormField<EnrollmentType>(
                 initialValue: _enrollmentType,
@@ -264,11 +267,11 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
                   ),
                 ),
                 items: const [
@@ -299,10 +302,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                 : _error != null
                   ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
                   : _filteredProfiles.isEmpty
-                    ? Center(child: Text('No se encontraron alumnos disponibles', style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.5))))
+                    ? Center(child: Text('No se encontraron alumnos disponibles', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5))))
                     : ListView.separated(
                         itemCount: _filteredProfiles.length,
-                        separatorBuilder: (_, __) => Divider(color: KaliColors.espresso.withValues(alpha: 0.1)),
+                        separatorBuilder: (_, __) => Divider(color: kaliColors.espresso.withValues(alpha: 0.1)),
                         itemBuilder: (context, index) {
                           final p = _filteredProfiles[index];
                           final name = p['full_name'] ?? 'Sin nombre';
@@ -312,14 +315,14 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
 
                           return ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: KaliColors.clay,
+                              backgroundColor: kaliColors.clay,
                               backgroundImage: AvatarProvider.fromUrl(p['avatar_url']),
                               child: p['avatar_url'] == null 
                                 ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 12))
                                 : null,
                             ),
                             title: Text(name, style: KaliText.body(
-                              KaliColors.espresso.withValues(alpha: disabledReason != null ? 0.5 : 1.0), 
+                              kaliColors.espresso.withValues(alpha: disabledReason != null ? 0.5 : 1.0), 
                               weight: FontWeight.w600
                             )),
                             subtitle: disabledReason != null
@@ -331,7 +334,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                                     style: TextStyle(
                                       color: ((maxRes ?? 0) > 0 && (currRes ?? 0) >= maxRes!)
                                           ? Colors.orange[700]
-                                          : KaliColors.clay,
+                                          : kaliColors.clay,
                                       fontSize: 12,
                                     ),
                                   ),

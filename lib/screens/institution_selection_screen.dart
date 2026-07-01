@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:argrity/screens/login_screen.dart';
@@ -87,13 +88,14 @@ class _InstitutionSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Scaffold(
-      backgroundColor: KaliColors.background,
+      backgroundColor: kaliColors.background,
       appBar: AppBar(
         title: const Text('Configuración de Institución'),
         centerTitle: true,
-        backgroundColor: KaliColors.espresso,
-        foregroundColor: KaliColors.warmWhite,
+        backgroundColor: kaliColors.espresso,
+        foregroundColor: kaliColors.warmWhite,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -115,7 +117,7 @@ class _InstitutionSelectionScreenState
             child: Container(
               constraints: const BoxConstraints(maxWidth: 500),
               decoration: BoxDecoration(
-                color: KaliColors.warmWhite,
+                color: kaliColors.warmWhite,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -133,7 +135,7 @@ class _InstitutionSelectionScreenState
                   children: [
                     Text(
                       'Crea una nueva institución para empezar a gestionar tu estudio.',
-                      style: KaliText.body(KaliColors.clayDark),
+                      style: KaliText.body(kaliColors.clayDark),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -171,15 +173,15 @@ class _InstitutionSelectionScreenState
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _handleCreate,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: KaliColors.espresso,
-                          foregroundColor: KaliColors.warmWhite,
+                          backgroundColor: kaliColors.espresso,
+                          foregroundColor: kaliColors.warmWhite,
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 24,
                                 height: 24,
                                 child: CircularProgressIndicator(
-                                    color: KaliColors.warmWhite,
+                                    color: kaliColors.warmWhite,
                                     strokeWidth: 2))
                             : const Text('CREAR Y CONTINUAR'),
                       ),

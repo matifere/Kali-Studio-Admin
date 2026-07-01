@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 class KaliTextField extends StatelessWidget {
   final String label;
@@ -25,6 +26,7 @@ class KaliTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Column(
       spacing: 8,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,7 @@ class KaliTextField extends StatelessWidget {
           children: [
             Text(
               label,
-              style: KaliText.label(KaliColors.espresso),
+              style: KaliText.label(kaliColors.espresso),
             ),
             if (actionLabel != null)
               InkWell(
@@ -44,7 +46,7 @@ class KaliTextField extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   child: Text(
                     actionLabel!,
-                    style: KaliText.caption(KaliColors.clayDark),
+                    style: KaliText.caption(kaliColors.clayDark),
                   ),
                 ),
               ),
@@ -53,28 +55,28 @@ class KaliTextField extends StatelessWidget {
         TextField(
           controller: controller,
           obscureText: obscureText,
-          style: KaliText.body(KaliColors.espresso, size: 14),
-          cursorColor: KaliColors.clay,
+          style: KaliText.body(kaliColors.espresso, size: 14),
+          cursorColor: kaliColors.clay,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: KaliText.body(KaliColors.clay, size: 14),
+            hintStyle: KaliText.body(kaliColors.clay, size: 14),
 
             filled: true,
-            fillColor: KaliColors.sand,
+            fillColor: kaliColors.sand,
 
             // Icono derecho
             suffixIcon: suffixIcon != null ? GestureDetector(
               onTap: onSuffixTap,
               child: Icon(
                 suffixIcon,
-                color: KaliColors.clayDark,
+                color: kaliColors.clayDark,
                 size: 18,
               ),
             ) : null,
 
-            border: _border(KaliColors.sand2),
-            enabledBorder: _border(KaliColors.sand2),
-            focusedBorder: _border(KaliColors.clay),
+            border: _border(kaliColors.sand2),
+            enabledBorder: _border(kaliColors.sand2),
+            focusedBorder: _border(kaliColors.clay),
 
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,

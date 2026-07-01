@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Pantalla de carga con branding. Se muestra mientras la app verifica la
 /// sesión / perfil tras el login, en lugar de un scaffold en blanco.
@@ -44,8 +45,9 @@ class _KaliSplashState extends State<KaliSplash>
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Scaffold(
-      backgroundColor: KaliColors.warmWhite,
+      backgroundColor: kaliColors.warmWhite,
       body: Center(
         child: FadeTransition(
           opacity: _fade,
@@ -64,22 +66,22 @@ class _KaliSplashState extends State<KaliSplash>
               const SizedBox(height: 18),
               Text(
                 'Argity',
-                style: KaliText.heading(KaliColors.espresso, size: 30),
+                style: KaliText.heading(kaliColors.espresso, size: 30),
               ),
               const SizedBox(height: 36),
-              const SizedBox(
+              SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: KaliColors.clayDark,
+                  color: kaliColors.clayDark,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
                 widget.message ?? 'Cargando tu panel...',
                 style: KaliText.body(
-                  KaliColors.espresso.withValues(alpha: 0.55),
+                  kaliColors.espresso.withValues(alpha: 0.55),
                   size: 13,
                 ),
               ),

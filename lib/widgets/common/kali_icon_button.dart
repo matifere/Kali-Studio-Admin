@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Botón de ícono reutilizable con tooltip.
 ///
@@ -36,6 +37,7 @@ class KaliIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -46,7 +48,7 @@ class KaliIconButton extends StatelessWidget {
           child: Icon(
             icon,
             size: iconSize,
-            color: color ?? KaliColors.espresso.withValues(alpha: 0.5),
+            color: color ?? kaliColors.espresso.withValues(alpha: 0.5),
           ),
         ),
       ),

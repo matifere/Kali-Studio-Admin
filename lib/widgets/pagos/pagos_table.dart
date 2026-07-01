@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_empty_state.dart';
 import 'package:argrity/widgets/common/kali_pagination.dart';
 import 'package:argrity/widgets/pagos/subscription_row.dart';
@@ -15,6 +16,7 @@ class PagosTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<PagosBloc, PagosState>(
       builder: (context, state) {
         return Container(
@@ -47,7 +49,7 @@ class PagosTable extends StatelessWidget {
                         const double minWidth = 780.0;
                         final tableRows = Column(
                           children: [
-                            _buildColumnHeaders(),
+                            _buildColumnHeaders(kaliColors),
                             ...state.pagePayments.map((p) => SubscriptionRow(subscription: p)),
                           ],
                         );
@@ -85,8 +87,8 @@ class PagosTable extends StatelessWidget {
   }
 
   // ── Encabezados de columna ─────────────────────────────────────────────────
-  Widget _buildColumnHeaders() {
-    final style = KaliText.label(KaliColors.espresso.withValues(alpha: 0.45));
+  Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
+    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),

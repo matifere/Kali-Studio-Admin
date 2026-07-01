@@ -3,18 +3,20 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/activity/activity_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 class DashboardRecentActivity extends StatelessWidget {
   const DashboardRecentActivity({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<ActivityBloc, ActivityState>(
       builder: (context, state) {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: KaliColors.sand,
+            color: kaliColors.sand,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -26,7 +28,7 @@ class DashboardRecentActivity extends StatelessWidget {
                 children: [
                   Text(
                     'Actividad Reciente',
-                    style: KaliText.headingItalic(KaliColors.espresso, size: 28)
+                    style: KaliText.headingItalic(kaliColors.espresso, size: 28)
                         .copyWith(fontWeight: FontWeight.w600),
                   ),
                   if (state.entries.isNotEmpty)
@@ -83,7 +85,7 @@ class _ClearButtonState extends State<_ClearButton> {
           opacity: _hovered ? 1.0 : 0.5,
           child: Text(
             'LIMPIAR',
-            style: KaliText.label(KaliColors.espresso),
+            style: KaliText.label(Theme.of(context).extension<KaliColorsExtension>()!.espresso),
           ),
         ),
       ),
@@ -95,6 +97,7 @@ class _ClearButtonState extends State<_ClearButton> {
 class _EmptyFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
@@ -103,17 +106,17 @@ class _EmptyFeed extends StatelessWidget {
             Icon(
               Icons.history_rounded,
               size: 36,
-              color: KaliColors.espresso.withValues(alpha: 0.2),
+              color: kaliColors.espresso.withValues(alpha: 0.2),
             ),
             const SizedBox(height: 12),
             Text(
               'Aún no hay actividad registrada.',
-              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.45)),
+              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.45)),
             ),
             const SizedBox(height: 4),
             Text(
               'Los cambios que hagas aparecerán aquí.',
-              style: KaliText.caption(KaliColors.espresso.withValues(alpha: 0.35)),
+              style: KaliText.caption(kaliColors.espresso.withValues(alpha: 0.35)),
             ),
           ],
         ),
@@ -131,10 +134,10 @@ class _ActivityItem extends StatelessWidget {
 
   /// Icono y color por categoría.
   (IconData, Color) get _iconAndColor => switch (activityEntry.category) {
-        ActivityCategory.alumno => (Icons.person_add_rounded, KaliColors.sage),
-        ActivityCategory.turno  => (Icons.event_rounded,      KaliColors.clayDark),
+        ActivityCategory.alumno => (Icons.person_add_rounded, const Color(0xFF7A9E7E)),
+        ActivityCategory.turno  => (Icons.event_rounded,      const Color(0xFF8A7C6E)),
         ActivityCategory.pago   => (Icons.payment_rounded,    const Color(0xFF5C9E6C)),
-        ActivityCategory.perfil => (Icons.manage_accounts_rounded, KaliColors.clay),
+        ActivityCategory.perfil => (Icons.manage_accounts_rounded, const Color(0xFFC2A98E)),
       };
 
   String _formatTime(DateTime ts) {
@@ -147,13 +150,14 @@ class _ActivityItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final (icon, color) = _iconAndColor;
 
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Timeline indicator ────────────────────────────────────────────
+          // ── Timeline indicator ─────────────────────────────────────────────────────
           SizedBox(
             width: 28,
             child: Column(
@@ -172,7 +176,7 @@ class _ActivityItem extends StatelessWidget {
                     child: Container(
                       width: 1,
                       margin: const EdgeInsets.symmetric(vertical: 4),
-                      color: KaliColors.espresso.withValues(alpha: 0.1),
+                      color: kaliColors.espresso.withValues(alpha: 0.1),
                     ),
                   ),
               ],
@@ -180,7 +184,7 @@ class _ActivityItem extends StatelessWidget {
           ),
           const SizedBox(width: 14),
 
-          // ── Texto ─────────────────────────────────────────────────────────
+          // ── Texto ───────────────────────────────────────────────────────────
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
@@ -189,17 +193,17 @@ class _ActivityItem extends StatelessWidget {
                 children: [
                   Text(
                     _formatTime(activityEntry.timestamp),
-                    style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.45)),
+                    style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.45)),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     activityEntry.title,
-                    style: KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
+                    style: KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     activityEntry.subtitle,
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.65)),
+                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.65)),
                   ),
                 ],
               ),

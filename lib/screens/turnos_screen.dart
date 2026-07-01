@@ -9,6 +9,7 @@ import 'package:argrity/widgets/turnos/turno_detail_panel.dart';
 import 'package:argrity/widgets/turnos/create_class_group_dialog.dart';
 import 'package:argrity/widgets/turnos/add_holiday_dialog.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/services/profile_cache.dart';
 
 /// Pantalla principal de Turnos (calendario semanal).
@@ -56,6 +57,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocConsumer<TurnosBloc, TurnosState>(
       listenWhen: (prev, curr) {
         if (curr.infoMessage != null && curr.infoMessage != prev.infoMessage) {
@@ -158,7 +160,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                       ? Center(
                                           child: Text(
                                             state.error!,
-                                            style: KaliText.body(KaliColors.espresso),
+                                            style: KaliText.body(kaliColors.espresso),
                                           ),
                                         )
                                       : Column(

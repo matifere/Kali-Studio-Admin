@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -223,9 +224,10 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: KaliColors.espresso),
+      return Center(
+        child: CircularProgressIndicator(color: kaliColors.espresso),
       );
     }
 
@@ -245,9 +247,9 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: KaliColors.warmWhite,
+            color: kaliColors.warmWhite,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: KaliColors.clayDark, width: 1),
+            border: Border.all(color: kaliColors.clayDark, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -261,7 +263,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             children: [
               Text(
                 'Suscripción Actual',
-                style: KaliText.heading(KaliColors.espresso, size: 24),
+                style: KaliText.heading(kaliColors.espresso, size: 24),
               ),
               const SizedBox(height: 16),
               LayoutBuilder(
@@ -271,9 +273,9 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                     spacing: 16,
                     runSpacing: 12,
                     children: [
-                      _buildInfoBadge('Plan', currentPlanName),
+                      _buildInfoBadge('Plan', currentPlanName, kaliColors),
                       _buildInfoBadge(
-                          'Estado', _translateStatus(currentStatus)),
+                          'Estado', _translateStatus(currentStatus), kaliColors),
                     ],
                   );
                   final bool showCancel = currentStatus == 'active' ||
@@ -319,18 +321,18 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
 
         Text(
           'Planes Disponibles',
-          style: KaliText.heading(KaliColors.espresso, size: 28),
+          style: KaliText.heading(kaliColors.espresso, size: 28),
         ),
         const SizedBox(height: 8),
         Text(
           'Mejora tu plan para acceder a nuevas herramientas de gestión y soporte.',
-          style: KaliText.body(KaliColors.clayDark, size: 14),
+          style: KaliText.body(kaliColors.clayDark, size: 14),
         ),
         const SizedBox(height: 24),
 
         if (_plans.isEmpty)
           Text('No hay planes disponibles en este momento.',
-              style: KaliText.body(KaliColors.espresso))
+              style: KaliText.body(kaliColors.espresso))
         else
           LayoutBuilder(
             builder: (context, constraints) {
@@ -351,7 +353,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                   final isThisPlanPending = matchesPlanId && isPending;
 
                   return _buildPlanCard(
-                      plan, isCurrent, isThisPlanPending, cardWidth);
+                      plan, isCurrent, isThisPlanPending, cardWidth, kaliColors);
                 }).toList(),
               );
             },
@@ -360,37 +362,37 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     );
   }
 
-  Widget _buildInfoBadge(String label, String value) {
+  Widget _buildInfoBadge(String label, String value, KaliColorsExtension kaliColors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: KaliColors.sand,
+        color: kaliColors.sand,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: KaliText.caption(KaliColors.clayDark)),
+          Text(label, style: KaliText.caption(kaliColors.clayDark)),
           const SizedBox(height: 4),
           Text(value,
               style:
-                  KaliText.body(KaliColors.espresso, weight: FontWeight.w600)),
+                  KaliText.body(kaliColors.espresso, weight: FontWeight.w600)),
         ],
       ),
     );
   }
 
   Widget _buildPlanCard(Map<String, dynamic> plan, bool isCurrent,
-      bool isThisPlanPending, double width) {
+      bool isThisPlanPending, double width, KaliColorsExtension kaliColors) {
     final highlight = isCurrent || isThisPlanPending;
     return Container(
       width: width,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: highlight ? KaliColors.espresso : KaliColors.warmWhite,
+        color: highlight ? kaliColors.espresso : kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: highlight ? KaliColors.espresso : KaliColors.clayDark,
+          color: highlight ? kaliColors.espresso : kaliColors.clayDark,
           width: 2,
         ),
         boxShadow: [
@@ -411,27 +413,27 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: isCurrent
-                    ? KaliColors.clay
+                    ? kaliColors.clay
                     : Colors.orange.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 isCurrent ? 'PLAN ACTUAL' : 'PAGO PENDIENTE',
-                style: KaliText.caption(KaliColors.espresso)
+                style: KaliText.caption(kaliColors.espresso)
                     .copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           Text(
             plan['name'] ?? '',
             style: KaliText.heading(
-                highlight ? KaliColors.warmWhite : KaliColors.espresso,
+                highlight ? kaliColors.warmWhite : kaliColors.espresso,
                 size: 28),
           ),
           const SizedBox(height: 8),
           Text(
             plan['description'] ?? '',
             style: KaliText.body(
-                highlight ? KaliColors.sand : KaliColors.clayDark,
+                highlight ? kaliColors.sand : kaliColors.clayDark,
                 size: 14),
           ),
           const SizedBox(height: 24),
@@ -441,7 +443,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
               Text(
                 '\$${plan['price']}',
                 style: KaliText.heading(
-                    highlight ? KaliColors.warmWhite : KaliColors.espresso,
+                    highlight ? kaliColors.warmWhite : kaliColors.espresso,
                     size: 40),
               ),
               Padding(
@@ -449,7 +451,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                 child: Text(
                   '${plan['currency']}/${(plan['interval'] == 'year' || plan['billing_cycle'] == 'yearly' || (plan['name'] ?? '').toString().toLowerCase().contains('anual')) ? 'año' : 'mes'}',
                   style: KaliText.body(
-                      highlight ? KaliColors.sand : KaliColors.clayDark,
+                      highlight ? kaliColors.sand : kaliColors.clayDark,
                       size: 14),
                 ),
               ),
@@ -464,11 +466,11 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                   (_isProcessing || isCurrent) ? null : () => _subscribe(plan),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    highlight ? KaliColors.warmWhite : KaliColors.espresso,
+                    highlight ? kaliColors.warmWhite : kaliColors.espresso,
                 foregroundColor:
-                    highlight ? KaliColors.espresso : KaliColors.warmWhite,
+                    highlight ? kaliColors.espresso : kaliColors.warmWhite,
                 disabledBackgroundColor: highlight
-                    ? KaliColors.warmWhite.withValues(alpha: 0.5)
+                    ? kaliColors.warmWhite.withValues(alpha: 0.5)
                     : null,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -481,8 +483,8 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                       height: 24,
                       child: CircularProgressIndicator(
                         color: highlight
-                            ? KaliColors.espresso
-                            : KaliColors.warmWhite,
+                            ? kaliColors.espresso
+                            : kaliColors.warmWhite,
                         strokeWidth: 2,
                       ),
                     )
@@ -493,7 +495,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                               ? 'REINTENTAR PAGO'
                               : 'SUSCRIBIRSE'),
                       style: KaliText.label(
-                        highlight ? KaliColors.espresso : KaliColors.warmWhite,
+                        highlight ? kaliColors.espresso : kaliColors.warmWhite,
                       ).copyWith(letterSpacing: 1.5),
                     ),
             ),

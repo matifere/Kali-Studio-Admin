@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -65,9 +66,10 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     const double widthInForm = 360;
     return Scaffold(
-      backgroundColor: KaliColors.background,
+      backgroundColor: kaliColors.background,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -78,26 +80,26 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               spacing: 8,
               children: [
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: KaliColors.espresso,
+                    color: kaliColors.espresso,
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(14.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
                     child: Icon(
                       Icons.lock_reset,
-                      color: KaliColors.background,
+                      color: kaliColors.background,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Nueva contraseña',
-                  style: KaliText.loginDisplay(KaliColors.espresso),
+                  style: KaliText.loginDisplay(kaliColors.espresso),
                 ),
                 Text(
                   'Elegí una contraseña segura para tu cuenta.',
-                  style: KaliText.loginBody(KaliColors.espresso),
+                  style: KaliText.loginBody(kaliColors.espresso),
                 ),
               ],
             ),
@@ -137,11 +139,11 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                         child: FilledButton(
                           onPressed: _loading ? null : _submit,
                           child: _loading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 24,
                                   height: 24,
                                   child: CircularProgressIndicator(
-                                    color: KaliColors.warmWhite,
+                                    color: kaliColors.warmWhite,
                                     strokeWidth: 2,
                                   ),
                                 )

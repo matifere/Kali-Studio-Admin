@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 class NotificationsButton extends StatelessWidget {
   const NotificationsButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<NotificationsCubit, NotificationsState>(
       builder: (context, state) {
         final unreadCount = state.unreadCount;
@@ -17,7 +19,7 @@ class NotificationsButton extends StatelessWidget {
           children: [
             IconButton(
               icon: Icon(Icons.notifications,
-                  color: KaliColors.espresso.withValues(alpha: 0.6)),
+                  color: kaliColors.espresso.withValues(alpha: 0.6)),
               onPressed: () {
                 _showNotificationsMenu(context, state.notifications);
                 context.read<NotificationsCubit>().markAllAsRead();
@@ -39,8 +41,8 @@ class NotificationsButton extends StatelessWidget {
                   ),
                   child: Text(
                     unreadCount > 9 ? '9+' : '$unreadCount',
-                    style: const TextStyle(
-                      color: KaliColors.warmWhite,
+                    style: TextStyle(
+                      color: kaliColors.warmWhite,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -56,6 +58,7 @@ class NotificationsButton extends StatelessWidget {
 
   void _showNotificationsMenu(
       BuildContext context, List<NotificationItem> notifications) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
         Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
@@ -72,7 +75,7 @@ class NotificationsButton extends StatelessWidget {
       ),
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: KaliColors.warmWhite,
+      color: kaliColors.warmWhite,
       constraints: const BoxConstraints(maxWidth: 320, maxHeight: 400),
       items: [
         PopupMenuItem(
@@ -84,10 +87,10 @@ class NotificationsButton extends StatelessWidget {
               Text(
                 'Notificaciones',
                 style:
-                    KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
+                    KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Divider(color: KaliColors.sand2, height: 1),
+              Divider(color: kaliColors.sand2, height: 1),
             ],
           ),
         ),
@@ -99,7 +102,7 @@ class NotificationsButton extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Text('No hay notificaciones',
                     style: KaliText.body(
-                        KaliColors.espresso.withValues(alpha: 0.5))),
+                        kaliColors.espresso.withValues(alpha: 0.5))),
               ),
             ),
           )
@@ -112,18 +115,18 @@ class NotificationsButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(n.title,
-                        style: KaliText.body(KaliColors.espresso,
+                        style: KaliText.body(kaliColors.espresso,
                             weight: FontWeight.w600, size: 14)),
                     const SizedBox(height: 4),
                     Text(n.message,
-                        style: KaliText.body(KaliColors.espresso, size: 13),
+                        style: KaliText.body(kaliColors.espresso, size: 13),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 4),
                     Text(
                       '${n.timestamp.hour.toString().padLeft(2, '0')}:${n.timestamp.minute.toString().padLeft(2, '0')}',
                       style: KaliText.caption(
-                          KaliColors.espresso.withValues(alpha: 0.4)),
+                          kaliColors.espresso.withValues(alpha: 0.4)),
                     ),
                   ],
                 ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 Widget buildTimeLabelsColumn({
   required double slotH,
   required int startHour,
   required int totalSlots,
   required int slotsPerHour,
+  required KaliColorsExtension kaliColors,
 }) {
   return SizedBox(
     width: 60,
@@ -23,7 +25,7 @@ Widget buildTimeLabelsColumn({
                     child: Text(
                       '${hour.toString().padLeft(2, '0')}:00',
                       style: KaliText.label(
-                        KaliColors.espresso.withValues(alpha: 0.3),
+                        kaliColors.espresso.withValues(alpha: 0.3),
                       ),
                     ),
                   ),

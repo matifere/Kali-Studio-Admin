@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Control de paginación reutilizable.
 ///
@@ -26,6 +27,7 @@ class KaliPagination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 16, 24, 20),
       child: Row(
@@ -34,7 +36,7 @@ class KaliPagination extends StatelessWidget {
           Text(
             'MOSTRANDO $showingCount DE $totalCount $itemLabel',
             style: KaliText.label(
-              KaliColors.espresso.withValues(alpha: 0.4),
+              kaliColors.espresso.withValues(alpha: 0.4),
             ),
           ),
           Row(
@@ -84,6 +86,7 @@ class _PageArrowBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: enabled ? onTap : null,
@@ -93,8 +96,8 @@ class _PageArrowBtn extends StatelessWidget {
           icon,
           size: 18,
           color: enabled
-              ? KaliColors.espresso.withValues(alpha: 0.6)
-              : KaliColors.espresso.withValues(alpha: 0.2),
+              ? kaliColors.espresso.withValues(alpha: 0.6)
+              : kaliColors.espresso.withValues(alpha: 0.2),
         ),
       ),
     );
@@ -122,6 +125,7 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
       onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
@@ -134,15 +138,15 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
           height: 32,
           decoration: BoxDecoration(
             color: widget.isActive
-                ? KaliColors.espresso
-                : (_hovered ? KaliColors.sand2 : Colors.transparent),
+                ? kaliColors.espresso
+                : (_hovered ? kaliColors.sand2 : Colors.transparent),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
           child: Text(
             '${widget.page}',
             style: KaliText.body(
-              widget.isActive ? KaliColors.warmWhite : KaliColors.sand,
+              widget.isActive ? kaliColors.warmWhite : kaliColors.sand,
               weight: widget.isActive ? FontWeight.w700 : FontWeight.w400,
             ),
           ),

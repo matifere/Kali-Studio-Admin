@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/models/student.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -139,9 +140,10 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: KaliColors.warmWhite,
+      backgroundColor: kaliColors.warmWhite,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: SingleChildScrollView(
@@ -158,12 +160,12 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                     Text(
                       _isEditMode ? 'Editar Alumno' : 'Añadir Nuevo Alumno',
                       style: _isEditMode 
-                          ? KaliText.headingItalic(KaliColors.espresso, size: 24)
-                          : GoogleFonts.cormorantGaramond(fontSize: 32, fontWeight: FontWeight.w600, color: KaliColors.espresso),
+                          ? KaliText.headingItalic(kaliColors.espresso, size: 24)
+                          : GoogleFonts.cormorantGaramond(fontSize: 32, fontWeight: FontWeight.w600, color: kaliColors.espresso),
                     ),
                     IconButton(
                       onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close, color: KaliColors.espresso),
+                      icon: Icon(Icons.close, color: kaliColors.espresso),
                     ),
                   ],
                 ),
@@ -171,7 +173,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   const SizedBox(height: 8),
                   Text(
                     'Se registrará con rol de usuario cliente.',
-                    style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -179,20 +181,20 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 // Nombre
                 const _FieldLabel('Nombre Completo'),
                 const SizedBox(height: 6),
-                _buildTextField(_nameController, hint: 'Ej. María Pérez'),
+                _buildTextField(_nameController, hint: 'Ej. María Pérez', kaliColors: kaliColors),
                 const SizedBox(height: 16),
 
                 // Correo Electrónico
                 const _FieldLabel('Correo Electrónico'),
                 const SizedBox(height: 6),
-                _buildTextField(_emailController, hint: 'correo@ejemplo.com', readOnly: _isEditMode),
+                _buildTextField(_emailController, hint: 'correo@ejemplo.com', readOnly: _isEditMode, kaliColors: kaliColors),
                 const SizedBox(height: 16),
 
                 // Contraseña (Solo en creación)
                 if (!_isEditMode) ...[
                   const _FieldLabel('Contraseña temporal'),
                   const SizedBox(height: 6),
-                  _buildTextField(_passwordController, hint: 'Mínimo 6 caracteres', obscureText: true),
+                  _buildTextField(_passwordController, hint: 'Mínimo 6 caracteres', obscureText: true, kaliColors: kaliColors),
                   const SizedBox(height: 16),
                 ],
 
@@ -217,12 +219,13 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                           _patologiaController,
                           hint: 'Añadir patología...',
                           onSubmitted: (_) => _addPatologia(),
+                          kaliColors: kaliColors,
                         ),
                       ),
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: _addPatologia,
-                        icon: const Icon(Icons.add_circle, color: KaliColors.clayDark, size: 30),
+                        icon: Icon(Icons.add_circle, color: kaliColors.clayDark, size: 30),
                       ),
                     ],
                   ),
@@ -232,11 +235,11 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                       spacing: 8,
                       runSpacing: 8,
                       children: _patologias.map((p) => Chip(
-                        label: Text(p, style: KaliText.body(KaliColors.espresso, size: 13)),
+                        label: Text(p, style: KaliText.body(kaliColors.espresso, size: 13)),
                         deleteIcon: const Icon(Icons.close, size: 15),
                         onDeleted: () => _removePatologia(p),
-                        backgroundColor: KaliColors.sand,
-                        side: BorderSide(color: KaliColors.clayDark.withValues(alpha: 0.3)),
+                        backgroundColor: kaliColors.sand,
+                        side: BorderSide(color: kaliColors.clayDark.withValues(alpha: 0.3)),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                       )).toList(),
@@ -262,7 +265,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: KaliColors.clayDark,
+                        backgroundColor: kaliColors.clayDark,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _isLoading
@@ -278,7 +281,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                         onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                         child: Text(
                           'Cancelar',
-                          style: KaliText.body(KaliColors.espresso),
+                          style: KaliText.body(kaliColors.espresso),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -290,21 +293,21 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                             duration: const Duration(milliseconds: 150),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             decoration: BoxDecoration(
-                              color: _isLoading ? KaliColors.espresso.withValues(alpha: 0.6) : KaliColors.espresso,
+                              color: _isLoading ? kaliColors.espresso.withValues(alpha: 0.6) : kaliColors.espresso,
                               borderRadius: BorderRadius.circular(28),
                             ),
                             child: _isLoading
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 18,
                                     height: 18,
                                     child: CircularProgressIndicator(
-                                      color: KaliColors.warmWhite,
+                                      color: kaliColors.warmWhite,
                                       strokeWidth: 2,
                                     ),
                                   )
                                 : Text(
                                     'Registrar Alumno',
-                                    style: KaliText.body(KaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                                    style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600, size: 13),
                                   ),
                           ),
                         ),
@@ -325,6 +328,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
     bool readOnly = false,
     bool obscureText = false,
     void Function(String)? onSubmitted,
+    required KaliColorsExtension kaliColors,
   }) {
     return TextField(
       controller: controller,
@@ -333,21 +337,21 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       onSubmitted: onSubmitted,
       style: KaliText.body(
         readOnly
-            ? KaliColors.espresso.withValues(alpha: 0.45)
-            : KaliColors.espresso,
+            ? kaliColors.espresso.withValues(alpha: 0.45)
+            : kaliColors.espresso,
         size: 14,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: KaliText.body(KaliColors.espresso.withValues(alpha: 0.35), size: 14),
+        hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.35), size: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.15)),
+          borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.15)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: KaliColors.espresso),
+          borderSide: BorderSide(color: kaliColors.espresso),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
@@ -361,9 +365,10 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Text(
       text,
-      style: KaliText.body(KaliColors.espresso, weight: FontWeight.w600, size: 13),
+      style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 13),
     );
   }
 }

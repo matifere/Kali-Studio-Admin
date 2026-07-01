@@ -30,7 +30,7 @@ class _PaymentRowState extends State<PaymentRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered
-            ? KaliColors.sand.withValues(alpha: 0.4)
+            ? kaliColors.sand.withValues(alpha: 0.4)
             : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         child: Row(
@@ -56,7 +56,7 @@ class _PaymentRowState extends State<PaymentRow> {
                   Text(
                     p.studentName,
                     style: KaliText.body(
-                      KaliColors.espresso,
+                      kaliColors.espresso,
                       weight: FontWeight.w600,
                       size: 14,
                     ),

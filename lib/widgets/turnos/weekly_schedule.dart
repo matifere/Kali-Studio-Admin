@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/day_column.dart';
 import 'package:argrity/widgets/turnos/time_labels_column.dart';
 import 'package:argrity/widgets/turnos/mobile_schedule.dart';
@@ -41,6 +42,7 @@ class WeeklySchedule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return LayoutBuilder(
       builder: (context, constraints) {
         // En celular la grilla de 7 días no entra: mostramos un solo día con
@@ -60,11 +62,11 @@ class WeeklySchedule extends StatelessWidget {
 
         const double minWidth = 680.0;
         final needsScroll = constraints.maxWidth < minWidth;
-        final schedule = Column(
-          children: [
-            _buildDayHeaders(),
-            Expanded(child: _buildScheduleBody()),
-          ],
+          final schedule = Column(
+            children: [
+              _buildDayHeaders(kaliColors),
+              Expanded(child: _buildScheduleBody(kaliColors)),
+            ],
         );
         if (needsScroll) {
           return SingleChildScrollView(
@@ -78,14 +80,14 @@ class WeeklySchedule extends StatelessWidget {
   }
 
   // ── Headers de días ────────────────────────────────────────────────────────
-  Widget _buildDayHeaders() {
+  Widget _buildDayHeaders(KaliColorsExtension kaliColors) {
     final now = DateTime.now();
     return Container(
       padding: const EdgeInsets.fromLTRB(60, 16, 0, 12),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: KaliColors.espresso.withValues(alpha: 0.06),
+            color: kaliColors.espresso.withValues(alpha: 0.06),
           ),
         ),
       ),
@@ -103,8 +105,8 @@ class WeeklySchedule extends StatelessWidget {
                     dayName,
                     style: KaliText.label(
                       isToday
-                          ? KaliColors.espresso
-                          : KaliColors.espresso.withValues(alpha: 0.45),
+                          ? kaliColors.espresso
+                          : kaliColors.espresso.withValues(alpha: 0.45),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -113,14 +115,14 @@ class WeeklySchedule extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       color:
-                          isToday ? KaliColors.espresso : Colors.transparent,
+                          isToday ? kaliColors.espresso : Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${dayDate.day}',
                       style: KaliText.body(
-                        isToday ? KaliColors.warmWhite : KaliColors.espresso,
+                        isToday ? kaliColors.warmWhite : kaliColors.espresso,
                         weight: isToday ? FontWeight.w700 : FontWeight.w400,
                         size: 16,
                       ),
@@ -136,7 +138,7 @@ class WeeklySchedule extends StatelessWidget {
   }
 
   // ── Cuerpo del calendario: horas + grilla por día ─────────────────────────
-  Widget _buildScheduleBody() {
+  Widget _buildScheduleBody(KaliColorsExtension kaliColors) {
     final now = DateTime.now();
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -144,11 +146,11 @@ class WeeklySchedule extends StatelessWidget {
         final double slotH = (constraints.maxHeight / _totalSlots).clamp(minSlotH, double.infinity);
         final double totalH = slotH * _totalSlots;
 
-        final row = Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTimeLabels(slotH),
-            ...List.generate(7, (dayIdx) {
+          final row = Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTimeLabels(slotH, kaliColors),
+              ...List.generate(7, (dayIdx) {
               final dayDate = currentWeekStart.add(Duration(days: dayIdx));
               final isToday = dayDate.year == now.year &&
                   dayDate.month == now.month &&
@@ -181,12 +183,13 @@ class WeeklySchedule extends StatelessWidget {
   }
 
   // ── Columna lateral de horas ───────────────────────────────────────────────
-  Widget _buildTimeLabels(double slotH) {
+  Widget _buildTimeLabels(double slotH, KaliColorsExtension kaliColors) {
     return buildTimeLabelsColumn(
       slotH: slotH,
       startHour: _startHour,
       totalSlots: _totalSlots,
       slotsPerHour: _slotsPerHour,
+      kaliColors: kaliColors,
     );
   }
 }

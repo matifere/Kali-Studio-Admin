@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 
 /// Header del calendario semanal con título, rango de fechas y filtros.
@@ -42,9 +43,10 @@ class ScheduleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 640;
-    final filters = _filterWidgets();
-    final actions = _actionWidgets(compact: isSmall);
+    final filters = _filterWidgets(kaliColors);
+    final actions = _actionWidgets(compact: isSmall, kaliColors: kaliColors);
 
     // ── Versión compacta para celular ─────────────────────────────────────────
     // Sin título grande (ya navegaste a Turnos) y todo en lo mínimo vertical
@@ -57,12 +59,12 @@ class ScheduleHeader extends StatelessWidget {
           children: [
             Row(
               children: [
-                _navControls(compact: true),
+                _navControls(compact: true, kaliColors: kaliColors),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     _weekRange,
-                    style: KaliText.body(KaliColors.espresso,
+                    style: KaliText.body(kaliColors.espresso,
                         weight: FontWeight.w600, size: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -98,17 +100,17 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               Text(
                 'Calendario Semanal',
-                style: KaliText.heading(KaliColors.espresso, size: 40)
+                style: KaliText.heading(kaliColors.espresso, size: 40)
                     .copyWith(fontWeight: FontWeight.w600),
               ),
-              _navControls(compact: false),
+              _navControls(compact: false, kaliColors: kaliColors),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             _weekRange,
             style: KaliText.body(
-              KaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.5),
               size: 14,
             ),
           ),
@@ -140,7 +142,7 @@ class ScheduleHeader extends StatelessWidget {
   }
 
   // ── Controles de navegación de semana (◀ ▶) ────────────────────────────────
-  Widget _navControls({required bool compact}) {
+  Widget _navControls({required bool compact, required KaliColorsExtension kaliColors}) {
     final double iconSize = compact ? 20 : 24;
     final BoxConstraints? constraints =
         compact ? const BoxConstraints(minWidth: 36, minHeight: 36) : null;
@@ -148,7 +150,7 @@ class ScheduleHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+        border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -156,7 +158,7 @@ class ScheduleHeader extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.chevron_left_rounded, size: iconSize),
             onPressed: onPreviousWeek,
-            color: KaliColors.espresso,
+            color: kaliColors.espresso,
             tooltip: 'Semana Anterior',
             padding: compact ? EdgeInsets.zero : null,
             constraints: constraints,
@@ -164,11 +166,11 @@ class ScheduleHeader extends StatelessWidget {
           Container(
               width: 1,
               height: 24,
-              color: KaliColors.espresso.withValues(alpha: 0.1)),
+              color: kaliColors.espresso.withValues(alpha: 0.1)),
           IconButton(
             icon: Icon(Icons.chevron_right_rounded, size: iconSize),
             onPressed: onNextWeek,
-            color: KaliColors.espresso,
+            color: kaliColors.espresso,
             tooltip: 'Próxima Semana',
             padding: compact ? EdgeInsets.zero : null,
             constraints: constraints,
@@ -179,7 +181,7 @@ class ScheduleHeader extends StatelessWidget {
   }
 
   // ── Dropdowns de filtro ────────────────────────────────────────────────────
-  List<Widget> _filterWidgets() {
+  List<Widget> _filterWidgets(KaliColorsExtension kaliColors) {
     return [
       if (showDropdownFilters && showInstructorFilter)
         _FilterDropdown(
@@ -209,7 +211,7 @@ class ScheduleHeader extends StatelessWidget {
   }
 
   // ── Botones de acción (crear turno / plantillas) ───────────────────────────
-  List<Widget> _actionWidgets({required bool compact}) {
+  List<Widget> _actionWidgets({required bool compact, required KaliColorsExtension kaliColors}) {
     final EdgeInsets pad = compact
         ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
         : const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
@@ -218,15 +220,15 @@ class ScheduleHeader extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onAddHoliday,
           icon: Icon(Icons.event_busy_rounded,
-              size: compact ? 18 : 20, color: KaliColors.espresso),
+              size: compact ? 18 : 20, color: kaliColors.espresso),
           label: Text(
             compact ? 'Feriado' : 'Agregar Feriado',
-            style: KaliText.body(KaliColors.espresso,
+            style: KaliText.body(kaliColors.espresso,
                 weight: FontWeight.w600, size: 13),
           ),
           style: OutlinedButton.styleFrom(
             padding: pad,
-            side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
+            side: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.2)),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -240,7 +242,7 @@ class ScheduleHeader extends StatelessWidget {
                 weight: FontWeight.w600, size: 13),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: KaliColors.espresso,
+            backgroundColor: kaliColors.espresso,
             padding: pad,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
@@ -273,6 +275,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return PopupMenuButton<String>(
       tooltip: '',
       offset: const Offset(0, 40),
@@ -287,7 +290,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
           child: Text(
             option,
             style: KaliText.body(
-              isSelected ? KaliColors.espresso : KaliColors.espresso.withValues(alpha: 0.7),
+              isSelected ? kaliColors.espresso : kaliColors.espresso.withValues(alpha: 0.7),
               weight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
@@ -300,10 +303,10 @@ class _FilterDropdownState extends State<_FilterDropdown> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: _hovered ? KaliColors.sand : Colors.white,
+            color: _hovered ? kaliColors.sand : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: KaliColors.espresso.withValues(alpha: 0.1),
+              color: kaliColors.espresso.withValues(alpha: 0.1),
             ),
           ),
           child: Row(
@@ -312,7 +315,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
               Text(
                 widget.label,
                 style: KaliText.body(
-                  KaliColors.espresso,
+                  kaliColors.espresso,
                   weight: FontWeight.w500,
                   size: 13,
                 ),
@@ -321,7 +324,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
-                color: KaliColors.espresso.withValues(alpha: 0.5),
+                color: kaliColors.espresso.withValues(alpha: 0.5),
               ),
             ],
           ),

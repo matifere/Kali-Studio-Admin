@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/screens/register_screen.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
@@ -26,11 +27,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleForgotPassword() async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final emailCtrl = TextEditingController(text: emailControl.text.trim());
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: KaliColors.warmWhite,
+        backgroundColor: kaliColors.warmWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
@@ -46,39 +48,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: const BoxDecoration(
-                    color: KaliColors.sand,
+                  decoration: BoxDecoration(
+                    color: kaliColors.sand,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_reset_rounded,
-                    color: KaliColors.clayDark,
+                    color: kaliColors.clayDark,
                     size: 30,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   '¿Olvidaste tu contraseña?',
-                  style: KaliText.heading(KaliColors.espresso, size: 22),
+                  style: KaliText.heading(kaliColors.espresso, size: 22),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Ingresá tu email y te enviamos un link para crear una nueva contraseña.',
-                  style: KaliText.body(KaliColors.clayDark, size: 14),
+                  style: KaliText.body(kaliColors.clayDark, size: 14),
                 ),
                 const SizedBox(height: 24),
                 TextField(
                   controller: emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   autofocus: true,
-                  style: KaliText.body(KaliColors.espresso),
+                  style: KaliText.body(kaliColors.espresso),
                   decoration: InputDecoration(
                     hintText: 'tu@email.com',
-                    hintStyle: KaliText.body(KaliColors.clay),
+                    hintStyle: KaliText.body(kaliColors.clay),
                     prefixIcon:
-                        const Icon(Icons.mail_outline, color: KaliColors.clay),
+                        Icon(Icons.mail_outline, color: kaliColors.clay),
                     filled: true,
-                    fillColor: KaliColors.sand,
+                    fillColor: kaliColors.sand,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
@@ -92,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide:
-                          const BorderSide(color: KaliColors.clay, width: 1.5),
+                          BorderSide(color: kaliColors.clay, width: 1.5),
                     ),
                   ),
                 ),
@@ -104,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () => Navigator.of(ctx).pop(false),
                       child: Text(
                         'Cancelar',
-                        style: KaliText.body(KaliColors.clayDark),
+                        style: KaliText.body(kaliColors.clayDark),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -172,6 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isSmall = screenWidth < 480;
     // El padding de la tarjeta y el del scroll exterior se descuentan del ancho
@@ -199,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return Scaffold(
-          backgroundColor: KaliColors.background,
+          backgroundColor: kaliColors.background,
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
             child: Center(
@@ -219,12 +222,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       Text(
                         "Bienvenid@ de nuevo",
-                        style: KaliText.loginDisplay(KaliColors.espresso),
+                        style: KaliText.loginDisplay(kaliColors.espresso),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         "Accede a tu panel de gestion",
-                        style: KaliText.loginBody(KaliColors.espresso),
+                        style: KaliText.loginBody(kaliColors.espresso),
                       ),
                     ],
                   ),
@@ -271,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Text(
                                     '¿Olvidé mi contraseña?',
                                     style:
-                                        KaliText.caption(KaliColors.clayDark),
+                                        KaliText.caption(kaliColors.clayDark),
                                   ),
                                 ),
                               ],
@@ -284,11 +287,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? null
                                     : () => _handleLogin(context),
                                 child: isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         width: 24,
                                         height: 24,
                                         child: CircularProgressIndicator(
-                                          color: KaliColors.warmWhite,
+                                          color: kaliColors.warmWhite,
                                           strokeWidth: 2,
                                         ),
                                       )

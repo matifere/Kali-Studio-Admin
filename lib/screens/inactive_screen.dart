@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/pagos/saas_subscription_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,36 +15,37 @@ class InactiveScreen extends StatefulWidget {
 class _InactiveScreenState extends State<InactiveScreen> {
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final isSudo = ProfileCache.role == 'sudo';
     final isProfileDisabled = ProfileCache.isProfileDisabled;
 
     return Scaffold(
-      backgroundColor: KaliColors.background,
+      backgroundColor: kaliColors.background,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: isProfileDisabled
-                ? _buildDisabledView()
-                : (isSudo ? _buildSudoView() : _buildClientView()),
+                ? _buildDisabledView(kaliColors)
+                : (isSudo ? _buildSudoView(kaliColors) : _buildClientView(kaliColors)),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDisabledView() {
+  Widget _buildDisabledView(KaliColorsExtension kaliColors) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        const Icon(Icons.block_rounded,
-            size: 80, color: KaliColors.espresso),
-        Text('Cuenta Deshabilitada', style: KaliText.heading(KaliColors.espresso)),
+        Icon(Icons.block_rounded,
+            size: 80, color: kaliColors.espresso),
+        Text('Cuenta Deshabilitada', style: KaliText.heading(kaliColors.espresso)),
         Text(
           'Tu cuenta ha sido deshabilitada.\nPor favor, contactá a soporte técnico.',
           textAlign: TextAlign.center,
-          style: KaliText.body(KaliColors.clayDark),
+          style: KaliText.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 16),
         FilledButton(
@@ -54,18 +56,18 @@ class _InactiveScreenState extends State<InactiveScreen> {
     );
   }
 
-  Widget _buildClientView() {
+  Widget _buildClientView(KaliColorsExtension kaliColors) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        const Icon(Icons.hourglass_empty_rounded,
-            size: 80, color: KaliColors.espresso),
-        Text('Cuenta Pendiente', style: KaliText.heading(KaliColors.espresso)),
+        Icon(Icons.hourglass_empty_rounded,
+            size: 80, color: kaliColors.espresso),
+        Text('Cuenta Pendiente', style: KaliText.heading(kaliColors.espresso)),
         Text(
           'Tu cuenta ha sido creada y está pendiente de aprobación.\nPor favor, contactá al administrador de tu institución.',
           textAlign: TextAlign.center,
-          style: KaliText.body(KaliColors.clayDark),
+          style: KaliText.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 16),
         FilledButton(
@@ -76,19 +78,19 @@ class _InactiveScreenState extends State<InactiveScreen> {
     );
   }
 
-  Widget _buildSudoView() {
+  Widget _buildSudoView(KaliColorsExtension kaliColors) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        const Icon(Icons.workspace_premium_rounded,
-            size: 64, color: KaliColors.espresso),
+        Icon(Icons.workspace_premium_rounded,
+            size: 64, color: kaliColors.espresso),
         Text('Activa tu Institución',
-            style: KaliText.heading(KaliColors.espresso)),
+            style: KaliText.heading(kaliColors.espresso)),
         Text(
           'Para comenzar a gestionar tu institución, por favor adquiere una suscripción.',
           textAlign: TextAlign.center,
-          style: KaliText.body(KaliColors.clayDark),
+          style: KaliText.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 24),
 

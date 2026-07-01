@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 class EditProfileDialog extends StatefulWidget {
   final String currentName;
@@ -112,9 +113,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: KaliColors.warmWhite,
+      backgroundColor: kaliColors.warmWhite,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 460, maxHeight: 700),
         child: SingleChildScrollView(
@@ -132,13 +134,13 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     style: GoogleFonts.cormorantGaramond(
                       fontSize: 32,
                       fontWeight: FontWeight.w600,
-                      color: KaliColors.espresso,
+                      color: kaliColors.espresso,
                     ),
                   ),
                   IconButton(
                     onPressed:
                         _isLoading ? null : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: KaliColors.espresso),
+                    icon: Icon(Icons.close, color: kaliColors.espresso),
                   ),
                 ],
               ),
@@ -173,7 +175,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     child: Text(
                       'Si cambiás el correo, recibirás un link de confirmación en la nueva dirección.',
                       style: KaliText.caption(
-                          KaliColors.espresso.withValues(alpha: 0.5)),
+                          kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ),
                 ],
@@ -190,7 +192,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 18,
-                    color: KaliColors.espresso.withValues(alpha: 0.45),
+                    color: kaliColors.espresso.withValues(alpha: 0.45),
                   ),
                   onPressed: () =>
                       setState(() => _showPassword = !_showPassword),
@@ -208,7 +210,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 18,
-                    color: KaliColors.espresso.withValues(alpha: 0.45),
+                    color: kaliColors.espresso.withValues(alpha: 0.45),
                   ),
                   onPressed: () => setState(() => _showConfirm = !_showConfirm),
                 ),
@@ -235,7 +237,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     child: Text(
                       'Cancelar',
                       style: KaliText.body(
-                          KaliColors.espresso.withValues(alpha: 0.6)),
+                          kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -251,22 +253,22 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                             horizontal: 28, vertical: 16),
                         decoration: BoxDecoration(
                           color: _isLoading
-                              ? KaliColors.espresso.withValues(alpha: 0.6)
-                              : KaliColors.espresso,
+                              ? kaliColors.espresso.withValues(alpha: 0.6)
+                              : kaliColors.espresso,
                           borderRadius: BorderRadius.circular(28),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
-                                  color: KaliColors.warmWhite,
+                                  color: kaliColors.warmWhite,
                                   strokeWidth: 2,
                                 ),
                               )
                             : Text(
                                 'Guardar cambios',
-                                style: KaliText.body(KaliColors.warmWhite,
+                                style: KaliText.body(kaliColors.warmWhite,
                                     weight: FontWeight.w600, size: 13),
                               ),
                       ),
@@ -289,9 +291,10 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Text(
       text,
-      style: KaliText.label(KaliColors.espresso.withValues(alpha: 0.4)),
+      style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.4)),
     );
   }
 }
@@ -315,12 +318,13 @@ class _ProfileField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: KaliText.body(KaliColors.espresso,
+          style: KaliText.body(kaliColors.espresso,
               weight: FontWeight.w600, size: 13),
         ),
         const SizedBox(height: 6),
@@ -328,22 +332,22 @@ class _ProfileField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: KaliText.body(KaliColors.espresso, size: 14),
+          style: KaliText.body(kaliColors.espresso, size: 14),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: KaliText.body(
-                KaliColors.espresso.withValues(alpha: 0.35),
+                kaliColors.espresso.withValues(alpha: 0.35),
                 size: 14),
             suffixIcon: suffix,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                  color: KaliColors.espresso.withValues(alpha: 0.15)),
+                  color: kaliColors.espresso.withValues(alpha: 0.15)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: KaliColors.espresso),
+              borderSide: BorderSide(color: kaliColors.espresso),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

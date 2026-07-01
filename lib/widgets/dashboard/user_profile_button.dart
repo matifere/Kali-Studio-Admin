@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 
 class UserProfileButton extends StatefulWidget {
   final String fullName;
@@ -31,6 +32,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (e) {
@@ -45,7 +47,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _hovered ? KaliColors.sand : Colors.transparent,
+            color: _hovered ? kaliColors.sand : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -58,13 +60,13 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                   children: [
                     Text(
                       widget.fullName,
-                      style: KaliText.body(KaliColors.espresso,
+                      style: KaliText.body(kaliColors.espresso,
                           weight: FontWeight.bold),
                     ),
                     Text(
                       widget.displayRole,
                       style: KaliText.label(
-                          KaliColors.espresso.withValues(alpha: 0.5)),
+                          kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -75,25 +77,25 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: KaliColors.clay,
+                    backgroundColor: kaliColors.clay,
                     backgroundImage: widget.avatarUrl != null
                         ? NetworkImage(widget.avatarUrl!)
                         : null,
                     child: widget.avatarUrl == null
                         ? Text(
                             widget.initial,
-                            style: KaliText.body(KaliColors.warmWhite,
+                            style: KaliText.body(kaliColors.warmWhite,
                                 weight: FontWeight.bold),
                           )
                         : null,
                   ),
                   if (widget.isLoading)
-                    const SizedBox(
+                    SizedBox(
                       width: 44,
                       height: 44,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: KaliColors.espresso,
+                        color: kaliColors.espresso,
                       ),
                     ),
                 ],
@@ -106,6 +108,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
   }
 
   void _showUserMenu(BuildContext context, Offset position) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(
@@ -116,7 +119,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
       ),
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: KaliColors.warmWhite,
+      color: kaliColors.warmWhite,
       items: [
         // Cabecera decorativa del menú
         PopupMenuItem(
@@ -128,15 +131,15 @@ class _UserProfileButtonState extends State<UserProfileButton> {
               Text(
                 widget.fullName,
                 style:
-                    KaliText.body(KaliColors.espresso, weight: FontWeight.bold),
+                    KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
               ),
               Text(
                 widget.displayRole,
                 style: KaliText.caption(
-                    KaliColors.espresso.withValues(alpha: 0.5)),
+                    kaliColors.espresso.withValues(alpha: 0.5)),
               ),
               const SizedBox(height: 8),
-              const Divider(color: KaliColors.sand2, height: 1),
+              Divider(color: kaliColors.sand2, height: 1),
             ],
           ),
         ),
@@ -147,10 +150,10 @@ class _UserProfileButtonState extends State<UserProfileButton> {
           child: Row(
             children: [
               Icon(Icons.edit_rounded,
-                  size: 16, color: KaliColors.espresso.withValues(alpha: 0.7)),
+                  size: 16, color: kaliColors.espresso.withValues(alpha: 0.7)),
               const SizedBox(width: 10),
               Text('Editar perfil',
-                  style: KaliText.body(KaliColors.espresso, size: 14)),
+                  style: KaliText.body(kaliColors.espresso, size: 14)),
             ],
           ),
         ),

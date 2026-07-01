@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/turno_card.dart';
 
 class DayColumn extends StatelessWidget {
@@ -91,16 +92,17 @@ class DayColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final layouts = _computeLayouts();
 
     return Container(
       decoration: BoxDecoration(
         color: isToday
-            ? KaliColors.sand.withValues(alpha: 0.35)
+            ? kaliColors.sand.withValues(alpha: 0.35)
             : Colors.transparent,
         border: Border(
           left: BorderSide(
-            color: KaliColors.espresso.withValues(alpha: 0.04),
+            color: kaliColors.espresso.withValues(alpha: 0.04),
           ),
         ),
       ),
@@ -120,7 +122,7 @@ class DayColumn extends StatelessWidget {
                   child: Container(
                     height: 1,
                     color: i % 2 == 0
-                        ? KaliColors.espresso.withValues(alpha: 0.04)
+                        ? kaliColors.espresso.withValues(alpha: 0.04)
                         : Colors.transparent,
                   ),
                 ),
@@ -148,7 +150,7 @@ class DayColumn extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: KaliColors.espresso.withValues(alpha: 0.15),
+                                color: kaliColors.espresso.withValues(alpha: 0.15),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),

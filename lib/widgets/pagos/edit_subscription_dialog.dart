@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/theme/kali_theme.dart';
+import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Dialog para editar una asignación de plan: permite cambiar el plan y las
@@ -132,6 +133,7 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: Colors.white,
@@ -150,12 +152,12 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                   children: [
                     Text(
                       'Editar Asignación',
-                      style: KaliText.heading(KaliColors.espresso, size: 24),
+                      style: KaliText.heading(kaliColors.espresso, size: 24),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Modificá el plan o las fechas de ${widget.subscription.studentName}.',
-                      style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6)),
+                      style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                     const SizedBox(height: 24),
                     if (_error != null)
@@ -165,11 +167,11 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                       ),
 
                     // Plan
-                    Text('Plan', style: KaliText.label(KaliColors.espresso)),
+                    Text('Plan', style: KaliText.label(kaliColors.espresso)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPlanId,
-                      decoration: _inputDecoration('Selecciona un plan'),
+                      decoration: _inputDecoration('Selecciona un plan', kaliColors),
                       items: _plans.map((p) {
                         final name = p['name'] ?? 'Sin nombre';
                         final price = (p['price'] as num?)?.toDouble() ?? 0.0;
@@ -178,7 +180,7 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                           value: p['id'] as String,
                           child: Text(
                             '$name - \$${price.toStringAsFixed(2)} $currency',
-                            style: KaliText.body(KaliColors.espresso),
+                            style: KaliText.body(kaliColors.espresso),
                           ),
                         );
                       }).toList(),
@@ -216,13 +218,13 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                         TextButton(
                           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                           child: Text('Cancelar',
-                              style: KaliText.body(KaliColors.espresso.withValues(alpha: 0.6))),
+                              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
                         ),
                         const SizedBox(width: 16),
                         ElevatedButton(
                           onPressed: _isSaving ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: KaliColors.espresso,
+                            backgroundColor: kaliColors.espresso,
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -240,16 +242,16 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
     return InputDecoration(
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
@@ -265,12 +267,13 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final text =
         '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: KaliText.label(KaliColors.espresso)),
+        Text(label, style: KaliText.label(kaliColors.espresso)),
         const SizedBox(height: 8),
         InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -279,14 +282,14 @@ class _DateField extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: KaliColors.espresso.withValues(alpha: 0.1)),
+              border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(text, style: KaliText.body(KaliColors.espresso)),
+                Text(text, style: KaliText.body(kaliColors.espresso)),
                 Icon(Icons.calendar_today_outlined,
-                    size: 16, color: KaliColors.espresso.withValues(alpha: 0.5)),
+                    size: 16, color: kaliColors.espresso.withValues(alpha: 0.5)),
               ],
             ),
           ),
