@@ -1,16 +1,13 @@
-# Project: Flutter Theme System Report
-# Scope: Root
+# Project: Include sudo in trainers
+# Scope: Full
 
 ## Architecture
-- A report summarizing hardcoded colors in `lib/` and proposing a Bloc (Cubit) based theme architecture.
+- Modify Supabase queries in Flutter to include the "sudo" role when fetching trainers.
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | Report Generation | Create `reporte_temas.md` at root with hardcoded colors and Cubit architecture | none | IN_PROGRESS |
+| 1 | Include sudo in trainers | Modify queries in `lib/` for trainers and shifts | none | IN_PROGRESS |
 
 ## Interface Contracts
-- None (No source code modifications allowed).
-
-## Code Layout
-- Root: `reporte_temas.md`
+- None

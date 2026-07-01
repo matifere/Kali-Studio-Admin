@@ -1,30 +1,31 @@
 # Original User Request
 
-## Initial Request — 2026-07-01T14:25:55Z
+## Initial Request — 2026-07-01T14:40:08-03:00
 
-# Teamwork Project Prompt
-
-Generar un reporte detallado para implementar un sistema de temas personalizable por el usuario en una aplicación Flutter. El reporte debe identificar exhaustivamente todos los colores "hardcodeados" actuales y proponer una arquitectura de tematización utilizando Bloc (Cubits). No se debe proponer ni realizar ninguna modificación a la base de datos por el momento. **IMPORTANTE: Ningún archivo de código fuente debe ser modificado por los agentes.**
+Analyze and modify the database queries in Kali-Studio-Admin to include the "sudo" user (app owner) in the list of trainers, specifically in the trainers section and when creating/filtering shifts (turnos).
 
 Working directory: /mnt/hdd2t/prog/Kali-Studio-Admin
-Integrity mode: development
+Integrity mode: benchmark
 
 ## Requirements
 
-### R1. Búsqueda exhaustiva de colores
-Realizar un análisis exhaustivo del directorio `lib/` para encontrar todas las instancias de colores hardcodeados (ej. `Colors.red`, `Color(0xFF...)`, `Colors.blue[200]`, etc.).
+### R1. Modificar consultas de entrenadores
+Modificar la obtención de datos de la base de datos para que las listas de entrenadores en la aplicación también incluyan a los usuarios que tengan el rol `sudo`.
 
-### R2. Arquitectura de Tematización (Cubit)
-Diseñar y proponer una arquitectura para manejar el estado del tema utilizando el patrón Bloc, específicamente empleando Cubits. Se debe mostrar cómo integrar el Cubit con el `ThemeData` nativo de Flutter.
+### R2. Integración en turnos
+Asegurarse de que el usuario `sudo` aparezca como una opción válida al momento de crear, asignar y filtrar turnos (shifts).
 
-### R3. Generación de Reporte sin modificaciones de código
-El entregable final debe ser un archivo Markdown llamado `reporte_temas.md` en la raiz del proyecto con el reporte. Los agentes tienen **estrictamente prohibido** realizar modificaciones en el código fuente del proyecto (`lib/`, etc.). 
+### R3. Preservar privilegios de administrador
+La lógica existente que le otorga permisos elevados al usuario `sudo` en toda la aplicación debe permanecer intacta. Lo que los agentes implementen no debe romper ni modificar el nivel de acceso superior del `sudo`.
 
 ## Acceptance Criteria
 
-### Verificación del Reporte
-- [ ] Se generó un archivo llamado `reporte_temas.md` en el directorio del proyecto.
-- [ ] El reporte contiene una lista exhaustiva de todos los archivos y líneas de código en `lib/` que contienen colores hardcodeados.
-- [ ] El reporte incluye un diseño conceptual claro y ejemplos de código para implementar el cambio de tema usando un Cubit.
-- [ ] El reporte no incluye código SQL ni modificaciones de base de datos.
-- [ ] **Ningún** archivo de código fuente del proyecto fue modificado por el equipo de agentes (verificable comprobando que no haya cambios en git o archivos modificados en `lib/`).
+### Verificación de obtención de datos
+- [ ] Las consultas a la base de datos devuelven usuarios con el rol `sudo` junto a los entrenadores regulares.
+
+### Verificación en Interfaz (Turnos y Entrenadores)
+- [ ] El menú o lista desplegable para crear un turno muestra al usuario `sudo` como un entrenador seleccionable.
+- [ ] El panel de "Entrenadores" (si aplica) muestra al usuario `sudo`.
+
+### Verificación de Regresión
+- [ ] El usuario `sudo` conserva todos sus accesos de administrador sin restricciones accidentales.

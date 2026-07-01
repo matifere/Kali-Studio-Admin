@@ -53,7 +53,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
       final res = await Supabase.instance.client
           .from('profiles')
           .select('full_name')
-          .eq('role', 'admin')
+          .inFilter('role', const ['admin', 'sudo'])
           .order('full_name', ascending: true);
       
       final list = (res as List).map((e) => e['full_name'] as String).toList();

@@ -33,7 +33,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
       final res = await Supabase.instance.client
           .from('profiles')
           .select('id, full_name, email, is_active')
-          .eq('role', 'admin')
+          .inFilter('role', const ['admin', 'sudo'])
           .order('full_name', ascending: true);
 
       if (mounted) {
