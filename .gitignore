@@ -10,7 +10,12 @@
 .history
 .agents/
 code_audit_report.md
+reporte_temas.md
 remote_exec.py
+ssh_script.py
+activar_pago.sh
+desactivar_pago.sh
+scratch.dart
 
 
 # Flutter repo-specific
