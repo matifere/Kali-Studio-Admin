@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeCubit extends Cubit<ThemeData> {
   static const String _themeKey = 'selected_theme';
 
-  ThemeCubit({required String initialThemeId}) 
+  ThemeCubit({required String initialThemeId})
       : super(_buildTheme(initialThemeId));
 
   /// Cambia el tema actual y lo guarda en SharedPreferences

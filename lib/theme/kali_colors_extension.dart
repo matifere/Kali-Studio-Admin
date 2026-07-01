@@ -41,8 +41,8 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
   );
 
   static const KaliColorsExtension darkTheme = KaliColorsExtension(
-    espresso: Color(0xFFEFEFEF),
-    espressoL: Color(0xFFFFFFFF),
+    espresso: Color(0xFFF5F0E8),
+    espressoL: Color(0xFF37474F),
     clay: Color(0xFFC4A882), // Accent keeping brand identity
     clayDark: Color(0xFFA08060),
     sand: Color(0xFF2C2C2C),
