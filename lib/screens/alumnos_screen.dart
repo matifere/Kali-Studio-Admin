@@ -24,7 +24,7 @@ class AlumnosScreen extends StatefulWidget {
 }
 
 class _AlumnosScreenState extends State<AlumnosScreen> {
-  final bool _isProfesor = ProfileCache.isAdmin;
+  final bool _isProfesor = ProfileCache.isAdmin && !ProfileCache.isSudo;
 
   @override
   void initState() {

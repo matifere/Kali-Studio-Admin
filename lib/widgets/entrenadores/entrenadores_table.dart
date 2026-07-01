@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
@@ -30,11 +31,19 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
       _error = null;
     });
     try {
-      final res = await Supabase.instance.client
+      // Filtrar por institución para mostrar solo entrenadores de este estudio.
+      final instId = ProfileCache.institutionId;
+
+      var query = Supabase.instance.client
           .from('profiles')
-          .select('id, full_name, email, is_active')
-          .inFilter('role', const ['admin', 'sudo'])
-          .order('full_name', ascending: true);
+          .select('id, full_name, email, is_active, role')
+          .inFilter('role', const ['admin', 'sudo']);
+
+      if (instId != null) {
+        query = query.eq('institution_id', instId);
+      }
+
+      final res = await query.order('full_name', ascending: true);
 
       if (mounted) {
         setState(() {

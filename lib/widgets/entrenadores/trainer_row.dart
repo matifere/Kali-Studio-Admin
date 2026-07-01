@@ -31,6 +31,7 @@ class _TrainerRowState extends State<TrainerRow> {
     final name = widget.trainer['full_name'] as String? ?? 'Sin nombre';
     final email = widget.trainer['email'] as String? ?? '—';
     final isActive = widget.trainer['is_active'] as bool? ?? true;
+    final isSudo = (widget.trainer['role'] as String?) == 'sudo';
     final statusColor =
         isActive ? const Color(0xFF5C9E6C) : const Color(0xFFD4685C);
 
@@ -112,12 +113,14 @@ class _TrainerRowState extends State<TrainerRow> {
             // Acciones
             Expanded(
               flex: 2,
-              child: KaliIconButton.action(
-                Icons.delete_outline,
-                tooltip: 'Eliminar',
-                color: const Color(0xFFD4685C),
-                onTap: widget.onDelete,
-              ),
+              child: isSudo
+                  ? const SizedBox.shrink() // El dueño (sudo) no se puede eliminar
+                  : KaliIconButton.action(
+                      Icons.delete_outline,
+                      tooltip: 'Eliminar',
+                      color: const Color(0xFFD4685C),
+                      onTap: widget.onDelete,
+                    ),
             ),
           ],
         ),

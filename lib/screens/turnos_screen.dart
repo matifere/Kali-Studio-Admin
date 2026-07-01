@@ -20,7 +20,12 @@ class TurnosScreen extends StatefulWidget {
 }
 
 class _TurnosScreenState extends State<TurnosScreen> {
-  final bool _isProfesor = ProfileCache.isAdmin;
+  // isAdmin → rol 'admin' (entrenador con acceso admin).
+  // isSudo  → rol 'sudo' (dueño de la app, acceso total).
+  // Ambos deben ver la pantalla con controles completos (crear, filtrar, feriados).
+  // Solo los 'client' no tienen acceso, pero nunca llegan a esta pantalla.
+  // _isProfesor == true limita la UI; false = acceso completo. Solo admin sin sudo.
+  final bool _isProfesor = ProfileCache.isAdmin && !ProfileCache.isSudo;
 
   @override
   void initState() {

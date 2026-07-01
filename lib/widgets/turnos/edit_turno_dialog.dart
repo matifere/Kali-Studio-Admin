@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -50,12 +51,19 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
 
   Future<void> _loadInstructors() async {
     try {
-      final res = await Supabase.instance.client
+      // Filtrar por institución para no mezclar entrenadores de otros estudios.
+      final instId = ProfileCache.institutionId;
+
+      var query = Supabase.instance.client
           .from('profiles')
           .select('full_name')
-          .inFilter('role', const ['admin', 'sudo'])
-          .order('full_name', ascending: true);
-      
+          .inFilter('role', const ['admin', 'sudo']);
+
+      if (instId != null) {
+        query = query.eq('institution_id', instId);
+      }
+
+      final res = await query.order('full_name', ascending: true);
       final list = (res as List).map((e) => e['full_name'] as String).toList();
       
       if (mounted) {
