@@ -74,33 +74,24 @@ class KaliText {
 
 // ─── Tema global ──────────────────────────────────────────────────────────────
 class KaliTheme {
-  static ThemeData get theme => ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: KaliColors.warmWhite,
-        colorScheme: const ColorScheme.light(
-          primary: KaliColors.espresso,
-          secondary: KaliColors.clay,
-          surface: KaliColors.warmWhite,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: KaliColors.espresso,
-          foregroundColor: KaliColors.warmWhite,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        extensions: const [
-          KaliColorsExtension(
-            espresso: KaliColors.espresso,
-            espressoL: KaliColors.espressoL,
-            clay: KaliColors.clay,
-            clayDark: KaliColors.clayDark,
-            sand: KaliColors.sand,
-            sand2: KaliColors.sand2,
-            sage: KaliColors.sage,
-            sageLight: KaliColors.sageLight,
-            warmWhite: KaliColors.warmWhite,
-            background: KaliColors.background,
-          )
-        ],
-      );
+  static ThemeData buildTheme(KaliColorsExtension colors) {
+    return ThemeData(
+      useMaterial3: true,
+      scaffoldBackgroundColor: colors.warmWhite,
+      colorScheme: ColorScheme.light(
+        primary: colors.espresso,
+        secondary: colors.clay,
+        surface: colors.warmWhite,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.espresso,
+        foregroundColor: colors.warmWhite,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      extensions: [colors],
+    );
+  }
+
+  static ThemeData get theme => buildTheme(KaliColorsExtension.defaultTheme());
 }

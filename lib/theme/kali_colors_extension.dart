@@ -25,6 +25,53 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     required this.background,
   });
 
+  // ─── Variantes predefinidas ───────────────────────────────────────────────
+
+  static KaliColorsExtension defaultTheme() {
+    return const KaliColorsExtension(
+      espresso: Color(0xFF2C1F14),
+      espressoL: Color(0xFF3D2B1A),
+      clay: Color(0xFFC4A882),
+      clayDark: Color(0xFFA08060),
+      sand: Color(0xFFF5F0E8),
+      sand2: Color(0xFFEDE6D8),
+      sage: Color(0xFF8A9E88),
+      sageLight: Color(0xFFD4DDD3),
+      warmWhite: Color(0xFFFAF7F2),
+      background: Color(0xFFE8E2D8),
+    );
+  }
+
+  static KaliColorsExtension darkTheme() {
+    return const KaliColorsExtension(
+      espresso: Color(0xFFEFEFEF),
+      espressoL: Color(0xFFFFFFFF),
+      clay: Color(0xFFC4A882), // Accent keeping brand identity
+      clayDark: Color(0xFFA08060),
+      sand: Color(0xFF2C2C2C),
+      sand2: Color(0xFF1A1A1A),
+      sage: Color(0xFF455A64),
+      sageLight: Color(0xFF37474F),
+      warmWhite: Color(0xFF121212),
+      background: Color(0xFF000000),
+    );
+  }
+
+  static KaliColorsExtension oceanTheme() {
+    return const KaliColorsExtension(
+      espresso: Color(0xFF0D47A1),
+      espressoL: Color(0xFF1565C0),
+      clay: Color(0xFF42A5F5),
+      clayDark: Color(0xFF1E88E5),
+      sand: Color(0xFFE3F2FD),
+      sand2: Color(0xFFBBDEFB),
+      sage: Color(0xFF26A69A),
+      sageLight: Color(0xFF80CBC4),
+      warmWhite: Color(0xFFFFFFFF),
+      background: Color(0xFFF1F5F9),
+    );
+  }
+
   @override
   ThemeExtension<KaliColorsExtension> copyWith({
     Color? espresso,

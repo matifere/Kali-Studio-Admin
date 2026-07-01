@@ -25,6 +25,7 @@ import 'package:argrity/repositories/turnos_repository.dart';
 import 'package:argrity/repositories/pagos_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'cubits/theme/theme_cubit.dart';
 
 Future<void> main() async {
@@ -81,7 +82,11 @@ Future<void> main() async {
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(url: url, anonKey: anon);
   SupaAuthClass.configure(url: url, anonKey: anon);
-  runApp(const KaliApp());
+
+  final prefs = await SharedPreferences.getInstance();
+  final initialThemeId = prefs.getString('selected_theme') ?? 'default';
+
+  runApp(KaliApp(initialThemeId: initialThemeId));
 }
 
 // ─── KaliApp: crea y posee los BLoCs ─────────────────────────────────────────
@@ -89,7 +94,8 @@ Future<void> main() async {
 // Es StatefulWidget para que el ciclo de vida de los BLoCs esté ligado
 // al Estado del widget raíz, y no se recreen en cada hot reload / rebuild.
 class KaliApp extends StatefulWidget {
-  const KaliApp({super.key});
+  final String initialThemeId;
+  const KaliApp({super.key, required this.initialThemeId});
 
   @override
   State<KaliApp> createState() => _KaliAppState();
@@ -131,7 +137,7 @@ class _KaliAppState extends State<KaliApp> {
     _pagosBloc = PagosBloc(repository: pagosRepo)..add(PagosLoadRequested());
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
-    _themeCubit = ThemeCubit();
+    _themeCubit = ThemeCubit(initialThemeId: widget.initialThemeId);
   }
 
   @override
