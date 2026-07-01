@@ -7,6 +7,7 @@ import 'package:argrity/widgets/turnos/weekly_schedule.dart';
 import 'package:argrity/widgets/turnos/schedule_bottom_bar.dart';
 import 'package:argrity/widgets/turnos/turno_detail_panel.dart';
 import 'package:argrity/widgets/turnos/create_class_group_dialog.dart';
+import 'package:argrity/widgets/turnos/add_holiday_dialog.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/services/profile_cache.dart';
 
@@ -38,14 +39,33 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
+  void _showHolidayDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: context.read<TurnosBloc>(),
+        child: const AddHolidayDialog(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TurnosBloc, TurnosState>(
       listenWhen: (prev, curr) {
+        if (curr.infoMessage != null && curr.infoMessage != prev.infoMessage) {
+          return true;
+        }
         final isMobile = MediaQuery.of(context).size.width < 700;
         return isMobile && !prev.hasSelection && curr.hasSelection;
       },
       listener: (ctx, state) {
+        if (state.infoMessage != null) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(content: Text(state.infoMessage!)),
+          );
+          return;
+        }
         if (!state.hasSelection) return;
         showModalBottomSheet(
           context: ctx,
@@ -112,6 +132,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                               context.read<TurnosBloc>().add(TurnosWeekChanged(next));
                             },
                             onCreateTurno: _isProfesor ? null : _showCreateDialog,
+                            onAddHoliday: _isProfesor ? null : _showHolidayDialog,
                           ),
                           Expanded(
                             child: Container(

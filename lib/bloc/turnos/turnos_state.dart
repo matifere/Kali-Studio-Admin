@@ -8,6 +8,10 @@ class TurnosState {
   final bool isLoading;
   final String? error;
 
+  /// Mensaje informativo transitorio (ej. resultado de cancelar un feriado).
+  /// La UI lo muestra en un SnackBar y luego se limpia.
+  final String? infoMessage;
+
   /// El turno actualmente seleccionado, o [null] si ninguno lo está.
   final ClassSession? selectedTurno;
 
@@ -19,6 +23,7 @@ class TurnosState {
     required this.currentWeekStart,
     this.isLoading = true,
     this.error,
+    this.infoMessage,
     this.selectedTurno,
     this.selectedInstructor,
     this.selectedRoom,
@@ -61,6 +66,8 @@ class TurnosState {
     bool? isLoading,
     String? error,
     bool clearError = false,
+    String? infoMessage,
+    bool clearInfoMessage = false,
     ClassSession? selectedTurno,
     bool clearSelection = false,
     String? Function()? selectedInstructor,
@@ -71,6 +78,7 @@ class TurnosState {
       currentWeekStart: currentWeekStart ?? this.currentWeekStart,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
+      infoMessage: clearInfoMessage ? null : (infoMessage ?? this.infoMessage),
       selectedTurno: clearSelection ? null : (selectedTurno ?? this.selectedTurno),
       selectedInstructor: selectedInstructor != null ? selectedInstructor() : this.selectedInstructor,
       selectedRoom: selectedRoom != null ? selectedRoom() : this.selectedRoom,

@@ -25,6 +25,8 @@ class TurnosRepository {
     var query = _client
         .from('class_sessions')
         .select(sessionSelect)
+        // Ocultar solo las canceladas (feriados); el .or preserva las de status NULL legacy.
+        .or('status.is.null,status.neq.cancelled')
         .gte('date', startIso)
         .lte('date', endIso);
 
@@ -278,6 +280,19 @@ class TurnosRepository {
 
   Future<void> removeStudent(String reservationId) async {
     await _client.from('reservations').delete().eq('id', reservationId);
+  }
+
+  /// Cancela todas las clases de [date] (feriado) y devuelve el crédito a cada
+  /// alumno afectado. Corre en el servidor de forma atómica (RPC security-definer)
+  /// y notifica a los alumnos (dispara el push). Devuelve el JSON del RPC con la
+  /// cantidad de clases y reservas canceladas.
+  Future<Map<String, dynamic>> cancelDayAsHoliday(
+      DateTime date, String? reason) async {
+    final res = await _client.rpc('cancel_day_as_holiday', params: {
+      'p_date': DateFormat('yyyy-MM-dd').format(date),
+      'p_reason': (reason == null || reason.trim().isEmpty) ? null : reason.trim(),
+    });
+    return Map<String, dynamic>.from(res as Map);
   }
 
   Future<void> toggleAttendance(

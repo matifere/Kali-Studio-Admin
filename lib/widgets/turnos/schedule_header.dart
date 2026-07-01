@@ -9,6 +9,7 @@ class ScheduleHeader extends StatelessWidget {
   final VoidCallback onPreviousWeek;
   final VoidCallback onNextWeek;
   final VoidCallback? onCreateTurno;
+  final VoidCallback? onAddHoliday;
   final bool showInstructorFilter;
   final bool showDropdownFilters;
   final String? selectedInstructor;
@@ -23,6 +24,7 @@ class ScheduleHeader extends StatelessWidget {
     required this.onPreviousWeek,
     required this.onNextWeek,
     this.onCreateTurno,
+    this.onAddHoliday,
     this.showInstructorFilter = true,
     this.showDropdownFilters = true,
     required this.selectedInstructor,
@@ -212,6 +214,22 @@ class ScheduleHeader extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
         : const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
     return [
+      if (onAddHoliday != null)
+        OutlinedButton.icon(
+          onPressed: onAddHoliday,
+          icon: Icon(Icons.event_busy_rounded,
+              size: compact ? 18 : 20, color: KaliColors.espresso),
+          label: Text(
+            compact ? 'Feriado' : 'Agregar Feriado',
+            style: KaliText.body(KaliColors.espresso,
+                weight: FontWeight.w600, size: 13),
+          ),
+          style: OutlinedButton.styleFrom(
+            padding: pad,
+            side: BorderSide(color: KaliColors.espresso.withValues(alpha: 0.2)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
       if (onCreateTurno != null)
         ElevatedButton.icon(
           onPressed: onCreateTurno,

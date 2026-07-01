@@ -27,6 +27,40 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoStudentRemoved>(_onTurnoStudentRemoved);
     on<TurnoStudentAttendanceToggled>(_onTurnoStudentAttendanceToggled);
     on<TurnosFilterChanged>(_onFilterChanged);
+    on<HolidayAdded>(_onHolidayAdded);
+  }
+
+  Future<void> _onHolidayAdded(
+    HolidayAdded event,
+    Emitter<TurnosState> emit,
+  ) async {
+    try {
+      final result =
+          await _repository.cancelDayAsHoliday(event.date, event.reason);
+      final sessions = (result['sessions'] as int?) ?? 0;
+      final reservations = (result['reservations'] as int?) ?? 0;
+      final fecha = DateFormat('dd/MM', 'es_ES').format(event.date);
+
+      final String message = sessions == 0
+          ? 'No había clases agendadas el $fecha.'
+          : 'Feriado aplicado el $fecha: $sessions ${sessions == 1 ? 'clase cancelada' : 'clases canceladas'}'
+              '${reservations > 0 ? ', $reservations ${reservations == 1 ? 'crédito devuelto' : 'créditos devueltos'}' : ''}.';
+
+      emit(state.copyWith(infoMessage: message, clearSelection: true));
+
+      if (sessions > 0) {
+        _activityBloc?.add(ActivityLogged(ActivityEntry(
+          title: 'Feriado aplicado',
+          subtitle:
+              'Se cancelaron $sessions clase(s) del $fecha y se devolvieron $reservations crédito(s).',
+          category: ActivityCategory.turno,
+          timestamp: DateTime.now(),
+        )));
+      }
+      add(TurnosLoadRequested(state.currentWeekStart));
+    } catch (e) {
+      emit(state.copyWith(error: 'Error al aplicar el feriado: $e'));
+    }
   }
 
   void _onFilterChanged(TurnosFilterChanged event, Emitter<TurnosState> emit) {
@@ -46,7 +80,7 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     TurnosLoadRequested event,
     Emitter<TurnosState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, clearError: true));
+    emit(state.copyWith(isLoading: true, clearError: true, clearInfoMessage: true));
     try {
       final start = event.weekStart;
       final end = start

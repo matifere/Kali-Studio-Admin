@@ -99,6 +99,15 @@ class TurnoStudentAttendanceToggled extends TurnosEvent {
   });
 }
 
+/// El admin marca un día como feriado: cancela las clases de ese día y devuelve
+/// el crédito a cada alumno inscripto.
+class HolidayAdded extends TurnosEvent {
+  final DateTime date;
+  final String? reason;
+
+  HolidayAdded({required this.date, this.reason});
+}
+
 /// El usuario cambió los filtros de instructores o salas
 class TurnosFilterChanged extends TurnosEvent {
   final String? instructor;
