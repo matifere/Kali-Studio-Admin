@@ -343,7 +343,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
   }
 
   InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
-    return InputDecoration(
+    return InputDecoration(filled: true, fillColor: kaliColors.background,
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

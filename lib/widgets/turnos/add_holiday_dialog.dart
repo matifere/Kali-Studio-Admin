@@ -84,7 +84,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                   onTap: _pickDate,
                   borderRadius: BorderRadius.circular(12),
                   child: InputDecorator(
-                    decoration: InputDecoration(
+                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                       border:
                           OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       contentPadding: const EdgeInsets.symmetric(
@@ -111,7 +111,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _reasonController,
-                  decoration: InputDecoration(
+                  decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                     hintText: 'Ej. Feriado nacional',
                     border:
                         OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

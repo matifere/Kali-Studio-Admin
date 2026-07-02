@@ -173,7 +173,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   TextFormField(
                     controller: _nameController,
                     validator: (val) => val == null || val.trim().isEmpty ? 'Requerido' : null,
-                    decoration: InputDecoration(
+                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                       hintText: 'Ej. Reformer Pilates',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -185,7 +185,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   TextFormField(
                     controller: _descriptionController,
                     maxLines: 3,
-                    decoration: InputDecoration(
+                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                       hintText: 'Ej. Nivel intermedio, traer mat propia',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -205,7 +205,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                                 : DropdownButtonFormField<String>(
                                     initialValue: _selectedInstructor,
                                     hint: const Text('Sin instructor'),
-                                    decoration: InputDecoration(
+                                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     ),
@@ -235,7 +235,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                                 if (int.tryParse(val.trim()) == null) return 'Debe ser número';
                                 return null;
                               },
-                              decoration: InputDecoration(
+                              decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                                 hintText: 'Ej. 8',
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               ),
@@ -255,7 +255,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: InkWell(
                           onTap: () => _selectTime(context, true),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                               labelText: 'Hora de Inicio',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -268,7 +268,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: InkWell(
                           onTap: () => _selectTime(context, false),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                               labelText: 'Hora de Fin',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -310,7 +310,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<_RecurrenceOption>(
                     initialValue: _recurrenceOption,
-                    decoration: InputDecoration(
+                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
