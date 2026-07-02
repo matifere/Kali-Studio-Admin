@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
@@ -48,20 +49,32 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(
-                      'assets/images/argity_logo.png',
-                      width: 28,
-                      height: 28,
-                      fit: BoxFit.contain,
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/argity_logo.png',
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Argity',
+                          style: GoogleFonts.outfit(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: kaliColors.espresso,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'argity',
-                      style: KaliText.heading(kaliColors.espresso, size: 18),
-                    ),
+                    const SizedBox(height: 24),
+                    Divider(color: kaliColors.espresso.withValues(alpha: 0.1), thickness: 1, height: 1),
                   ],
                 ),
               ),
