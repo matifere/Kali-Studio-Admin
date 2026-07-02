@@ -89,6 +89,43 @@ class KaliTheme {
         elevation: 0,
         centerTitle: true,
       ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: colors.warmWhite,
+        hourMinuteTextColor: colors.espresso,
+        hourMinuteColor: colors.background,
+        dayPeriodTextColor: colors.espresso,
+        dayPeriodColor: colors.background,
+        dialHandColor: colors.espresso,
+        dialBackgroundColor: colors.background,
+        dialTextColor: WidgetStateColor.resolveWith((states) =>
+            states.contains(WidgetState.selected)
+                ? colors.warmWhite
+                : colors.espresso),
+        entryModeIconColor: colors.espresso,
+        helpTextStyle: TextStyle(color: colors.espresso),
+        cancelButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+        confirmButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: colors.warmWhite,
+        headerBackgroundColor: colors.espresso,
+        headerForegroundColor: colors.warmWhite,
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return colors.warmWhite;
+          return colors.espresso;
+        }),
+        todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return colors.warmWhite;
+          return colors.espresso;
+        }),
+        dayOverlayColor: WidgetStateProperty.all(colors.espresso.withValues(alpha: 0.1)),
+        yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return colors.warmWhite;
+          return colors.espresso;
+        }),
+        cancelButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+        confirmButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+      ),
       extensions: [colors],
     );
   }
