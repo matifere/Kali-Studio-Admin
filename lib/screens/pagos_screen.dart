@@ -38,7 +38,7 @@ class _PagosScreenState extends State<PagosScreen> {
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isSmall ? 20 : 40,
-                vertical: 16,
+                vertical: 32,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

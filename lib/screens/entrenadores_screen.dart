@@ -18,7 +18,7 @@ class EntrenadoresScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
               horizontal: isSmall ? 20 : 40,
-              vertical: 16,
+              vertical: 32,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

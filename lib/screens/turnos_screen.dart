@@ -108,7 +108,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                   // ── Contenido principal ─────────────────────────────────
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(isMobile ? 16 : 40, 16, isMobile ? 16 : 24, 24),
+                      padding: EdgeInsets.fromLTRB(isMobile ? 16 : 40, 32, isMobile ? 16 : 24, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
