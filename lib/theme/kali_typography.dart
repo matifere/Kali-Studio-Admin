@@ -98,6 +98,40 @@ class KaliTypography {
         GoogleFonts.nunito(fontSize: 14, fontWeight: FontWeight.normal),
   );
 
+  static final KaliTypography natureTypography = KaliTypography(
+    displayBase: GoogleFonts.lora(
+        fontSize: 36, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
+    headingBase:
+        GoogleFonts.lora(fontSize: 24, fontWeight: FontWeight.w400),
+    headingItalicBase: GoogleFonts.lora(
+        fontSize: 26, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
+    bodyBase: GoogleFonts.workSans(fontSize: 13, fontWeight: FontWeight.w400),
+    labelBase: GoogleFonts.workSans(
+        fontSize: 13, fontWeight: FontWeight.w500, letterSpacing: 1.2),
+    captionBase: GoogleFonts.workSans(fontSize: 11, fontWeight: FontWeight.w400),
+    loginDisplayBase:
+        GoogleFonts.lora(fontSize: 36, fontWeight: FontWeight.bold),
+    loginBodyBase:
+        GoogleFonts.workSans(fontSize: 14, fontWeight: FontWeight.normal),
+  );
+
+  static final KaliTypography magentaTypography = KaliTypography(
+    displayBase: GoogleFonts.playfairDisplay(
+        fontSize: 36, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
+    headingBase:
+        GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.w400),
+    headingItalicBase: GoogleFonts.playfairDisplay(
+        fontSize: 26, fontWeight: FontWeight.w400, fontStyle: FontStyle.italic),
+    bodyBase: GoogleFonts.lato(fontSize: 13, fontWeight: FontWeight.w400),
+    labelBase: GoogleFonts.lato(
+        fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+    captionBase: GoogleFonts.lato(fontSize: 11, fontWeight: FontWeight.w400),
+    loginDisplayBase:
+        GoogleFonts.playfairDisplay(fontSize: 36, fontWeight: FontWeight.bold),
+    loginBodyBase:
+        GoogleFonts.lato(fontSize: 14, fontWeight: FontWeight.normal),
+  );
+
   KaliTypography lerp(KaliTypography? other, double t) {
     if (other == null) return this;
     return KaliTypography(

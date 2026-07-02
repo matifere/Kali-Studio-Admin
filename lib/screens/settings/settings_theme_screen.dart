@@ -10,14 +10,15 @@ class SettingsThemeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0, top: 48.0),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Tema Visual',
-            style: kaliColors.heading(kaliColors.espresso, size: 28),
+            style: kaliColors.heading(kaliColors.espresso, size: 36),
           ),
           const SizedBox(height: 8),
           Text(
@@ -44,9 +45,20 @@ class SettingsThemeScreen extends StatelessWidget {
                 title: 'Océano',
                 themeColors: KaliColorsExtension.oceanTheme,
               ),
+              _ThemeCard(
+                themeId: 'nature',
+                title: 'Bosque',
+                themeColors: KaliColorsExtension.natureTheme,
+              ),
+              _ThemeCard(
+                themeId: 'magenta',
+                title: 'Magenta',
+                themeColors: KaliColorsExtension.magentaTheme,
+              ),
             ],
           ),
         ],
+      ),
       ),
     );
   }

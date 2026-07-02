@@ -72,6 +72,34 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     typography: KaliTypography.oceanTypography,
   );
 
+  static final KaliColorsExtension natureTheme = KaliColorsExtension(
+    espresso: Color(0xFF1B3B2B), // Deep Forest
+    espressoL: Color(0xFF2E5945),
+    clay: Color(0xFF83B594),     // Mint/Sage
+    clayDark: Color(0xFF5E8E6F),
+    sand: Color(0xFFE6EFEB),     // Pale Mint Surface
+    sand2: Color(0xFFD6E3DD),
+    sage: Color(0xFF88A66D),
+    sageLight: Color(0xFFB4C9BE),
+    warmWhite: Color(0xFFF4F7F5),
+    background: Color(0xFFEAF0EC),
+    typography: KaliTypography.natureTypography,
+  );
+
+  static final KaliColorsExtension magentaTheme = KaliColorsExtension(
+    espresso: Color(0xFF3B1B2B), // Deep Berry
+    espressoL: Color(0xFF5A2C44),
+    clay: Color(0xFFD17C9B),     // Vivid Dusty Rose
+    clayDark: Color(0xFFA65876),
+    sand: Color(0xFFF6E8EE),     // Pale Pink Surface
+    sand2: Color(0xFFEAD2DD),
+    sage: Color(0xFF9E7C88),
+    sageLight: Color(0xFFC7AFB8),
+    warmWhite: Color(0xFFF9F5F6),
+    background: Color(0xFFF0EAEB),
+    typography: KaliTypography.magentaTypography,
+  );
+
   @override
   ThemeExtension<KaliColorsExtension> copyWith({
     Color? espresso,

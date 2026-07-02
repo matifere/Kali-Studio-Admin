@@ -26,6 +26,12 @@ class ThemeCubit extends Cubit<ThemeData> {
       case 'ocean':
         colors = KaliColorsExtension.oceanTheme;
         break;
+      case 'nature':
+        colors = KaliColorsExtension.natureTheme;
+        break;
+      case 'magenta':
+        colors = KaliColorsExtension.magentaTheme;
+        break;
       case 'default':
       default:
         colors = KaliColorsExtension.defaultTheme;
