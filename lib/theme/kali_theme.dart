@@ -16,62 +16,6 @@ class KaliColors {
   static const Color background = Color(0xFFE8E2D8);
 }
 
-// ─── TextStyles ───────────────────────────────────────────────────────────────
-class KaliText {
-  //logintext
-  static TextStyle loginDisplay(Color color) => GoogleFonts.newsreader(
-        fontSize: 36,
-        fontWeight: FontWeight.bold,
-        color: color,
-        fontStyle: FontStyle.normal,
-      );
-  static TextStyle loginBody(Color color) => GoogleFonts.manrope(
-        fontSize: 14,
-        fontWeight: FontWeight.normal,
-        color: color,
-        fontStyle: FontStyle.normal,
-      );
-  //
-  static TextStyle display(Color color) => GoogleFonts.cormorantGaramond(
-        fontSize: 36,
-        fontWeight: FontWeight.w300,
-        color: color,
-        fontStyle: FontStyle.italic,
-      );
-
-  static TextStyle heading(Color color, {double size = 24}) =>
-      GoogleFonts.cormorantGaramond(
-        fontSize: size,
-        fontWeight: FontWeight.w300,
-        color: color,
-      );
-
-  static TextStyle headingItalic(Color color, {double size = 26}) =>
-      GoogleFonts.cormorantGaramond(
-        fontSize: size,
-        fontWeight: FontWeight.w300,
-        color: color,
-        fontStyle: FontStyle.italic,
-      );
-
-  static TextStyle body(Color color,
-          {double size = 13, FontWeight weight = FontWeight.w400}) =>
-      GoogleFonts.dmSans(fontSize: size, fontWeight: weight, color: color);
-
-  static TextStyle label(Color color) => GoogleFonts.dmSans(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        letterSpacing: 1.4,
-        color: color,
-      );
-
-  static TextStyle caption(Color color) => GoogleFonts.dmSans(
-        fontSize: 11,
-        fontWeight: FontWeight.w300,
-        color: color,
-      );
-}
-
 // ─── Tema global ──────────────────────────────────────────────────────────────
 class KaliTheme {
   static ThemeData buildTheme(KaliColorsExtension colors) {
@@ -103,8 +47,10 @@ class KaliTheme {
                 : colors.espresso),
         entryModeIconColor: colors.espresso,
         helpTextStyle: TextStyle(color: colors.espresso),
-        cancelButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
-        confirmButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+        cancelButtonStyle:
+            TextButton.styleFrom(foregroundColor: colors.espresso),
+        confirmButtonStyle:
+            TextButton.styleFrom(foregroundColor: colors.espresso),
       ),
       datePickerTheme: DatePickerThemeData(
         backgroundColor: colors.warmWhite,
@@ -118,13 +64,16 @@ class KaliTheme {
           if (states.contains(WidgetState.selected)) return colors.warmWhite;
           return colors.espresso;
         }),
-        dayOverlayColor: WidgetStateProperty.all(colors.espresso.withValues(alpha: 0.1)),
+        dayOverlayColor:
+            WidgetStateProperty.all(colors.espresso.withValues(alpha: 0.1)),
         yearForegroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return colors.warmWhite;
           return colors.espresso;
         }),
-        cancelButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
-        confirmButtonStyle: TextButton.styleFrom(foregroundColor: colors.espresso),
+        cancelButtonStyle:
+            TextButton.styleFrom(foregroundColor: colors.espresso),
+        confirmButtonStyle:
+            TextButton.styleFrom(foregroundColor: colors.espresso),
       ),
       extensions: [colors],
     );

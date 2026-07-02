@@ -45,8 +45,11 @@ class PagosBloc extends Bloc<PagosEvent, PagosState> {
       final expiredIds = <String>[];
 
       final updatedSubscriptions = subscriptions.map((sub) {
-        final endDate = DateTime(sub.endDate.year, sub.endDate.month, sub.endDate.day);
-        if (sub.status != 'expired' && sub.status != 'cancelled' && today.isAfter(endDate)) {
+        final endDate =
+            DateTime(sub.endDate.year, sub.endDate.month, sub.endDate.day);
+        if (sub.status != 'expired' &&
+            sub.status != 'cancelled' &&
+            today.isAfter(endDate)) {
           expiredIds.add(sub.id);
           return sub.copyWith(status: 'expired');
         }

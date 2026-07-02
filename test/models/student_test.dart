@@ -96,7 +96,9 @@ void main() {
       expect(s.planEndDate, DateTime(2024, 12, 31));
     });
 
-    test('nextShift es la reserva futura más próxima (no la primera de la lista)', () {
+    test(
+        'nextShift es la reserva futura más próxima (no la primera de la lista)',
+        () {
       final now = DateTime.now();
       String inDays(int d) {
         final dt = now.add(Duration(days: d));
@@ -156,9 +158,11 @@ void main() {
       expect(s.shiftClass, 'Sin clase');
     });
 
-    test('attendedThisMonth counts only current-month attended reservations', () {
+    test('attendedThisMonth counts only current-month attended reservations',
+        () {
       final now = DateTime.now();
-      final thisMonth = '${now.year}-${now.month.toString().padLeft(2, '0')}-10';
+      final thisMonth =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-10';
       final lastMonth = now.month == 1
           ? '${now.year - 1}-12-10'
           : '${now.year}-${(now.month - 1).toString().padLeft(2, '0')}-10';
@@ -223,6 +227,4 @@ void main() {
       expect(make('Juan Carlos García').initials, 'JC');
     });
   });
-
-
 }

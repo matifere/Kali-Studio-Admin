@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 
@@ -64,7 +63,7 @@ class ScheduleHeader extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _weekRange,
-                    style: KaliText.body(kaliColors.espresso,
+                    style: kaliColors.body(kaliColors.espresso,
                         weight: FontWeight.w600, size: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -100,7 +99,8 @@ class ScheduleHeader extends StatelessWidget {
             children: [
               Text(
                 'Calendario Semanal',
-                style: KaliText.heading(kaliColors.espresso, size: 40)
+                style: kaliColors
+                    .heading(kaliColors.espresso, size: 40)
                     .copyWith(fontWeight: FontWeight.w600),
               ),
               _navControls(compact: false, kaliColors: kaliColors),
@@ -109,7 +109,7 @@ class ScheduleHeader extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             _weekRange,
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso.withValues(alpha: 0.5),
               size: 14,
             ),
@@ -142,7 +142,8 @@ class ScheduleHeader extends StatelessWidget {
   }
 
   // ── Controles de navegación de semana (◀ ▶) ────────────────────────────────
-  Widget _navControls({required bool compact, required KaliColorsExtension kaliColors}) {
+  Widget _navControls(
+      {required bool compact, required KaliColorsExtension kaliColors}) {
     final double iconSize = compact ? 20 : 24;
     final BoxConstraints? constraints =
         compact ? const BoxConstraints(minWidth: 36, minHeight: 36) : null;
@@ -211,7 +212,8 @@ class ScheduleHeader extends StatelessWidget {
   }
 
   // ── Botones de acción (crear turno / plantillas) ───────────────────────────
-  List<Widget> _actionWidgets({required bool compact, required KaliColorsExtension kaliColors}) {
+  List<Widget> _actionWidgets(
+      {required bool compact, required KaliColorsExtension kaliColors}) {
     final EdgeInsets pad = compact
         ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
         : const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
@@ -223,28 +225,31 @@ class ScheduleHeader extends StatelessWidget {
               size: compact ? 18 : 20, color: kaliColors.espresso),
           label: Text(
             compact ? 'Feriado' : 'Agregar Feriado',
-            style: KaliText.body(kaliColors.espresso,
+            style: kaliColors.body(kaliColors.espresso,
                 weight: FontWeight.w600, size: 13),
           ),
           style: OutlinedButton.styleFrom(
             padding: pad,
             side: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.2)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       if (onCreateTurno != null)
         ElevatedButton.icon(
           onPressed: onCreateTurno,
-          icon: Icon(Icons.add_rounded, size: compact ? 18 : 20, color: kaliColors.warmWhite),
+          icon: Icon(Icons.add_rounded,
+              size: compact ? 18 : 20, color: kaliColors.warmWhite),
           label: Text(
             compact ? 'Turno' : 'Nuevo Turno',
-            style: KaliText.body(kaliColors.warmWhite,
+            style: kaliColors.body(kaliColors.warmWhite,
                 weight: FontWeight.w600, size: 13),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: kaliColors.espresso,
             padding: pad,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
         ),
@@ -289,16 +294,24 @@ class _FilterDropdownState extends State<_FilterDropdown> {
           value: option,
           child: Text(
             option,
-            style: KaliText.body(
-              isSelected ? kaliColors.espresso : kaliColors.espresso.withValues(alpha: 0.7),
+            style: kaliColors.body(
+              isSelected
+                  ? kaliColors.espresso
+                  : kaliColors.espresso.withValues(alpha: 0.7),
               weight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
         );
       }).toList(),
       child: MouseRegion(
-        onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-        onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+        onEnter: (e) {
+          if (e.kind == PointerDeviceKind.mouse)
+            setState(() => _hovered = true);
+        },
+        onExit: (e) {
+          if (e.kind == PointerDeviceKind.mouse)
+            setState(() => _hovered = false);
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -314,7 +327,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
             children: [
               Text(
                 widget.label,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w500,
                   size: 13,

@@ -38,28 +38,44 @@ class ScheduleTemplate {
   /// Helper to convert English day names from DB to index (0 = Lunes)
   int get dayIndex {
     switch (dayOfWeek.toLowerCase()) {
-      case 'monday': return 0;
-      case 'tuesday': return 1;
-      case 'wednesday': return 2;
-      case 'thursday': return 3;
-      case 'friday': return 4;
-      case 'saturday': return 5;
-      case 'sunday': return 6;
-      default: return 0;
+      case 'monday':
+        return 0;
+      case 'tuesday':
+        return 1;
+      case 'wednesday':
+        return 2;
+      case 'thursday':
+        return 3;
+      case 'friday':
+        return 4;
+      case 'saturday':
+        return 5;
+      case 'sunday':
+        return 6;
+      default:
+        return 0;
     }
   }
 
   /// Retorna el nombre del día en Español para la UI
   String get dayNameSpanish {
     switch (dayIndex) {
-      case 0: return 'Lunes';
-      case 1: return 'Martes';
-      case 2: return 'Miércoles';
-      case 3: return 'Jueves';
-      case 4: return 'Viernes';
-      case 5: return 'Sábado';
-      case 6: return 'Domingo';
-      default: return 'Desconocido';
+      case 0:
+        return 'Lunes';
+      case 1:
+        return 'Martes';
+      case 2:
+        return 'Miércoles';
+      case 3:
+        return 'Jueves';
+      case 4:
+        return 'Viernes';
+      case 5:
+        return 'Sábado';
+      case 6:
+        return 'Domingo';
+      default:
+        return 'Desconocido';
     }
   }
 }

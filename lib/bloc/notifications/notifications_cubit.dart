@@ -57,22 +57,24 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     //   payload: { title: '...', message: '...' }
     // })
     _channel = Supabase.instance.client.channel('system_notifications');
-    _channel!.onBroadcast(
-        event: 'new_notification',
-        callback: (payload) {
-          final data = payload['payload'] ?? {};
-          
-          // Filtrar notificaciones dirigidas a otros usuarios
-          final targetUserId = data['user_id']?.toString();
-          final currentUserId = Supabase.instance.client.auth.currentUser?.id;
-          if (targetUserId != null && targetUserId != currentUserId) {
-            return;
-          }
+    _channel!
+        .onBroadcast(
+            event: 'new_notification',
+            callback: (payload) {
+              final data = payload['payload'] ?? {};
 
-          final title = data['title']?.toString() ?? 'Nueva notificación';
-          final message = data['message']?.toString() ?? '';
-          addNotification(title: title, message: message);
-        })
+              // Filtrar notificaciones dirigidas a otros usuarios
+              final targetUserId = data['user_id']?.toString();
+              final currentUserId =
+                  Supabase.instance.client.auth.currentUser?.id;
+              if (targetUserId != null && targetUserId != currentUserId) {
+                return;
+              }
+
+              final title = data['title']?.toString() ?? 'Nueva notificación';
+              final message = data['message']?.toString() ?? '';
+              addNotification(title: title, message: message);
+            })
         .onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
@@ -105,7 +107,8 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       message: message,
       timestamp: DateTime.now(),
     );
-    final updatedList = List<NotificationItem>.from(state.notifications)..insert(0, newItem);
+    final updatedList = List<NotificationItem>.from(state.notifications)
+      ..insert(0, newItem);
     emit(state.copyWith(notifications: updatedList));
   }
 
@@ -118,7 +121,8 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   }
 
   void markAllAsRead() {
-    final updatedList = state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+    final updatedList =
+        state.notifications.map((n) => n.copyWith(isRead: true)).toList();
     emit(state.copyWith(notifications: updatedList));
   }
 

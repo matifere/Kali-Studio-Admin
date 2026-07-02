@@ -6,7 +6,11 @@ void main() {
     Map<String, dynamic> base() => {
           'id': 'sub-1',
           'profiles': {'full_name': 'Juan García', 'avatar_url': null},
-          'plans': {'name': 'Plan Mensual', 'price': 15000.0, 'currency': 'ARS'},
+          'plans': {
+            'name': 'Plan Mensual',
+            'price': 15000.0,
+            'currency': 'ARS'
+          },
           'start_date': '2024-01-01',
           'end_date': '2024-01-31',
           'status': 'active',
@@ -85,13 +89,15 @@ void main() {
         });
 
     test('active → ACTIVO', () => expect(make('active').statusLabel, 'ACTIVO'));
-    test('pending → PENDIENTE', () => expect(make('pending').statusLabel, 'PENDIENTE'));
-    test('expired → VENCIDO', () => expect(make('expired').statusLabel, 'VENCIDO'));
-    test('cancelled → CANCELADO', () => expect(make('cancelled').statusLabel, 'CANCELADO'));
-    test('unknown → uppercased value', () => expect(make('custom').statusLabel, 'CUSTOM'));
+    test('pending → PENDIENTE',
+        () => expect(make('pending').statusLabel, 'PENDIENTE'));
+    test('expired → VENCIDO',
+        () => expect(make('expired').statusLabel, 'VENCIDO'));
+    test('cancelled → CANCELADO',
+        () => expect(make('cancelled').statusLabel, 'CANCELADO'));
+    test('unknown → uppercased value',
+        () => expect(make('custom').statusLabel, 'CUSTOM'));
   });
-
-
 
   group('Subscription.studentInitials', () {
     Subscription make(String name) => Subscription(
@@ -105,8 +111,10 @@ void main() {
           status: 'active',
         );
 
-    test('two-word name → initials', () => expect(make('Ana López').studentInitials, 'AL'));
-    test('single word → first letter', () => expect(make('Roxanne').studentInitials, 'R'));
+    test('two-word name → initials',
+        () => expect(make('Ana López').studentInitials, 'AL'));
+    test('single word → first letter',
+        () => expect(make('Roxanne').studentInitials, 'R'));
     test('empty string → empty', () => expect(make('').studentInitials, ''));
   });
 
@@ -126,9 +134,18 @@ void main() {
 
     test('month abbreviations for all months', () {
       final months = {
-        '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
-        '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
-        '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic',
+        '01': 'Ene',
+        '02': 'Feb',
+        '03': 'Mar',
+        '04': 'Abr',
+        '05': 'May',
+        '06': 'Jun',
+        '07': 'Jul',
+        '08': 'Ago',
+        '09': 'Sep',
+        '10': 'Oct',
+        '11': 'Nov',
+        '12': 'Dic',
       };
       for (final entry in months.entries) {
         final s = Subscription.fromJson({

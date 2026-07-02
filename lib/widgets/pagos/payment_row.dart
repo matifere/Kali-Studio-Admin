@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/models/payment.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Fila de la tabla de pagos.
@@ -22,11 +21,16 @@ class _PaymentRowState extends State<PaymentRow> {
     final p = widget.payment;
 
     final avatarColors = [kaliColors.clay, kaliColors.sand, kaliColors.sage];
-    final avatarColor = avatarColors[p.studentName.length % avatarColors.length];
+    final avatarColor =
+        avatarColors[p.studentName.length % avatarColors.length];
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered
@@ -45,7 +49,7 @@ class _PaymentRowState extends State<PaymentRow> {
                     backgroundColor: avatarColor,
                     child: Text(
                       p.studentInitials,
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso,
                         weight: FontWeight.w600,
                         size: 11,
@@ -55,7 +59,7 @@ class _PaymentRowState extends State<PaymentRow> {
                   const SizedBox(width: 12),
                   Text(
                     p.studentName,
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.espresso,
                       weight: FontWeight.w600,
                       size: 14,
@@ -70,7 +74,7 @@ class _PaymentRowState extends State<PaymentRow> {
               flex: 3,
               child: Text(
                 p.reference,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso.withValues(alpha: 0.6),
                   size: 13,
                 ),
@@ -82,7 +86,7 @@ class _PaymentRowState extends State<PaymentRow> {
               flex: 2,
               child: Text(
                 p.date,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso.withValues(alpha: 0.6),
                   size: 13,
                 ),
@@ -94,7 +98,7 @@ class _PaymentRowState extends State<PaymentRow> {
               flex: 3,
               child: Text(
                 p.methodLabel,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso.withValues(alpha: 0.7),
                   size: 13,
                 ),
@@ -112,7 +116,7 @@ class _PaymentRowState extends State<PaymentRow> {
               flex: 2,
               child: Text(
                 p.amountFormatted,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w700,
                   size: 15,
@@ -135,7 +139,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
-    
+
     Color statusBgColor;
     Color statusColor;
     switch (payment.status) {
@@ -163,7 +167,8 @@ class _StatusBadge extends StatelessWidget {
         ),
         child: Text(
           payment.statusLabel,
-          style: KaliText.label(statusColor)
+          style: kaliColors
+              .label(statusColor)
               .copyWith(fontSize: 8, letterSpacing: 1.0),
         ),
       ),

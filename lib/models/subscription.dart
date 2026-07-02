@@ -53,9 +53,12 @@ class Subscription {
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
     final profileRaw = json['profiles'];
-    final profile = (profileRaw is List ? profileRaw.firstOrNull : profileRaw) as Map? ?? {};
+    final profile =
+        (profileRaw is List ? profileRaw.firstOrNull : profileRaw) as Map? ??
+            {};
     final planRaw = json['plans'];
-    final plan = (planRaw is List ? planRaw.firstOrNull : planRaw) as Map? ?? {};
+    final plan =
+        (planRaw is List ? planRaw.firstOrNull : planRaw) as Map? ?? {};
 
     return Subscription(
       id: json['id'] ?? '',
@@ -76,7 +79,8 @@ class Subscription {
   }
 
   String get studentInitials {
-    final parts = studentName.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts =
+        studentName.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.isEmpty) return '';
     if (parts.length == 1) return parts[0].substring(0, 1);
     return parts[0].substring(0, 1) + parts[1].substring(0, 1);

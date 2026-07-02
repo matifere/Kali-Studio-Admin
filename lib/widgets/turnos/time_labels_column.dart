@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 Widget buildTimeLabelsColumn({
@@ -24,7 +23,7 @@ Widget buildTimeLabelsColumn({
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       '${hour.toString().padLeft(2, '0')}:00',
-                      style: KaliText.label(
+                      style: kaliColors.label(
                         kaliColors.espresso.withValues(alpha: 0.3),
                       ),
                     ),

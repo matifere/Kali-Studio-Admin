@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/cubits/theme/theme_cubit.dart';
 
@@ -18,15 +17,15 @@ class SettingsThemeScreen extends StatelessWidget {
         children: [
           Text(
             'Tema Visual',
-            style: KaliText.heading(kaliColors.espresso, size: 28),
+            style: kaliColors.heading(kaliColors.espresso, size: 28),
           ),
           const SizedBox(height: 8),
           Text(
             'Personalizá los colores de tu espacio de trabajo.',
-            style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.7)),
+            style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.7)),
           ),
           const SizedBox(height: 32),
-          const Wrap(
+          Wrap(
             spacing: 24,
             runSpacing: 24,
             children: [
@@ -66,7 +65,8 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeKaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    final activeKaliColors =
+        Theme.of(context).extension<KaliColorsExtension>()!;
     // En un caso real, el ThemeCubit podría guardar el themeId seleccionado actual,
     // o podríamos adivinar si el tema activo es igual a éste. Para simplicidad de UI
     // comparamos el fondo para saber si está (más o menos) activo, o dejamos sin marcar.
@@ -103,7 +103,8 @@ class _ThemeCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: KaliText.body(activeKaliColors.espresso, weight: FontWeight.bold),
+              style: activeKaliColors.body(activeKaliColors.espresso,
+                  weight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             // Preview de los colores

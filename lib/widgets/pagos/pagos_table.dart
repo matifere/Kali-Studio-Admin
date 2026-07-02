@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_empty_state.dart';
 import 'package:argrity/widgets/common/kali_pagination.dart';
@@ -40,8 +39,7 @@ class PagosTable extends StatelessWidget {
                     const KaliEmptyState(
                       icon: Icons.card_membership_rounded,
                       title: 'No hay suscripciones registradas',
-                      subtitle:
-                          'Las suscripciones a planes aparecerán aquí.',
+                      subtitle: 'Las suscripciones a planes aparecerán aquí.',
                     )
                   else ...[
                     LayoutBuilder(
@@ -50,7 +48,8 @@ class PagosTable extends StatelessWidget {
                         final tableRows = Column(
                           children: [
                             _buildColumnHeaders(kaliColors),
-                            ...state.pagePayments.map((p) => SubscriptionRow(subscription: p)),
+                            ...state.pagePayments
+                                .map((p) => SubscriptionRow(subscription: p)),
                           ],
                         );
                         if (constraints.maxWidth < minWidth) {
@@ -69,9 +68,7 @@ class PagosTable extends StatelessWidget {
                       totalCount: state.payments.length,
                       itemLabel: 'SUSCRIPCIONES',
                       onPageChanged: (page) {
-                        context
-                            .read<PagosBloc>()
-                            .add(PagosPageChanged(page));
+                        context.read<PagosBloc>().add(PagosPageChanged(page));
                       },
                     ),
                   ],
@@ -88,7 +85,7 @@ class PagosTable extends StatelessWidget {
 
   // ── Encabezados de columna ─────────────────────────────────────────────────
   Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
-    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
+    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.45));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),

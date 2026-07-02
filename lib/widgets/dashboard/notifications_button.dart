@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 class NotificationsButton extends StatelessWidget {
@@ -86,8 +85,8 @@ class NotificationsButton extends StatelessWidget {
             children: [
               Text(
                 'Notificaciones',
-                style:
-                    KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
+                style: kaliColors.body(kaliColors.espresso,
+                    weight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Divider(color: kaliColors.sand2, height: 1),
@@ -101,8 +100,8 @@ class NotificationsButton extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text('No hay notificaciones',
-                    style: KaliText.body(
-                        kaliColors.espresso.withValues(alpha: 0.5))),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.5))),
               ),
             ),
           )
@@ -115,18 +114,18 @@ class NotificationsButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(n.title,
-                        style: KaliText.body(kaliColors.espresso,
+                        style: kaliColors.body(kaliColors.espresso,
                             weight: FontWeight.w600, size: 14)),
                     const SizedBox(height: 4),
                     Text(n.message,
-                        style: KaliText.body(kaliColors.espresso, size: 13),
+                        style: kaliColors.body(kaliColors.espresso, size: 13),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 4),
                     Text(
                       '${n.timestamp.hour.toString().padLeft(2, '0')}:${n.timestamp.minute.toString().padLeft(2, '0')}',
-                      style: KaliText.caption(
-                          kaliColors.espresso.withValues(alpha: 0.4)),
+                      style: kaliColors
+                          .caption(kaliColors.espresso.withValues(alpha: 0.4)),
                     ),
                   ],
                 ),

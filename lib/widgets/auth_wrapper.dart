@@ -24,6 +24,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   // Arrancamos con el último valor conocido: si el usuario ya estaba activo,
   // un remount no debe mostrar InactiveScreen mientras se re-verifica.
   bool _isActive = ProfileCache.isActive;
+
   /// true una vez que _checkProfile() completó la verificación de suscripción.
   /// Mientras sea false, el stream listener NO puede sobreescribir _isActive
   /// para evitar la race condition que causa bypass del paywall.
@@ -56,7 +57,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
             // Re-verificar la validez de la suscripción antes de decidir
             // si el usuario puede acceder al dashboard.
-            final shouldBeActive = profileIsActive && await _isSubscriptionValid();
+            final shouldBeActive =
+                profileIsActive && await _isSubscriptionValid();
 
             ProfileCache.updateIsActive(shouldBeActive);
             if (mounted && shouldBeActive != _isActive) {
@@ -72,10 +74,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
           .stream(primaryKey: ['id'])
           .eq('institution_id', institutionId)
           .listen((_) async {
-        if (mounted && _subscriptionChecked) {
-          await _checkProfile();
-        }
-      });
+            if (mounted && _subscriptionChecked) {
+              await _checkProfile();
+            }
+          });
     }
   }
 
@@ -98,7 +100,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final status = subData['status'] as String?;
       if (status == 'active' || status == 'authorized') {
         return true;
-      } else if (status == 'cancelled' && subData['current_period_end'] != null) {
+      } else if (status == 'cancelled' &&
+          subData['current_period_end'] != null) {
         final end = DateTime.tryParse(subData['current_period_end'].toString());
         return end != null && DateTime.now().isBefore(end);
       }
@@ -137,7 +140,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
           institutionId: data['institution_id'] as String?,
           fullName: data['full_name'] as String?,
         );
-        ProfileCache.updateIsProfileDisabled(!(data['is_active'] as bool? ?? true));
+        ProfileCache.updateIsProfileDisabled(
+            !(data['is_active'] as bool? ?? true));
       }
 
       final isSubValid = await _isSubscriptionValid();

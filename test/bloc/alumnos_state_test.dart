@@ -142,12 +142,15 @@ void main() {
           makeStudent(id: '3', patologias: ['artritis']),
         ],
       );
-      expect(state.availablePatologias, ['artritis', 'escoliosis', 'lumbalgia']);
+      expect(
+          state.availablePatologias, ['artritis', 'escoliosis', 'lumbalgia']);
     });
 
     test('ignora strings vacíos en patologías', () {
       final state = AlumnosLoaded(
-        students: [makeStudent(id: '1', patologias: ['', 'lumbalgia'])],
+        students: [
+          makeStudent(id: '1', patologias: ['', 'lumbalgia'])
+        ],
       );
       expect(state.availablePatologias, ['lumbalgia']);
     });
@@ -203,7 +206,8 @@ void main() {
       expect(state.pageStudents.length, 2);
     });
 
-    test('pageStudents devuelve lista vacía cuando no hay resultados filtrados', () {
+    test('pageStudents devuelve lista vacía cuando no hay resultados filtrados',
+        () {
       final state = AlumnosLoaded(
         students: makeStudents(4),
         searchQuery: 'SIN_MATCH',

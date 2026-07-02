@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/day_column.dart';
 import 'package:argrity/widgets/turnos/time_labels_column.dart';
@@ -38,7 +37,6 @@ class WeeklySchedule extends StatelessWidget {
   // Cada hora = 2 celdas de 30 min.
   static const int _slotsPerHour = 2;
   int get _totalSlots => _totalHours * _slotsPerHour;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +60,11 @@ class WeeklySchedule extends StatelessWidget {
 
         const double minWidth = 680.0;
         final needsScroll = constraints.maxWidth < minWidth;
-          final schedule = Column(
-            children: [
-              _buildDayHeaders(kaliColors),
-              Expanded(child: _buildScheduleBody(kaliColors)),
-            ],
+        final schedule = Column(
+          children: [
+            _buildDayHeaders(kaliColors),
+            Expanded(child: _buildScheduleBody(kaliColors)),
+          ],
         );
         if (needsScroll) {
           return SingleChildScrollView(
@@ -94,8 +92,11 @@ class WeeklySchedule extends StatelessWidget {
       child: Row(
         children: List.generate(7, (i) {
           final dayDate = currentWeekStart.add(Duration(days: i));
-          final isToday = dayDate.year == now.year && dayDate.month == now.month && dayDate.day == now.day;
-          final dayName = DateFormat('EEE', 'es_ES').format(dayDate).toUpperCase();
+          final isToday = dayDate.year == now.year &&
+              dayDate.month == now.month &&
+              dayDate.day == now.day;
+          final dayName =
+              DateFormat('EEE', 'es_ES').format(dayDate).toUpperCase();
           return Expanded(
             child: Center(
               child: Column(
@@ -103,7 +104,7 @@ class WeeklySchedule extends StatelessWidget {
                 children: [
                   Text(
                     dayName,
-                    style: KaliText.label(
+                    style: kaliColors.label(
                       isToday
                           ? kaliColors.espresso
                           : kaliColors.espresso.withValues(alpha: 0.45),
@@ -114,14 +115,13 @@ class WeeklySchedule extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color:
-                          isToday ? kaliColors.espresso : Colors.transparent,
+                      color: isToday ? kaliColors.espresso : Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${dayDate.day}',
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         isToday ? kaliColors.warmWhite : kaliColors.espresso,
                         weight: isToday ? FontWeight.w700 : FontWeight.w400,
                         size: 16,
@@ -143,14 +143,15 @@ class WeeklySchedule extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const double minSlotH = 17.0;
-        final double slotH = (constraints.maxHeight / _totalSlots).clamp(minSlotH, double.infinity);
+        final double slotH = (constraints.maxHeight / _totalSlots)
+            .clamp(minSlotH, double.infinity);
         final double totalH = slotH * _totalSlots;
 
-          final row = Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTimeLabels(slotH, kaliColors),
-              ...List.generate(7, (dayIdx) {
+        final row = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTimeLabels(slotH, kaliColors),
+            ...List.generate(7, (dayIdx) {
               final dayDate = currentWeekStart.add(Duration(days: dayIdx));
               final isToday = dayDate.year == now.year &&
                   dayDate.month == now.month &&

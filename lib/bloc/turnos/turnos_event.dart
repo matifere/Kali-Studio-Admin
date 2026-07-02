@@ -76,7 +76,7 @@ class TurnoStudentAssigned extends TurnosEvent {
   final EnrollmentType enrollmentType;
 
   TurnoStudentAssigned({
-    required this.userId, 
+    required this.userId,
     required this.session,
     this.enrollmentType = EnrollmentType.single,
   });
@@ -118,4 +118,3 @@ class TurnosFilterChanged extends TurnosEvent {
     this.room,
   });
 }
-

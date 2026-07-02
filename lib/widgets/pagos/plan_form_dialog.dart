@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -40,7 +39,8 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
       _description = p['description'];
       _price = (p['price'] as num?)?.toDouble() ?? 0.0;
       _currency = p['currency'] ?? 'ARS';
-      _maxReservationsPerMonth = (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
+      _maxReservationsPerMonth =
+          (p['max_reservations_per_month'] as num?)?.toInt() ?? 8;
       _isActive = p['is_active'] ?? true;
     } else {
       _name = '';
@@ -76,7 +76,11 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
         await db.from('plans').update(payload).eq('id', widget.plan!['id']);
       } else {
         final user = db.auth.currentUser;
-        final profile = await db.from('profiles').select('institution_id').eq('id', user!.id).maybeSingle();
+        final profile = await db
+            .from('profiles')
+            .select('institution_id')
+            .eq('id', user!.id)
+            .maybeSingle();
         final instId = profile?['institution_id'];
         if (instId != null) payload['institution_id'] = instId;
 
@@ -87,7 +91,10 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
         widget.onRefresh?.call();
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEditMode ? 'Plan actualizado exitosamente' : 'Plan creado exitosamente')),
+          SnackBar(
+              content: Text(_isEditMode
+                  ? 'Plan actualizado exitosamente'
+                  : 'Plan creado exitosamente')),
         );
       }
     } catch (e) {
@@ -116,38 +123,46 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
               children: [
                 Text(
                   _isEditMode ? 'Editar Plan' : 'Crear Nuevo Plan',
-                  style: KaliText.heading(kaliColors.espresso, size: 24),
+                  style: kaliColors.heading(kaliColors.espresso, size: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _isEditMode ? 'Modifica los datos del plan de pagos.' : 'Define un plan de pagos para los alumnos del estudio.',
-                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                  _isEditMode
+                      ? 'Modifica los datos del plan de pagos.'
+                      : 'Define un plan de pagos para los alumnos del estudio.',
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 24),
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                    child: Text(_error!,
+                        style: const TextStyle(color: Colors.red)),
                   ),
 
                 // Name
-                Text('Nombre del Plan', style: KaliText.label(kaliColors.espresso)),
+                Text('Nombre del Plan',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _name,
-                  decoration: _inputDecoration('Ej. Plan Mensual 2x', kaliColors),
+                  decoration:
+                      _inputDecoration('Ej. Plan Mensual 2x', kaliColors),
                   validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
                   onSaved: (v) => _name = v!,
                 ),
                 const SizedBox(height: 16),
 
                 // Description
-                Text('Descripción (Opcional)', style: KaliText.label(kaliColors.espresso)),
+                Text('Descripción (Opcional)',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _description,
                   maxLines: 2,
-                  decoration: _inputDecoration('Ej. Permite hasta 8 reservas por mes', kaliColors),
+                  decoration: _inputDecoration(
+                      'Ej. Permite hasta 8 reservas por mes', kaliColors),
                   onSaved: (v) => _description = v?.isEmpty == true ? null : v,
                 ),
                 const SizedBox(height: 16),
@@ -160,13 +175,20 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Precio', style: KaliText.label(kaliColors.espresso)),
+                          Text('Precio',
+                              style: kaliColors.label(kaliColors.espresso)),
                           const SizedBox(height: 8),
                           TextFormField(
-                            initialValue: _price == 0.0 && !_isEditMode ? '' : _price.toString(),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _inputDecoration('Ej. 25000', kaliColors),
-                            validator: (v) => double.tryParse(v ?? '') == null ? 'Número inválido' : null,
+                            initialValue: _price == 0.0 && !_isEditMode
+                                ? ''
+                                : _price.toString(),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration:
+                                _inputDecoration('Ej. 25000', kaliColors),
+                            validator: (v) => double.tryParse(v ?? '') == null
+                                ? 'Número inválido'
+                                : null,
                             onSaved: (v) => _price = double.parse(v!),
                           ),
                         ],
@@ -178,7 +200,8 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Moneda', style: KaliText.label(kaliColors.espresso)),
+                          Text('Moneda',
+                              style: kaliColors.label(kaliColors.espresso)),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
                             initialValue: _currency,
@@ -186,7 +209,9 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                             items: _currencies.map((c) {
                               return DropdownMenuItem<String>(
                                 value: c,
-                                child: Text(c, style: KaliText.body(kaliColors.espresso)),
+                                child: Text(c,
+                                    style:
+                                        kaliColors.body(kaliColors.espresso)),
                               );
                             }).toList(),
                             onChanged: (v) {
@@ -201,13 +226,15 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                 const SizedBox(height: 16),
 
                 // Max reservations per month
-                Text('Máximo de Reservas por Mes', style: KaliText.label(kaliColors.espresso)),
+                Text('Máximo de Reservas por Mes',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _maxReservationsPerMonth.toString(),
                   keyboardType: TextInputType.number,
                   decoration: _inputDecoration('Ej. 8', kaliColors),
-                  validator: (v) => int.tryParse(v ?? '') == null ? 'Número inválido' : null,
+                  validator: (v) =>
+                      int.tryParse(v ?? '') == null ? 'Número inválido' : null,
                   onSaved: (v) => _maxReservationsPerMonth = int.parse(v!),
                 ),
                 const SizedBox(height: 16),
@@ -216,8 +243,11 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                 SwitchListTile.adaptive(
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
-                  title: Text('Plan Activo', style: KaliText.body(kaliColors.espresso, size: 14)),
-                  subtitle: Text('Determina si el plan está disponible.', style: KaliText.caption(kaliColors.espresso.withValues(alpha: 0.6))),
+                  title: Text('Plan Activo',
+                      style: kaliColors.body(kaliColors.espresso, size: 14)),
+                  subtitle: Text('Determina si el plan está disponible.',
+                      style: kaliColors
+                          .caption(kaliColors.espresso.withValues(alpha: 0.6))),
                   activeThumbColor: kaliColors.warmWhite,
                   activeTrackColor: kaliColors.espresso,
                   contentPadding: EdgeInsets.zero,
@@ -228,16 +258,21 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                      child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+                      onPressed:
+                          _isSaving ? null : () => Navigator.of(context).pop(),
+                      child: Text('Cancelar',
+                          style: kaliColors.body(
+                              kaliColors.espresso.withValues(alpha: 0.6))),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: _isSaving ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kaliColors.espresso,
-                        foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        foregroundColor:
+                            kaliColors.getContrastColor(kaliColors.espresso),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -247,9 +282,15 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
-                                  color: kaliColors.getContrastColor(kaliColors.espresso), strokeWidth: 2))
-                          : Text(_isEditMode ? 'Guardar Cambios' : 'Guardar Plan',
-                              style: KaliText.body(kaliColors.getContrastColor(kaliColors.espresso), weight: FontWeight.w600)),
+                                  color: kaliColors
+                                      .getContrastColor(kaliColors.espresso),
+                                  strokeWidth: 2))
+                          : Text(
+                              _isEditMode ? 'Guardar Cambios' : 'Guardar Plan',
+                              style: kaliColors.body(
+                                  kaliColors
+                                      .getContrastColor(kaliColors.espresso),
+                                  weight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -261,21 +302,21 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
+  InputDecoration _inputDecoration(
+      String hint, KaliColorsExtension kaliColors) {
     return InputDecoration(
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-            color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-            color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 }

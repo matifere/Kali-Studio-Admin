@@ -149,8 +149,12 @@ class Student {
       isActive: json['is_active'] ?? false,
       nextShift: nextShiftDate,
       shiftClass: shiftClassName,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) ?? DateTime.now() : DateTime.now(),
-      patologias: json['patologias'] != null ? List<String>.from(json['patologias']) : [],
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at']) ?? DateTime.now()
+          : DateTime.now(),
+      patologias: json['patologias'] != null
+          ? List<String>.from(json['patologias'])
+          : [],
       planEndDate: endDate,
       reactivate: false,
       attendedThisMonth: attendedThisMonth,

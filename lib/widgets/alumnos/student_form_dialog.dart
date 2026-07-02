@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/models/student.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class StudentFormDialog extends StatefulWidget {
   final Student? student;
@@ -25,7 +23,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
   late TextEditingController _patologiaController;
   late List<String> _patologias;
   late bool _isActive;
-  
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -34,8 +32,10 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: _isEditMode ? widget.student!.name : '');
-    _emailController = TextEditingController(text: _isEditMode ? widget.student!.email : '');
+    _nameController =
+        TextEditingController(text: _isEditMode ? widget.student!.name : '');
+    _emailController =
+        TextEditingController(text: _isEditMode ? widget.student!.email : '');
     _passwordController = TextEditingController();
     _patologiaController = TextEditingController();
     _patologias = _isEditMode ? List.from(widget.student!.patologias) : [];
@@ -71,7 +71,8 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
     final pass = _passwordController.text;
 
     if (name.isEmpty) {
-      if (mounted) setState(() => _errorMessage = 'El nombre no puede estar vacío');
+      if (mounted)
+        setState(() => _errorMessage = 'El nombre no puede estar vacío');
       return;
     }
 
@@ -87,14 +88,19 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
 
     try {
       if (_isEditMode) {
-        final result = await Supabase.instance.client.from('profiles').update({
-          'full_name': name,
-          'patologias': _patologias,
-          'is_active': _isActive,
-        }).eq('id', widget.student!.id).select('id');
+        final result = await Supabase.instance.client
+            .from('profiles')
+            .update({
+              'full_name': name,
+              'patologias': _patologias,
+              'is_active': _isActive,
+            })
+            .eq('id', widget.student!.id)
+            .select('id');
 
         if (result.isEmpty) {
-          throw Exception('No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
+          throw Exception(
+              'No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
         }
 
         if (mounted) {
@@ -132,7 +138,9 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = _isEditMode ? 'No se pudo actualizar el alumno. Intentá nuevamente.' : 'Error al registrar: $e';
+          _errorMessage = _isEditMode
+              ? 'No se pudo actualizar el alumno. Intentá nuevamente.'
+              : 'Error al registrar: $e';
         });
       }
     }
@@ -159,12 +167,14 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   children: [
                     Text(
                       _isEditMode ? 'Editar Alumno' : 'Añadir Nuevo Alumno',
-                      style: _isEditMode 
-                          ? KaliText.headingItalic(kaliColors.espresso, size: 24)
-                          : GoogleFonts.cormorantGaramond(fontSize: 32, fontWeight: FontWeight.w600, color: kaliColors.espresso),
+                      style: _isEditMode
+                          ? kaliColors.headingItalic(kaliColors.espresso,
+                              size: 24)
+                          : kaliColors.heading(kaliColors.espresso, size: 32).copyWith(fontWeight: FontWeight.w600),
                     ),
                     IconButton(
-                      onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                      onPressed:
+                          _isLoading ? null : () => Navigator.of(context).pop(),
                       icon: Icon(Icons.close, color: kaliColors.espresso),
                     ),
                   ],
@@ -173,7 +183,8 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   const SizedBox(height: 8),
                   Text(
                     'Se registrará con rol de usuario cliente.',
-                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -181,20 +192,27 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 // Nombre
                 const _FieldLabel('Nombre Completo'),
                 const SizedBox(height: 6),
-                _buildTextField(_nameController, hint: 'Ej. María Pérez', kaliColors: kaliColors),
+                _buildTextField(_nameController,
+                    hint: 'Ej. María Pérez', kaliColors: kaliColors),
                 const SizedBox(height: 16),
 
                 // Correo Electrónico
                 const _FieldLabel('Correo Electrónico'),
                 const SizedBox(height: 6),
-                _buildTextField(_emailController, hint: 'correo@ejemplo.com', readOnly: _isEditMode, kaliColors: kaliColors),
+                _buildTextField(_emailController,
+                    hint: 'correo@ejemplo.com',
+                    readOnly: _isEditMode,
+                    kaliColors: kaliColors),
                 const SizedBox(height: 16),
 
                 // Contraseña (Solo en creación)
                 if (!_isEditMode) ...[
                   const _FieldLabel('Contraseña temporal'),
                   const SizedBox(height: 6),
-                  _buildTextField(_passwordController, hint: 'Mínimo 6 caracteres', obscureText: true, kaliColors: kaliColors),
+                  _buildTextField(_passwordController,
+                      hint: 'Mínimo 6 caracteres',
+                      obscureText: true,
+                      kaliColors: kaliColors),
                   const SizedBox(height: 16),
                 ],
 
@@ -225,7 +243,8 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: _addPatologia,
-                        icon: Icon(Icons.add_circle, color: kaliColors.clayDark, size: 30),
+                        icon: Icon(Icons.add_circle,
+                            color: kaliColors.clayDark, size: 30),
                       ),
                     ],
                   ),
@@ -234,15 +253,23 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _patologias.map((p) => Chip(
-                        label: Text(p, style: KaliText.body(kaliColors.espresso, size: 13)),
-                        deleteIcon: const Icon(Icons.close, size: 15),
-                        onDeleted: () => _removePatologia(p),
-                        backgroundColor: kaliColors.sand,
-                        side: BorderSide(color: kaliColors.clayDark.withValues(alpha: 0.3)),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                      )).toList(),
+                      children: _patologias
+                          .map((p) => Chip(
+                                label: Text(p,
+                                    style: kaliColors.body(kaliColors.espresso,
+                                        size: 13)),
+                                deleteIcon: const Icon(Icons.close, size: 15),
+                                onDeleted: () => _removePatologia(p),
+                                backgroundColor: kaliColors.sand,
+                                side: BorderSide(
+                                    color: kaliColors.clayDark
+                                        .withValues(alpha: 0.3)),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                              ))
+                          .toList(),
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -252,7 +279,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   const SizedBox(height: 16),
                   Text(
                     _errorMessage!,
-                    style: KaliText.body(const Color(0xFFD4685C)),
+                    style: kaliColors.body(const Color(0xFFD4685C)),
                   ),
                 ],
                 const SizedBox(height: 32),
@@ -266,12 +293,18 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                       onPressed: _isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kaliColors.clayDark,
-                        foregroundColor: kaliColors.getContrastColor(kaliColors.clayDark),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        foregroundColor:
+                            kaliColors.getContrastColor(kaliColors.clayDark),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _isLoading
-                          ? CircularProgressIndicator(color: kaliColors.getContrastColor(kaliColors.clayDark))
-                          : Text('Guardar Cambios', style: KaliText.body(kaliColors.getContrastColor(kaliColors.clayDark))),
+                          ? CircularProgressIndicator(
+                              color: kaliColors
+                                  .getContrastColor(kaliColors.clayDark))
+                          : Text('Guardar Cambios',
+                              style: kaliColors.body(kaliColors
+                                  .getContrastColor(kaliColors.clayDark))),
                     ),
                   )
                 else
@@ -279,22 +312,29 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isLoading
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: Text(
                           'Cancelar',
-                          style: KaliText.body(kaliColors.espresso),
+                          style: kaliColors.body(kaliColors.espresso),
                         ),
                       ),
                       const SizedBox(width: 16),
                       MouseRegion(
-                        cursor: _isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                        cursor: _isLoading
+                            ? SystemMouseCursors.basic
+                            : SystemMouseCursors.click,
                         child: GestureDetector(
                           onTap: _isLoading ? null : _submit,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
                             decoration: BoxDecoration(
-                              color: _isLoading ? kaliColors.espresso.withValues(alpha: 0.6) : kaliColors.espresso,
+                              color: _isLoading
+                                  ? kaliColors.espresso.withValues(alpha: 0.6)
+                                  : kaliColors.espresso,
                               borderRadius: BorderRadius.circular(28),
                             ),
                             child: _isLoading
@@ -308,7 +348,8 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                                   )
                                 : Text(
                                     'Registrar Alumno',
-                                    style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                                    style: kaliColors.body(kaliColors.warmWhite,
+                                        weight: FontWeight.w600, size: 13),
                                   ),
                           ),
                         ),
@@ -336,7 +377,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       readOnly: readOnly,
       obscureText: obscureText,
       onSubmitted: onSubmitted,
-      style: KaliText.body(
+      style: kaliColors.body(
         readOnly
             ? kaliColors.espresso.withValues(alpha: 0.45)
             : kaliColors.espresso,
@@ -344,17 +385,20 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.35), size: 14),
+        hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.35),
+            size: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.15)),
+          borderSide:
+              BorderSide(color: kaliColors.espresso.withValues(alpha: 0.15)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: kaliColors.espresso),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
   }
@@ -369,7 +413,8 @@ class _FieldLabel extends StatelessWidget {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Text(
       text,
-      style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 13),
+      style: kaliColors.body(kaliColors.espresso,
+          weight: FontWeight.w600, size: 13),
     );
   }
 }
@@ -384,16 +429,19 @@ class _ActiveToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: (value ? _activeColor : _inactiveColor).withValues(alpha: 0.08),
+          color:
+              (value ? _activeColor : _inactiveColor).withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: (value ? _activeColor : _inactiveColor).withValues(alpha: 0.3),
+            color:
+                (value ? _activeColor : _inactiveColor).withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -407,7 +455,7 @@ class _ActiveToggle extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               value ? 'Activo' : 'Inactivo',
-              style: KaliText.body(
+              style: kaliColors.body(
                 value ? _activeColor : _inactiveColor,
                 weight: FontWeight.w600,
                 size: 14,

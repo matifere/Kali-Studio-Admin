@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/navigation/navigation_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/sidebar.dart';
 import 'package:argrity/widgets/dashboard/stat_cards.dart';
@@ -125,16 +124,12 @@ class _DashboardHomeState extends State<_DashboardHome> {
               children: [
                 Text(
                   _greeting,
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: isSmall ? 32 : 40,
-                    fontWeight: FontWeight.w600,
-                    color: kaliColors.espresso,
-                  ),
+                  style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 32 : 40).copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Esto es lo que está pasando hoy.',
-                  style: KaliText.body(
+                  style: kaliColors.body(
                     kaliColors.espresso.withValues(alpha: 0.6),
                     size: 16,
                   ),

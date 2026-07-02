@@ -18,8 +18,7 @@ class TurnosRepository {
     final startIso = DateFormat('yyyy-MM-dd').format(start);
     final endIso = DateFormat('yyyy-MM-dd').format(end);
 
-    const sessionSelect =
-        '*, '
+    const sessionSelect = '*, '
         'reservations(id, user_id, status, profiles:profiles!reservations_user_id_fkey(full_name))';
 
     var query = _client
@@ -119,7 +118,8 @@ class TurnosRepository {
         .lte('date', endOfYearIso);
   }
 
-  Future<void> updateSession(String sessionId, Map<String, dynamic> data) async {
+  Future<void> updateSession(
+      String sessionId, Map<String, dynamic> data) async {
     await _client.from('class_sessions').update(data).eq('id', sessionId);
   }
 
@@ -157,9 +157,8 @@ class TurnosRepository {
     if (session.groupId != null) {
       query = query.eq('group_id', session.groupId!);
     } else {
-      query = query
-          .eq('name', session.name)
-          .eq('start_time', session.startTime);
+      query =
+          query.eq('name', session.name).eq('start_time', session.startTime);
       if (session.institutionId != null) {
         query = query.eq('institution_id', session.institutionId!);
       }
@@ -290,13 +289,13 @@ class TurnosRepository {
       DateTime date, String? reason) async {
     final res = await _client.rpc('cancel_day_as_holiday', params: {
       'p_date': DateFormat('yyyy-MM-dd').format(date),
-      'p_reason': (reason == null || reason.trim().isEmpty) ? null : reason.trim(),
+      'p_reason':
+          (reason == null || reason.trim().isEmpty) ? null : reason.trim(),
     });
     return Map<String, dynamic>.from(res as Map);
   }
 
-  Future<void> toggleAttendance(
-      String reservationId, String nextStatus) async {
+  Future<void> toggleAttendance(String reservationId, String nextStatus) async {
     await _client
         .from('reservations')
         .update({'status': nextStatus}).eq('id', reservationId);

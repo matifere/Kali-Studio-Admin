@@ -17,15 +17,18 @@ class ProfileCache {
   static String? get fullName => _fullName;
   static bool get isAdmin => _role == 'admin';
   static bool get isSudo => _role == 'sudo';
+
   /// true si el caché fue poblado al menos una vez (sesión activa previa).
   static bool get isLoaded => _loaded;
+
   /// Último resultado conocido de is_active && suscripción válida.
   /// Evita que AuthWrapper muestre InactiveScreen en un remount mientras
   /// re-verifica el perfil de un usuario que ya estaba activo.
   static bool get isActive => _isActive;
   static bool get isProfileDisabled => _isProfileDisabled;
 
-  static void set({required String role, String? institutionId, String? fullName}) {
+  static void set(
+      {required String role, String? institutionId, String? fullName}) {
     _role = role;
     _institutionId = institutionId;
     _fullName = fullName;

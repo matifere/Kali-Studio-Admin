@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 class UserProfileButton extends StatefulWidget {
@@ -60,13 +59,13 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                   children: [
                     Text(
                       widget.fullName,
-                      style: KaliText.body(kaliColors.espresso,
+                      style: kaliColors.body(kaliColors.espresso,
                           weight: FontWeight.bold),
                     ),
                     Text(
                       widget.displayRole,
-                      style: KaliText.label(
-                          kaliColors.espresso.withValues(alpha: 0.5)),
+                      style: kaliColors
+                          .label(kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -84,7 +83,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                     child: widget.avatarUrl == null
                         ? Text(
                             widget.initial,
-                            style: KaliText.body(kaliColors.warmWhite,
+                            style: kaliColors.body(kaliColors.warmWhite,
                                 weight: FontWeight.bold),
                           )
                         : null,
@@ -130,13 +129,13 @@ class _UserProfileButtonState extends State<UserProfileButton> {
             children: [
               Text(
                 widget.fullName,
-                style:
-                    KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
+                style: kaliColors.body(kaliColors.espresso,
+                    weight: FontWeight.bold),
               ),
               Text(
                 widget.displayRole,
-                style: KaliText.caption(
-                    kaliColors.espresso.withValues(alpha: 0.5)),
+                style: kaliColors
+                    .caption(kaliColors.espresso.withValues(alpha: 0.5)),
               ),
               const SizedBox(height: 8),
               Divider(color: kaliColors.sand2, height: 1),
@@ -153,7 +152,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                   size: 16, color: kaliColors.espresso.withValues(alpha: 0.7)),
               const SizedBox(width: 10),
               Text('Editar perfil',
-                  style: KaliText.body(kaliColors.espresso, size: 14)),
+                  style: kaliColors.body(kaliColors.espresso, size: 14)),
             ],
           ),
         ),
@@ -167,7 +166,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                   size: 16, color: Color(0xFFD4685C)),
               const SizedBox(width: 10),
               Text('Cerrar sesión',
-                  style: KaliText.body(const Color(0xFFD4685C), size: 14)),
+                  style: kaliColors.body(const Color(0xFFD4685C), size: 14)),
             ],
           ),
         ),

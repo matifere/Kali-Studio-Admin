@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/day_column.dart';
 import 'package:argrity/widgets/turnos/time_labels_column.dart';
@@ -92,11 +91,13 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                 children: [
                   Text(
                     dayName,
-                    style: KaliText.label(
-                      isSelected
-                          ? kaliColors.espresso
-                          : kaliColors.espresso.withValues(alpha: 0.45),
-                    ).copyWith(fontSize: 11, letterSpacing: 0.5),
+                    style: kaliColors
+                        .label(
+                          isSelected
+                              ? kaliColors.espresso
+                              : kaliColors.espresso.withValues(alpha: 0.45),
+                        )
+                        .copyWith(fontSize: 11, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 4),
                   Container(
@@ -105,20 +106,17 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? kaliColors.espresso
-                          : (isToday
-                              ? kaliColors.sand
-                              : Colors.transparent),
+                          : (isToday ? kaliColors.sand : Colors.transparent),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${dayDate.day}',
-                      style: KaliText.body(
-                        isSelected
-                            ? kaliColors.warmWhite
-                            : kaliColors.espresso,
-                        weight:
-                            isSelected || isToday ? FontWeight.w700 : FontWeight.w400,
+                      style: kaliColors.body(
+                        isSelected ? kaliColors.warmWhite : kaliColors.espresso,
+                        weight: isSelected || isToday
+                            ? FontWeight.w700
+                            : FontWeight.w400,
                         size: 14,
                       ),
                     ),
@@ -190,7 +188,7 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                   child: Center(
                     child: Text(
                       'No hay turnos este día',
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso.withValues(alpha: 0.4),
                       ),
                     ),

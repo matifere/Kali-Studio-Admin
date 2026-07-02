@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/entrenadores/entrenadores_table.dart';
 
@@ -25,16 +24,12 @@ class EntrenadoresScreen extends StatelessWidget {
               children: [
                 Text(
                   'Entrenadores',
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: isSmall ? 36 : 46,
-                    fontWeight: FontWeight.w600,
-                    color: kaliColors.espresso,
-                  ),
+                  style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 36 : 46).copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Gestioná el equipo de entrenadores.',
-                  style: KaliText.body(
+                  style: kaliColors.body(
                     kaliColors.espresso.withValues(alpha: 0.6),
                     size: 14,
                   ),
@@ -50,4 +45,3 @@ class EntrenadoresScreen extends StatelessWidget {
     );
   }
 }
-

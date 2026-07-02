@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:argrity/widgets/alumnos/student_directory.dart';
@@ -53,11 +52,7 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                     children: [
                       Text(
                         'Alumnos',
-                        style: GoogleFonts.cormorantGaramond(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w600,
-                          color: kaliColors.espresso,
-                        ),
+                        style: kaliColors.heading(kaliColors.espresso, size: 36).copyWith(fontWeight: FontWeight.w600),
                       ),
                       if (!_isProfesor) ...[
                         const SizedBox(height: 16),
@@ -75,16 +70,12 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                         children: [
                           Text(
                             'Alumnos',
-                            style: GoogleFonts.cormorantGaramond(
-                              fontSize: 46,
-                              fontWeight: FontWeight.w600,
-                              color: kaliColors.espresso,
-                            ),
+                            style: kaliColors.heading(kaliColors.espresso, size: 46).copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Gestiona tu comunidad.',
-                            style: KaliText.body(
+                            style: kaliColors.body(
                               kaliColors.espresso.withValues(alpha: 0.6),
                               size: 14,
                             ),
@@ -157,7 +148,7 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
           icon: Icon(Icons.add, color: kaliColors.warmWhite, size: 18),
           label: Text(
             'Añadir Alumno',
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.warmWhite,
               weight: FontWeight.w600,
               size: 13,
@@ -174,4 +165,3 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
     );
   }
 }
-

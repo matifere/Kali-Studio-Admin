@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Badge que muestra el plan del alumno.
@@ -26,7 +25,7 @@ class KaliPlanBadge extends StatelessWidget {
       ),
       child: Text(
         plan,
-        style: KaliText.label(
+        style: kaliColors.label(
           kaliColors.espresso.withValues(alpha: 0.75),
         ),
       ),

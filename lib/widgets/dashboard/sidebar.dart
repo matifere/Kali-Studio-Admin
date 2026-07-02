@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -64,12 +63,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                         const SizedBox(width: 12),
                         Text(
                           'Argity',
-                          style: GoogleFonts.outfit(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: kaliColors.espresso,
-                          ),
+                          style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
                         ),
                       ],
                     ),
@@ -114,7 +108,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         ),
         title: Text(
           title,
-          style: KaliText.body(
+          style: kaliColors.body(
             isActive
                 ? kaliColors.espresso
                 : kaliColors.espresso.withValues(alpha: 0.6),
@@ -147,7 +141,8 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             const SizedBox(width: 12),
             Text(
               title,
-              style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
+              style:
+                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -173,7 +168,8 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             const SizedBox(width: 12),
             Text(
               'CONFIGURACIÓN',
-              style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
+              style:
+                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -196,7 +192,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
           children: [
             Text(
               title,
-              style: KaliText.body(
+              style: kaliColors.body(
                 isActive
                     ? kaliColors.espresso
                     : kaliColors.espresso.withValues(alpha: 0.6),

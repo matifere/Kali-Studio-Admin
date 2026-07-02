@@ -77,11 +77,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         if (sub['status'] != 'active') continue;
         final endStr = sub['end_date'] as String?;
         final end = endStr != null ? DateTime.tryParse(endStr) : null;
-        if (end != null && today.isAfter(DateTime(end.year, end.month, end.day))) {
+        if (end != null &&
+            today.isAfter(DateTime(end.year, end.month, end.day))) {
           continue;
         }
         final plan = sub['plans'];
-        final planMap = plan is List ? (plan.isNotEmpty ? plan.first : null) : plan;
+        final planMap =
+            plan is List ? (plan.isNotEmpty ? plan.first : null) : plan;
         final price = (planMap is Map ? planMap['price'] as num? : null) ?? 0;
         ingresos += price.toDouble();
       }

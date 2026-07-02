@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
@@ -88,7 +87,7 @@ class AlumnosStatCards extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       '${isPositive ? '+' : ''}$percentGrowthStr este mes',
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         isPositive
                             ? const Color(0xFF5C9E6C)
                             : const Color(0xFFD4685C),
@@ -109,8 +108,8 @@ class AlumnosStatCards extends StatelessWidget {
                     state is AlumnosLoading ? null : expiringCount.toString(),
                 badge: Text(
                   'En los próximos 7 días',
-                  style:
-                      KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.5)),
                 ),
                 kaliColors: kaliColors,
               ),
@@ -168,16 +167,16 @@ class AlumnosStatCards extends StatelessWidget {
         children: [
           Text(title,
               style:
-                  KaliText.label(kaliColors.espresso.withValues(alpha: 0.5))),
+                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5))),
           const SizedBox(height: 16),
           value != null
               ? Text(
                   value,
-                  style: KaliText.display(kaliColors.espresso).copyWith(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.normal,
-                  ),
+                  style: kaliColors.display(kaliColors.espresso).copyWith(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                      ),
                 )
               : const LinearProgressIndicator(),
           const SizedBox(height: 12),
@@ -328,8 +327,8 @@ class _ClayPlanCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   planName.toUpperCase(),
-                  style: KaliText.label(
-                      kaliColors.espresso.withValues(alpha: 0.7)),
+                  style: kaliColors
+                      .label(kaliColors.espresso.withValues(alpha: 0.7)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -358,11 +357,11 @@ class _ClayPlanCard extends StatelessWidget {
           count != null
               ? Text(
                   count.toString(),
-                  style: KaliText.display(kaliColors.espresso).copyWith(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.normal,
-                  ),
+                  style: kaliColors.display(kaliColors.espresso).copyWith(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.normal,
+                      ),
                 )
               : const SizedBox(
                   width: 80,
@@ -371,7 +370,7 @@ class _ClayPlanCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             count == 1 ? 'alumno con este plan' : 'alumnos con este plan',
-            style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+            style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
           ),
         ],
       ),

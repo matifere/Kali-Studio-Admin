@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/pagos/plan_form_dialog.dart';
@@ -30,7 +29,8 @@ class _PlansTableState extends State<PlansTable> {
     try {
       final res = await Supabase.instance.client
           .from('plans')
-          .select('id, name, description, price, currency, max_reservations_per_month, is_active')
+          .select(
+              'id, name, description, price, currency, max_reservations_per_month, is_active')
           .order('name', ascending: true);
       if (mounted) {
         setState(() {
@@ -68,20 +68,26 @@ class _PlansTableState extends State<PlansTable> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('No se puede eliminar', style: KaliText.heading(kaliColors.espresso, size: 20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('No se puede eliminar',
+              style: kaliColors.heading(kaliColors.espresso, size: 20)),
           content: Text(
             'El plan "$planName" tiene suscripciones asociadas y no puede eliminarse.\n\n¿Querés desactivarlo? No aparecerá al asignar nuevos planes pero las suscripciones existentes se mantienen.',
-            style: KaliText.body(kaliColors.espresso),
+            style: kaliColors.body(kaliColors.espresso),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+              child: Text('Cancelar',
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6))),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Desactivar', style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+              child: const Text('Desactivar',
+                  style: TextStyle(
+                      color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -91,8 +97,7 @@ class _PlansTableState extends State<PlansTable> {
         try {
           await Supabase.instance.client
               .from('plans')
-              .update({'is_active': false})
-              .eq('id', planId);
+              .update({'is_active': false}).eq('id', planId);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Plan "$planName" desactivado')),
@@ -102,7 +107,9 @@ class _PlansTableState extends State<PlansTable> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se pudo desactivar el plan. Intentá nuevamente.')),
+              const SnackBar(
+                  content: Text(
+                      'No se pudo desactivar el plan. Intentá nuevamente.')),
             );
           }
         }
@@ -113,20 +120,26 @@ class _PlansTableState extends State<PlansTable> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('Eliminar Plan', style: KaliText.heading(kaliColors.espresso, size: 20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Eliminar Plan',
+              style: kaliColors.heading(kaliColors.espresso, size: 20)),
           content: Text(
             '¿Estás seguro de que deseas eliminar el plan "$planName"? Esta acción no se puede deshacer.',
-            style: KaliText.body(kaliColors.espresso),
+            style: kaliColors.body(kaliColors.espresso),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+              child: Text('Cancelar',
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6))),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Eliminar', style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+              child: const Text('Eliminar',
+                  style: TextStyle(
+                      color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -147,7 +160,9 @@ class _PlansTableState extends State<PlansTable> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se pudo eliminar el plan. Intentá nuevamente.')),
+              const SnackBar(
+                  content:
+                      Text('No se pudo eliminar el plan. Intentá nuevamente.')),
             );
           }
         }
@@ -185,7 +200,7 @@ class _PlansTableState extends State<PlansTable> {
                 padding: const EdgeInsets.all(40.0),
                 child: Text(
                   _error!,
-                  style: KaliText.body(kaliColors.espresso),
+                  style: kaliColors.body(kaliColors.espresso),
                 ),
               ),
             )
@@ -195,7 +210,8 @@ class _PlansTableState extends State<PlansTable> {
               child: Center(
                 child: Text(
                   'Aún no hay planes creados.',
-                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.5)),
                 ),
               ),
             )
@@ -245,7 +261,7 @@ class _PlansTableState extends State<PlansTable> {
         children: [
           Text(
             'Planes del Estudio',
-            style: KaliText.headingItalic(kaliColors.espresso, size: 22),
+            style: kaliColors.headingItalic(kaliColors.espresso, size: 22),
           ),
           Row(
             children: [
@@ -264,7 +280,7 @@ class _PlansTableState extends State<PlansTable> {
   }
 
   Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
-    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
+    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.45));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
@@ -296,8 +312,12 @@ class _CreatePlanButtonState extends State<_CreatePlanButton> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: () async {
           await showDialog(
@@ -320,7 +340,8 @@ class _CreatePlanButtonState extends State<_CreatePlanButton> {
               const SizedBox(width: 6),
               Text(
                 'Crear Plan',
-                style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600, size: 13),
+                style: kaliColors.body(kaliColors.warmWhite,
+                    weight: FontWeight.w600, size: 13),
               ),
             ],
           ),
@@ -361,8 +382,12 @@ class _PlanRowState extends State<_PlanRow> {
     final bool isActive = p['is_active'] ?? true;
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeIn,
@@ -378,7 +403,7 @@ class _PlanRowState extends State<_PlanRow> {
                 children: [
                   Text(
                     name,
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.espresso,
                       weight: FontWeight.w600,
                       size: 14,
@@ -388,7 +413,7 @@ class _PlanRowState extends State<_PlanRow> {
                     const SizedBox(height: 2),
                     Text(
                       description,
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso.withValues(alpha: 0.5),
                         size: 12,
                       ),
@@ -403,7 +428,7 @@ class _PlanRowState extends State<_PlanRow> {
               flex: 3,
               child: Text(
                 '\$${price.toStringAsFixed(2)} $currency',
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w500,
                 ),
@@ -415,7 +440,7 @@ class _PlanRowState extends State<_PlanRow> {
               flex: 3,
               child: Text(
                 '$maxReservations clases / mes',
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w400,
                 ),
@@ -461,6 +486,7 @@ class _StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final color = isActive ? const Color(0xFF5C9E6C) : const Color(0xFFD4685C);
 
     return Row(
@@ -473,7 +499,7 @@ class _StatusIndicator extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           isActive ? 'Activo' : 'Inactivo',
-          style: KaliText.body(color, weight: FontWeight.w500),
+          style: kaliColors.body(color, weight: FontWeight.w500),
         ),
       ],
     );

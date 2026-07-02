@@ -176,7 +176,9 @@ class SupaAuthClass {
       final signupBody = jsonDecode(signupResp.body) as Map<String, dynamic>;
 
       if (signupResp.statusCode != 200 && signupResp.statusCode != 201) {
-        return signupBody['message'] ?? signupBody['msg'] ?? 'Error al registrar usuario';
+        return signupBody['message'] ??
+            signupBody['msg'] ??
+            'Error al registrar usuario';
       }
 
       // Supabase devuelve { "user": { "id": ... } } sin confirmación de email,

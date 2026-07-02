@@ -60,8 +60,7 @@ void main() {
     test('el resultado es siempre >= 1', () {
       for (int month = 1; month <= 12; month++) {
         final weeks = weeksUntilEndOfYear(DateTime(2024, month, 1));
-        expect(weeks, greaterThanOrEqualTo(1),
-            reason: 'Falló para mes $month');
+        expect(weeks, greaterThanOrEqualTo(1), reason: 'Falló para mes $month');
       }
     });
 

@@ -34,7 +34,8 @@ class DayColumn extends StatelessWidget {
   double _heightForTurno(ClassSession t) {
     final start = t.parsedStartTime;
     final end = t.parsedEndTime;
-    final durationMinutes = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
+    final durationMinutes =
+        (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
     return (durationMinutes / 30) * slotHeight;
   }
 
@@ -149,7 +150,8 @@ class DayColumn extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: kaliColors.espresso.withValues(alpha: 0.15),
+                                color:
+                                    kaliColors.espresso.withValues(alpha: 0.15),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),

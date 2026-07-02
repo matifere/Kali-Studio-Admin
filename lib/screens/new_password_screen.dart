@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -95,11 +94,11 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Nueva contraseña',
-                  style: KaliText.loginDisplay(kaliColors.espresso),
+                  style: kaliColors.loginDisplay(kaliColors.espresso),
                 ),
                 Text(
                   'Elegí una contraseña segura para tu cuenta.',
-                  style: KaliText.loginBody(kaliColors.espresso),
+                  style: kaliColors.loginBody(kaliColors.espresso),
                 ),
               ],
             ),

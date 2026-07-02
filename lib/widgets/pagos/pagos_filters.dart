@@ -6,7 +6,6 @@ import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/pagos/assign_plan_dialog.dart';
 
@@ -14,7 +13,8 @@ import 'package:argrity/widgets/pagos/assign_plan_dialog.dart';
 class PagosFilters extends StatelessWidget {
   const PagosFilters({super.key});
 
-  void _toggleStatus(BuildContext context, Set<String> current, String status, bool add) {
+  void _toggleStatus(
+      BuildContext context, Set<String> current, String status, bool add) {
     final newSet = Set<String>.from(current);
     if (add) {
       newSet.add(status);
@@ -53,7 +53,7 @@ class PagosFilters extends StatelessWidget {
                     children: [
                       Text(
                         'BUSCAR USUARIO',
-                        style: KaliText.label(
+                        style: kaliColors.label(
                           kaliColors.espresso.withValues(alpha: 0.45),
                         ),
                       ),
@@ -62,12 +62,14 @@ class PagosFilters extends StatelessWidget {
                         height: 40,
                         child: TextField(
                           onChanged: (value) {
-                            context.read<PagosBloc>().add(PagosSearchChanged(value));
+                            context
+                                .read<PagosBloc>()
+                                .add(PagosSearchChanged(value));
                           },
-                          style: KaliText.body(kaliColors.espresso, size: 14),
+                          style: kaliColors.body(kaliColors.espresso, size: 14),
                           decoration: InputDecoration(
                             hintText: 'Ej. Juan Pérez',
-                            hintStyle: KaliText.body(
+                            hintStyle: kaliColors.body(
                               kaliColors.espresso.withValues(alpha: 0.4),
                               size: 14,
                             ),
@@ -76,19 +78,22 @@ class PagosFilters extends StatelessWidget {
                               size: 18,
                               color: kaliColors.espresso.withValues(alpha: 0.4),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16),
                             filled: true,
                             fillColor: kaliColors.warmWhite,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
-                                color: kaliColors.espresso.withValues(alpha: 0.1),
+                                color:
+                                    kaliColors.espresso.withValues(alpha: 0.1),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
-                                color: kaliColors.espresso.withValues(alpha: 0.1),
+                                color:
+                                    kaliColors.espresso.withValues(alpha: 0.1),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -109,7 +114,7 @@ class PagosFilters extends StatelessWidget {
                   children: [
                     Text(
                       'ESTADO',
-                      style: KaliText.label(
+                      style: kaliColors.label(
                         kaliColors.espresso.withValues(alpha: 0.45),
                       ),
                     ),
@@ -121,35 +126,48 @@ class PagosFilters extends StatelessWidget {
                         _StatusChip(
                           label: 'Activo',
                           isSelected: selectedStatuses.contains('active'),
-                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'active', selected),
+                          onToggle: (selected) => _toggleStatus(
+                              context, selectedStatuses, 'active', selected),
                         ),
                         _StatusChip(
                           label: 'Pendiente',
                           isSelected: selectedStatuses.contains('pending'),
-                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'pending', selected),
+                          onToggle: (selected) => _toggleStatus(
+                              context, selectedStatuses, 'pending', selected),
                         ),
                         _StatusChip(
                           label: 'Vencido',
                           isSelected: selectedStatuses.contains('expired'),
-                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'expired', selected),
+                          onToggle: (selected) => _toggleStatus(
+                              context, selectedStatuses, 'expired', selected),
                         ),
                         _StatusChip(
                           label: 'Cancelado',
                           isSelected: selectedStatuses.contains('cancelled'),
-                          onToggle: (selected) => _toggleStatus(context, selectedStatuses, 'cancelled', selected),
+                          onToggle: (selected) => _toggleStatus(
+                              context, selectedStatuses, 'cancelled', selected),
                         ),
                         if (selectedStatuses.isNotEmpty)
                           TextButton.icon(
                             onPressed: () {
-                              context.read<PagosBloc>().add(PagosFiltersChanged(const {}));
+                              context
+                                  .read<PagosBloc>()
+                                  .add(PagosFiltersChanged(const {}));
                             },
-                            icon: Icon(Icons.clear, size: 16, color: kaliColors.espresso.withValues(alpha: 0.5)),
+                            icon: Icon(Icons.clear,
+                                size: 16,
+                                color:
+                                    kaliColors.espresso.withValues(alpha: 0.5)),
                             label: Text(
                               'Limpiar',
-                              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5), size: 13, weight: FontWeight.w600),
+                              style: kaliColors.body(
+                                  kaliColors.espresso.withValues(alpha: 0.5),
+                                  size: 13,
+                                  weight: FontWeight.w600),
                             ),
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               minimumSize: const Size(0, 36),
                             ),
                           ),
@@ -194,10 +212,20 @@ class PagosFilters extends StatelessWidget {
     );
   }
 
-  Future<void> _exportReport(BuildContext context, List<Subscription> payments) async {
+  Future<void> _exportReport(
+      BuildContext context, List<Subscription> payments) async {
     try {
       List<List<dynamic>> rows = [
-        ['ID', 'Alumno', 'Plan', 'Monto', 'Moneda', 'Fecha Inicio', 'Fecha Fin', 'Estado']
+        [
+          'ID',
+          'Alumno',
+          'Plan',
+          'Monto',
+          'Moneda',
+          'Fecha Inicio',
+          'Fecha Fin',
+          'Estado'
+        ]
       ];
 
       for (var p in payments) {
@@ -231,7 +259,9 @@ class PagosFilters extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo exportar el archivo. Intentá nuevamente.')),
+          const SnackBar(
+              content:
+                  Text('No se pudo exportar el archivo. Intentá nuevamente.')),
         );
       }
     }
@@ -256,7 +286,7 @@ class _StatusChip extends StatelessWidget {
     return FilterChip(
       label: Text(
         label,
-        style: KaliText.body(
+        style: kaliColors.body(
           isSelected ? kaliColors.warmWhite : kaliColors.espresso,
           weight: FontWeight.w500,
           size: 13,
@@ -270,7 +300,9 @@ class _StatusChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: isSelected ? kaliColors.espresso : kaliColors.espresso.withValues(alpha: 0.1),
+          color: isSelected
+              ? kaliColors.espresso
+              : kaliColors.espresso.withValues(alpha: 0.1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -284,7 +316,8 @@ class _OutlinedActionBtn extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const _OutlinedActionBtn({required this.icon, required this.label, this.onTap});
+  const _OutlinedActionBtn(
+      {required this.icon, required this.label, this.onTap});
 
   @override
   State<_OutlinedActionBtn> createState() => _OutlinedActionBtnState();
@@ -297,8 +330,12 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -318,7 +355,7 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
               const SizedBox(width: 8),
               Text(
                 widget.label,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w600,
                   size: 13,
@@ -351,8 +388,12 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -378,7 +419,7 @@ class _FilledActionBtnState extends State<_FilledActionBtn> {
               const SizedBox(width: 8),
               Text(
                 widget.label,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.warmWhite,
                   weight: FontWeight.w600,
                   size: 13,

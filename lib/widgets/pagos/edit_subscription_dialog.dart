@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -105,7 +104,8 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
       return;
     }
     if (_endDate.isBefore(_startDate)) {
-      setState(() => _error = 'La fecha de fin no puede ser anterior al inicio.');
+      setState(
+          () => _error = 'La fecha de fin no puede ser anterior al inicio.');
       return;
     }
 
@@ -152,26 +152,29 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                   children: [
                     Text(
                       'Editar Asignación',
-                      style: KaliText.heading(kaliColors.espresso, size: 24),
+                      style: kaliColors.heading(kaliColors.espresso, size: 24),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Modificá el plan o las fechas de ${widget.subscription.studentName}.',
-                      style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                      style: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                     const SizedBox(height: 24),
                     if (_error != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
-                        child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                        child: Text(_error!,
+                            style: const TextStyle(color: Colors.red)),
                       ),
 
                     // Plan
-                    Text('Plan', style: KaliText.label(kaliColors.espresso)),
+                    Text('Plan', style: kaliColors.label(kaliColors.espresso)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPlanId,
-                      decoration: _inputDecoration('Selecciona un plan', kaliColors),
+                      decoration:
+                          _inputDecoration('Selecciona un plan', kaliColors),
                       items: _plans.map((p) {
                         final name = p['name'] ?? 'Sin nombre';
                         final price = (p['price'] as num?)?.toDouble() ?? 0.0;
@@ -180,7 +183,7 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                           value: p['id'] as String,
                           child: Text(
                             '$name - \$${price.toStringAsFixed(2)} $currency',
-                            style: KaliText.body(kaliColors.espresso),
+                            style: kaliColors.body(kaliColors.espresso),
                           ),
                         );
                       }).toList(),
@@ -216,23 +219,31 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
                           child: Text('Cancelar',
-                              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+                              style: kaliColors.body(
+                                  kaliColors.espresso.withValues(alpha: 0.6))),
                         ),
                         const SizedBox(width: 16),
                         ElevatedButton(
                           onPressed: _isSaving ? null : _submit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kaliColors.espresso,
-                            foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            foregroundColor: kaliColors
+                                .getContrastColor(kaliColors.espresso),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: Text('Guardar Cambios',
-                              style: KaliText.body(kaliColors.getContrastColor(kaliColors.espresso), weight: FontWeight.w600)),
+                              style: kaliColors.body(
+                                  kaliColors
+                                      .getContrastColor(kaliColors.espresso),
+                                  weight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -243,16 +254,19 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
+  InputDecoration _inputDecoration(
+      String hint, KaliColorsExtension kaliColors) {
     return InputDecoration(
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
@@ -264,7 +278,8 @@ class _DateField extends StatelessWidget {
   final DateTime date;
   final VoidCallback onTap;
 
-  const _DateField({required this.label, required this.date, required this.onTap});
+  const _DateField(
+      {required this.label, required this.date, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +289,7 @@ class _DateField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: KaliText.label(kaliColors.espresso)),
+        Text(label, style: kaliColors.label(kaliColors.espresso)),
         const SizedBox(height: 8),
         InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -283,14 +298,16 @@ class _DateField extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+              border:
+                  Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(text, style: KaliText.body(kaliColors.espresso)),
+                Text(text, style: kaliColors.body(kaliColors.espresso)),
                 Icon(Icons.calendar_today_outlined,
-                    size: 16, color: kaliColors.espresso.withValues(alpha: 0.5)),
+                    size: 16,
+                    color: kaliColors.espresso.withValues(alpha: 0.5)),
               ],
             ),
           ),

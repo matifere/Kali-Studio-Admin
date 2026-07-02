@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -66,8 +65,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
         final uid = sub['user_id'] as String;
         usersWithPlan.add(uid);
         final plansData = sub['plans'];
-        if (plansData != null && plansData['max_reservations_per_month'] != null) {
-          userMaxRes[uid] = (userMaxRes[uid] ?? 0) + (plansData['max_reservations_per_month'] as int);
+        if (plansData != null &&
+            plansData['max_reservations_per_month'] != null) {
+          userMaxRes[uid] = (userMaxRes[uid] ?? 0) +
+              (plansData['max_reservations_per_month'] as int);
         }
       }
 
@@ -87,8 +88,10 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
 
       // 4b. ¿Hay más sesiones de esta misma serie en lo que resta del mes?
       //     Si las hay, ofrecemos proyectar la inscripción; si no, no aparece.
-      final seriesStartIso =
-          sessionDate.add(const Duration(days: 1)).toIso8601String().split('T')[0];
+      final seriesStartIso = sessionDate
+          .add(const Duration(days: 1))
+          .toIso8601String()
+          .split('T')[0];
       var seriesQuery = client
           .from('class_sessions')
           .select('id')
@@ -101,39 +104,40 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
             .eq('name', widget.session.name)
             .eq('start_time', widget.session.startTime);
         if (widget.session.institutionId != null) {
-          seriesQuery = seriesQuery.eq('institution_id', widget.session.institutionId!);
+          seriesQuery =
+              seriesQuery.eq('institution_id', widget.session.institutionId!);
         }
       }
       final seriesRes = await seriesQuery.limit(1);
       final canProject = (seriesRes as List).isNotEmpty;
 
       // 4. Filtrar los que ya están anotados en esta sesión
-      final enrolledIds = widget.session.enrolledStudents.map((e) => e.userId).toSet();
+      final enrolledIds =
+          widget.session.enrolledStudents.map((e) => e.userId).toSet();
 
       final available = (profilesRes as List<dynamic>)
           .map((e) => Map<String, dynamic>.from(e as Map<String, dynamic>))
           .where((p) => !enrolledIds.contains(p['id']))
           .map((p) {
-            final uid = p['id'] as String;
-            String? disabledReason;
-            int maxRes = 0;
-            int currRes = userReservations[uid] ?? 0;
+        final uid = p['id'] as String;
+        String? disabledReason;
+        int maxRes = 0;
+        int currRes = userReservations[uid] ?? 0;
 
-            if (!usersWithPlan.contains(uid)) {
-              disabledReason = 'Sin plan activo';
-            } else {
-              maxRes = userMaxRes[uid] ?? 0;
-              if (maxRes > 0 && currRes >= maxRes) {
-                disabledReason = 'Límite mensual alcanzado';
-              }
-            }
+        if (!usersWithPlan.contains(uid)) {
+          disabledReason = 'Sin plan activo';
+        } else {
+          maxRes = userMaxRes[uid] ?? 0;
+          if (maxRes > 0 && currRes >= maxRes) {
+            disabledReason = 'Límite mensual alcanzado';
+          }
+        }
 
-            p['disabledReason'] = disabledReason;
-            p['currRes'] = currRes;
-            p['maxRes'] = maxRes;
-            return p;
-          })
-          .toList();
+        p['disabledReason'] = disabledReason;
+        p['currRes'] = currRes;
+        p['maxRes'] = maxRes;
+        return p;
+      }).toList();
 
       if (mounted) {
         setState(() {
@@ -168,39 +172,44 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
   }
 
   void _assign(String userId) {
-    context.read<TurnosBloc>().add(
-      TurnoStudentAssigned(
-        userId: userId,
-        session: widget.session,
-        enrollmentType: _enrollmentType,
-      )
-    );
+    context.read<TurnosBloc>().add(TurnoStudentAssigned(
+          userId: userId,
+          session: widget.session,
+          enrollmentType: _enrollmentType,
+        ));
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Alumno inscripto correctamente')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Alumno inscripto correctamente')));
   }
 
   /// Permite al admin forzar la inscripción de un alumno que no cumple los
   /// requisitos (sin plan activo o con el límite mensual alcanzado).
-  Future<void> _confirmOverride(String userId, String name, String reason) async {
+  Future<void> _confirmOverride(
+      String userId, String name, String reason) async {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Inscribir sin créditos', style: KaliText.heading(kaliColors.espresso, size: 20)),
+        title: Text('Inscribir sin créditos',
+            style: kaliColors.heading(kaliColors.espresso, size: 20)),
         content: Text(
           '$name no cumple los requisitos ($reason). '
           '¿Inscribirlo de todas formas? Como admin podés forzar la inscripción.',
-          style: KaliText.body(kaliColors.espresso),
+          style: kaliColors.body(kaliColors.espresso),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+            child: Text('Cancelar',
+                style: kaliColors
+                    .body(kaliColors.espresso.withValues(alpha: 0.6))),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Inscribir igual', style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600)),
+            child: Text('Inscribir igual',
+                style: kaliColors.body(kaliColors.espresso,
+                    weight: FontWeight.w600)),
           ),
         ],
       ),
@@ -227,7 +236,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
               children: [
                 Text(
                   'Inscribir Alumno',
-                  style: KaliText.heading(kaliColors.espresso, size: 24),
+                  style: kaliColors.heading(kaliColors.espresso, size: 24),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -238,7 +247,8 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
             const SizedBox(height: 8),
             Text(
               'Asignar a: ${widget.session.name}',
-              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+              style:
+                  kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -249,29 +259,36 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                  borderSide: BorderSide(
+                      color: kaliColors.espresso.withValues(alpha: 0.1)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                  borderSide: BorderSide(
+                      color: kaliColors.espresso.withValues(alpha: 0.1)),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             if (_canProject || widget.session.groupId != null) ...[
-              Text('Opciones de inscripción recurrentes', style: KaliText.body(kaliColors.espresso, size: 14, weight: FontWeight.w600)),
+              Text('Opciones de inscripción recurrentes',
+                  style: kaliColors.body(kaliColors.espresso,
+                      size: 14, weight: FontWeight.w600)),
               const SizedBox(height: 8),
               DropdownButtonFormField<EnrollmentType>(
                 initialValue: _enrollmentType,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(
+                        color: kaliColors.espresso.withValues(alpha: 0.1)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(
+                        color: kaliColors.espresso.withValues(alpha: 0.1)),
                   ),
                 ),
                 items: const [
@@ -298,58 +315,85 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
             ],
             Expanded(
               child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
-                  ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
-                  : _filteredProfiles.isEmpty
-                    ? Center(child: Text('No se encontraron alumnos disponibles', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5))))
-                    : ListView.separated(
-                        itemCount: _filteredProfiles.length,
-                        separatorBuilder: (_, __) => Divider(color: kaliColors.espresso.withValues(alpha: 0.1)),
-                        itemBuilder: (context, index) {
-                          final p = _filteredProfiles[index];
-                          final name = p['full_name'] ?? 'Sin nombre';
-                          final disabledReason = p['disabledReason'] as String?;
-                          final currRes = p['currRes'] as int?;
-                          final maxRes = p['maxRes'] as int?;
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? Center(
+                          child: Text(_error!,
+                              style: const TextStyle(color: Colors.red)))
+                      : _filteredProfiles.isEmpty
+                          ? Center(
+                              child: Text(
+                                  'No se encontraron alumnos disponibles',
+                                  style: kaliColors.body(kaliColors.espresso
+                                      .withValues(alpha: 0.5))))
+                          : ListView.separated(
+                              itemCount: _filteredProfiles.length,
+                              separatorBuilder: (_, __) => Divider(
+                                  color: kaliColors.espresso
+                                      .withValues(alpha: 0.1)),
+                              itemBuilder: (context, index) {
+                                final p = _filteredProfiles[index];
+                                final name = p['full_name'] ?? 'Sin nombre';
+                                final disabledReason =
+                                    p['disabledReason'] as String?;
+                                final currRes = p['currRes'] as int?;
+                                final maxRes = p['maxRes'] as int?;
 
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: kaliColors.clay,
-                              backgroundImage: AvatarProvider.fromUrl(p['avatar_url']),
-                              child: p['avatar_url'] == null 
-                                ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: TextStyle(color: kaliColors.warmWhite, fontSize: 12))
-                                : null,
-                            ),
-                            title: Text(name, style: KaliText.body(
-                              kaliColors.espresso.withValues(alpha: disabledReason != null ? 0.5 : 1.0), 
-                              weight: FontWeight.w600
-                            )),
-                            subtitle: disabledReason != null
-                                ? Text(disabledReason, style: TextStyle(color: Colors.red[700], fontSize: 12))
-                                : Text(
-                                    (maxRes ?? 0) > 0
-                                        ? '$currRes/$maxRes reservas este mes'
-                                        : 'Con plan activo',
-                                    style: TextStyle(
-                                      color: ((maxRes ?? 0) > 0 && (currRes ?? 0) >= maxRes!)
-                                          ? Colors.orange[700]
-                                          : kaliColors.clay,
-                                      fontSize: 12,
-                                    ),
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: kaliColors.clay,
+                                    backgroundImage:
+                                        AvatarProvider.fromUrl(p['avatar_url']),
+                                    child: p['avatar_url'] == null
+                                        ? Text(
+                                            name.isNotEmpty
+                                                ? name[0].toUpperCase()
+                                                : '?',
+                                            style: TextStyle(
+                                                color: kaliColors.warmWhite,
+                                                fontSize: 12))
+                                        : null,
                                   ),
-                            trailing: TextButton(
-                              onPressed: disabledReason != null
-                                  ? () => _confirmOverride(p['id'], name, disabledReason)
-                                  : () => _assign(p['id']),
-                              style: disabledReason != null
-                                  ? TextButton.styleFrom(foregroundColor: Colors.orange[800])
-                                  : null,
-                              child: Text(disabledReason != null ? 'Inscribir igual' : 'Inscribir'),
+                                  title: Text(name,
+                                      style: kaliColors.body(
+                                          kaliColors.espresso.withValues(
+                                              alpha: disabledReason != null
+                                                  ? 0.5
+                                                  : 1.0),
+                                          weight: FontWeight.w600)),
+                                  subtitle: disabledReason != null
+                                      ? Text(disabledReason,
+                                          style: TextStyle(
+                                              color: Colors.red[700],
+                                              fontSize: 12))
+                                      : Text(
+                                          (maxRes ?? 0) > 0
+                                              ? '$currRes/$maxRes reservas este mes'
+                                              : 'Con plan activo',
+                                          style: TextStyle(
+                                            color: ((maxRes ?? 0) > 0 &&
+                                                    (currRes ?? 0) >= maxRes!)
+                                                ? Colors.orange[700]
+                                                : kaliColors.clay,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                  trailing: TextButton(
+                                    onPressed: disabledReason != null
+                                        ? () => _confirmOverride(
+                                            p['id'], name, disabledReason)
+                                        : () => _assign(p['id']),
+                                    style: disabledReason != null
+                                        ? TextButton.styleFrom(
+                                            foregroundColor: Colors.orange[800])
+                                        : null,
+                                    child: Text(disabledReason != null
+                                        ? 'Inscribir igual'
+                                        : 'Inscribir'),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
             ),
           ],
         ),

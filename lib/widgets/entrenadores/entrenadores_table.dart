@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/entrenadores/add_trainer_button.dart';
@@ -77,23 +76,24 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Eliminar entrenador',
-          style: KaliText.body(kaliColors.espresso,
+          style: kaliColors.body(kaliColors.espresso,
               weight: FontWeight.w600, size: 18),
         ),
         content: Text(
           '¿Seguro que querés eliminar a ${trainer['full_name']}? Esta acción no se puede deshacer.',
-          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.7)),
+          style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso)),
+            child:
+                Text('Cancelar', style: kaliColors.body(kaliColors.espresso)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Eliminar',
-              style: KaliText.body(const Color(0xFFD4685C),
+              style: kaliColors.body(const Color(0xFFD4685C),
                   weight: FontWeight.w600),
             ),
           ),
@@ -161,8 +161,8 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
           else if (_error != null)
             Padding(
               padding: const EdgeInsets.all(40),
-              child:
-                  Text(_error!, style: KaliText.body(const Color(0xFFD4685C))),
+              child: Text(_error!,
+                  style: kaliColors.body(const Color(0xFFD4685C))),
             )
           else if (_trainers.isEmpty)
             Padding(
@@ -178,8 +178,8 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
                     const SizedBox(height: 12),
                     Text(
                       'Aún no hay entrenadores registrados.',
-                      style: KaliText.body(
-                          kaliColors.espresso.withValues(alpha: 0.5)),
+                      style: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -222,7 +222,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
           Expanded(
             child: Text(
               'Entrenadores del Estudio',
-              style: KaliText.headingItalic(kaliColors.espresso, size: 22),
+              style: kaliColors.headingItalic(kaliColors.espresso, size: 22),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -240,7 +240,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
   }
 
   Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
-    final style = KaliText.label(kaliColors.espresso.withValues(alpha: 0.45));
+    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.45));
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
       child: Row(

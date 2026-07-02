@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Indicador de estado vacío reutilizable.
@@ -34,7 +33,7 @@ class KaliEmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: KaliText.body(
+              style: kaliColors.body(
                 kaliColors.espresso.withValues(alpha: 0.5),
                 weight: FontWeight.w600,
                 size: 16,
@@ -43,7 +42,7 @@ class KaliEmptyState extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: KaliText.body(
+              style: kaliColors.body(
                 kaliColors.espresso.withValues(alpha: 0.35),
                 size: 13,
               ),

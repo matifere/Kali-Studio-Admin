@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/services/auth_service.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 
@@ -94,11 +93,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                   Expanded(
                     child: Text(
                       'Añadir Entrenador',
-                      style: GoogleFonts.cormorantGaramond(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w600,
-                        color: kaliColors.espresso,
-                      ),
+                      style: kaliColors.heading(kaliColors.espresso, size: 30).copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                   IconButton(
@@ -112,7 +107,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
               Text(
                 'Se registrará con acceso de entrenador (rol admin).',
                 style:
-                    KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                    kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 28),
 
@@ -143,7 +138,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
               if (_error != null) ...[
                 const SizedBox(height: 14),
                 Text(_error!,
-                    style: KaliText.body(const Color(0xFFD4685C), size: 13)),
+                    style: kaliColors.body(const Color(0xFFD4685C), size: 13)),
               ],
 
               const SizedBox(height: 28),
@@ -157,8 +152,8 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                         _isLoading ? null : () => Navigator.of(context).pop(),
                     child: Text(
                       'Cancelar',
-                      style: KaliText.body(
-                          kaliColors.espresso.withValues(alpha: 0.6)),
+                      style: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -189,7 +184,7 @@ class _CreateTrainerDialogState extends State<CreateTrainerDialog> {
                               )
                             : Text(
                                 'Registrar Entrenador',
-                                style: KaliText.body(
+                                style: kaliColors.body(
                                   kaliColors.warmWhite,
                                   weight: FontWeight.w600,
                                   size: 13,

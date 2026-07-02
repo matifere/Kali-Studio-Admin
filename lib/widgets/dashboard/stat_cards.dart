@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/services/profile_cache.dart';
 
@@ -21,7 +20,8 @@ class DashboardStatCards extends StatelessWidget {
             final bool isNarrow = constraints.maxWidth < 700;
 
             if (state.isLoading && !state.hasLoaded) {
-              return _buildSkeletonRow(isNarrow: isNarrow, kaliColors: kaliColors);
+              return _buildSkeletonRow(
+                  isNarrow: isNarrow, kaliColors: kaliColors);
             }
 
             final widgets = <Widget>[];
@@ -35,7 +35,8 @@ class DashboardStatCards extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   bottomWidget: Text(
                     'Suscripciones activas',
-                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                   kaliColors: kaliColors,
                 ),
@@ -51,7 +52,8 @@ class DashboardStatCards extends StatelessWidget {
                   state.turnosActivosHoy > 0
                       ? "Sesiones programadas para hoy"
                       : "No hay sesiones hoy",
-                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 kaliColors: kaliColors,
               ),
@@ -94,10 +96,12 @@ class DashboardStatCards extends StatelessWidget {
     );
   }
 
-  Widget _buildSkeletonRow({required bool isNarrow, required KaliColorsExtension kaliColors}) {
+  Widget _buildSkeletonRow(
+      {required bool isNarrow, required KaliColorsExtension kaliColors}) {
     final cardsCount = ProfileCache.isSudo ? 3 : 2;
-    final cards = List.generate(cardsCount, (_) => _buildSkeletonCard(kaliColors));
-    
+    final cards =
+        List.generate(cardsCount, (_) => _buildSkeletonCard(kaliColors));
+
     if (isNarrow) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -194,13 +198,14 @@ class DashboardStatCards extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title,
-                  style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.5))),
+                  style: kaliColors
+                      .label(kaliColors.espresso.withValues(alpha: 0.5))),
               Icon(icon, color: kaliColors.espresso, size: 20),
             ],
           ),
           const SizedBox(height: 16),
           Text(value,
-              style: KaliText.display(kaliColors.espresso).copyWith(
+              style: kaliColors.display(kaliColors.espresso).copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 40,
                   fontStyle: FontStyle.normal)),
@@ -232,13 +237,14 @@ class DashboardStatCards extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title,
-                  style: KaliText.label(kaliColors.warmWhite.withValues(alpha: 0.6))),
+                  style: kaliColors
+                      .label(kaliColors.warmWhite.withValues(alpha: 0.6))),
               Icon(icon, color: kaliColors.warmWhite, size: 20),
             ],
           ),
           const SizedBox(height: 16),
           Text(value,
-              style: KaliText.display(kaliColors.warmWhite).copyWith(
+              style: kaliColors.display(kaliColors.warmWhite).copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 40,
                   fontStyle: FontStyle.normal)),
@@ -254,7 +260,8 @@ class DashboardStatCards extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(capacityText,
-              style: KaliText.body(kaliColors.warmWhite.withValues(alpha: 0.6))),
+              style:
+                  kaliColors.body(kaliColors.warmWhite.withValues(alpha: 0.6))),
         ],
       ),
     );

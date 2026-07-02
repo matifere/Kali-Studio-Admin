@@ -88,7 +88,9 @@ void main() {
     });
   });
 
-  group('Subscription.studentInitials – casos con espacios problemáticos (bug fix)', () {
+  group(
+      'Subscription.studentInitials – casos con espacios problemáticos (bug fix)',
+      () {
     test('doble espacio no lanza excepción', () {
       expect(() => makeSub('Juan  García').studentInitials, returnsNormally);
     });

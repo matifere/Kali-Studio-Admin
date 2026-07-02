@@ -15,7 +15,8 @@ class AlumnosBloc extends Bloc<AlumnosEvent, AlumnosState> {
   final ActivityBloc? _activityBloc;
   final AlumnosRepository _repository;
 
-  AlumnosBloc({ActivityBloc? activityBloc, required AlumnosRepository repository})
+  AlumnosBloc(
+      {ActivityBloc? activityBloc, required AlumnosRepository repository})
       : _activityBloc = activityBloc,
         _repository = repository,
         super(AlumnosInitial()) {

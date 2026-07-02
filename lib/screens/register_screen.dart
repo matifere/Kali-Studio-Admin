@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/auth/auth_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 
@@ -63,15 +62,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const Spacer(),
           Text(
             "Crear Perfil\nAdministrativo",
-            style: KaliText.display(kaliColors.warmWhite).copyWith(
-              fontSize: 48,
-              fontStyle: FontStyle.italic,
-            ),
+            style: kaliColors.display(kaliColors.warmWhite).copyWith(
+                  fontSize: 48,
+                  fontStyle: FontStyle.italic,
+                ),
           ),
           const SizedBox(height: 24),
           Text(
             "Comienza a gestionar tu institución\nhoy con herramientas diseñadas\npara la administración profesional.",
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.clay,
               size: 16,
             ),
@@ -83,7 +82,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // ── Formulario de registro ────────────────────────────────────────────────
-  Widget _buildForm(BuildContext context, bool isLoading, KaliColorsExtension kaliColors) {
+  Widget _buildForm(
+      BuildContext context, bool isLoading, KaliColorsExtension kaliColors) {
     return Container(
       color: kaliColors.warmWhite,
       padding: const EdgeInsets.all(32.0),
@@ -93,7 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Text(
               "Registro de Staff",
-              style: KaliText.heading(
+              style: kaliColors.heading(
                 kaliColors.espresso,
                 size: 32,
               ),
@@ -101,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 12),
             Text(
               "Ingresa los detalles para configurar el acceso administrativo al portal del estudio.",
-              style: KaliText.body(
+              style: kaliColors.body(
                 kaliColors.clayDark,
                 size: 14,
               ),
@@ -126,9 +126,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hint: "••••••••",
                   obscureText: _isPassObscured,
                   controller: passControl,
-                  suffixIcon: _isPassObscured
-                      ? Icons.visibility_off
-                      : Icons.visibility,
+                  suffixIcon:
+                      _isPassObscured ? Icons.visibility_off : Icons.visibility,
                   onSuffixTap: () => setState(
                     () => _isPassObscured = !_isPassObscured,
                   ),
@@ -172,7 +171,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: isLoading ? null : () => _handleRegister(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kaliColors.espresso,
-                  foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
+                  foregroundColor:
+                      kaliColors.getContrastColor(kaliColors.espresso),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(27),
@@ -189,10 +189,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       )
                     : Text(
                         "CREAR CUENTA",
-                        style: KaliText.label(kaliColors.warmWhite).copyWith(
-                          fontSize: 12,
-                          letterSpacing: 2,
-                        ),
+                        style: kaliColors.label(kaliColors.warmWhite).copyWith(
+                              fontSize: 12,
+                              letterSpacing: 2,
+                            ),
                       ),
               ),
             ),
@@ -202,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onTap: () => Navigator.of(context).pop(),
                 child: RichText(
                   text: TextSpan(
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.clayDark,
                       size: 14,
                     ),
@@ -290,7 +290,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ? Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(flex: 4, child: _buildBrandPanel(kaliColors)),
+                            Expanded(
+                                flex: 4, child: _buildBrandPanel(kaliColors)),
                             Expanded(
                               flex: 6,
                               child: _buildForm(context, isLoading, kaliColors),

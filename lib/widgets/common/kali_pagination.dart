@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Control de paginación reutilizable.
@@ -35,7 +34,7 @@ class KaliPagination extends StatelessWidget {
         children: [
           Text(
             'MOSTRANDO $showingCount DE $totalCount $itemLabel',
-            style: KaliText.label(
+            style: kaliColors.label(
               kaliColors.espresso.withValues(alpha: 0.4),
             ),
           ),
@@ -127,8 +126,12 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -145,7 +148,7 @@ class _PageNumberBtnState extends State<_PageNumberBtn> {
           alignment: Alignment.center,
           child: Text(
             '${widget.page}',
-            style: KaliText.body(
+            style: kaliColors.body(
               widget.isActive ? kaliColors.warmWhite : kaliColors.sand,
               weight: widget.isActive ? FontWeight.w700 : FontWeight.w400,
             ),

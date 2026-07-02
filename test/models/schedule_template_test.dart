@@ -81,12 +81,19 @@ void main() {
           'is_active': true,
         });
 
-    test('monday → Lunes', () => expect(make('monday').dayNameSpanish, 'Lunes'));
-    test('tuesday → Martes', () => expect(make('tuesday').dayNameSpanish, 'Martes'));
-    test('wednesday → Miércoles', () => expect(make('wednesday').dayNameSpanish, 'Miércoles'));
-    test('thursday → Jueves', () => expect(make('thursday').dayNameSpanish, 'Jueves'));
-    test('friday → Viernes', () => expect(make('friday').dayNameSpanish, 'Viernes'));
-    test('saturday → Sábado', () => expect(make('saturday').dayNameSpanish, 'Sábado'));
-    test('sunday → Domingo', () => expect(make('sunday').dayNameSpanish, 'Domingo'));
+    test(
+        'monday → Lunes', () => expect(make('monday').dayNameSpanish, 'Lunes'));
+    test('tuesday → Martes',
+        () => expect(make('tuesday').dayNameSpanish, 'Martes'));
+    test('wednesday → Miércoles',
+        () => expect(make('wednesday').dayNameSpanish, 'Miércoles'));
+    test('thursday → Jueves',
+        () => expect(make('thursday').dayNameSpanish, 'Jueves'));
+    test('friday → Viernes',
+        () => expect(make('friday').dayNameSpanish, 'Viernes'));
+    test('saturday → Sábado',
+        () => expect(make('saturday').dayNameSpanish, 'Sábado'));
+    test('sunday → Domingo',
+        () => expect(make('sunday').dayNameSpanish, 'Domingo'));
   });
 }

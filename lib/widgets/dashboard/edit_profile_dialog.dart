@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 class EditProfileDialog extends StatefulWidget {
@@ -131,11 +130,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 children: [
                   Text(
                     'Editar Perfil',
-                    style: GoogleFonts.cormorantGaramond(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      color: kaliColors.espresso,
-                    ),
+                    style: kaliColors.heading(kaliColors.espresso, size: 32).copyWith(fontWeight: FontWeight.w600),
                   ),
                   IconButton(
                     onPressed:
@@ -174,8 +169,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                   Expanded(
                     child: Text(
                       'Si cambiás el correo, recibirás un link de confirmación en la nueva dirección.',
-                      style: KaliText.caption(
-                          kaliColors.espresso.withValues(alpha: 0.5)),
+                      style: kaliColors
+                          .caption(kaliColors.espresso.withValues(alpha: 0.5)),
                     ),
                   ),
                 ],
@@ -221,7 +216,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 const SizedBox(height: 16),
                 Text(
                   _error!,
-                  style: KaliText.body(const Color(0xFFD4685C), size: 13),
+                  style: kaliColors.body(const Color(0xFFD4685C), size: 13),
                 ),
               ],
 
@@ -236,8 +231,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         _isLoading ? null : () => Navigator.of(context).pop(),
                     child: Text(
                       'Cancelar',
-                      style: KaliText.body(
-                          kaliColors.espresso.withValues(alpha: 0.6)),
+                      style: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -268,7 +263,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                               )
                             : Text(
                                 'Guardar cambios',
-                                style: KaliText.body(kaliColors.warmWhite,
+                                style: kaliColors.body(kaliColors.warmWhite,
                                     weight: FontWeight.w600, size: 13),
                               ),
                       ),
@@ -294,7 +289,7 @@ class _SectionLabel extends StatelessWidget {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Text(
       text,
-      style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.4)),
+      style: kaliColors.label(kaliColors.espresso.withValues(alpha: 0.4)),
     );
   }
 }
@@ -324,7 +319,7 @@ class _ProfileField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: KaliText.body(kaliColors.espresso,
+          style: kaliColors.body(kaliColors.espresso,
               weight: FontWeight.w600, size: 13),
         ),
         const SizedBox(height: 6),
@@ -332,12 +327,11 @@ class _ProfileField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: KaliText.body(kaliColors.espresso, size: 14),
+          style: kaliColors.body(kaliColors.espresso, size: 14),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: KaliText.body(
-                kaliColors.espresso.withValues(alpha: 0.35),
-                size: 14),
+            hintStyle: kaliColors
+                .body(kaliColors.espresso.withValues(alpha: 0.35), size: 14),
             suffixIcon: suffix,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(

@@ -7,7 +7,6 @@ import 'package:argrity/widgets/turnos/schedule_bottom_bar.dart';
 import 'package:argrity/widgets/turnos/turno_detail_panel.dart';
 import 'package:argrity/widgets/turnos/create_class_group_dialog.dart';
 import 'package:argrity/widgets/turnos/add_holiday_dialog.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/services/profile_cache.dart';
 
@@ -83,7 +82,8 @@ class _TurnosScreenState extends State<TurnosScreen> {
               height: MediaQuery.of(ctx).size.height * 0.88,
               decoration: BoxDecoration(
                 color: kaliColors.warmWhite,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: TurnoDetailPanel(
                 turno: state.selectedTurno!,
@@ -102,13 +102,14 @@ class _TurnosScreenState extends State<TurnosScreen> {
         final isMobile = MediaQuery.of(context).size.width < 700;
         return Column(
           children: [
-                Expanded(
+            Expanded(
               child: Row(
                 children: [
                   // ── Contenido principal ─────────────────────────────────
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(isMobile ? 16 : 40, 32, isMobile ? 16 : 24, 24),
+                      padding: EdgeInsets.fromLTRB(
+                          isMobile ? 16 : 40, 32, isMobile ? 16 : 24, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -129,15 +130,23 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                   );
                             },
                             onPreviousWeek: () {
-                              final prev = state.currentWeekStart.subtract(const Duration(days: 7));
-                              context.read<TurnosBloc>().add(TurnosWeekChanged(prev));
+                              final prev = state.currentWeekStart
+                                  .subtract(const Duration(days: 7));
+                              context
+                                  .read<TurnosBloc>()
+                                  .add(TurnosWeekChanged(prev));
                             },
                             onNextWeek: () {
-                              final next = state.currentWeekStart.add(const Duration(days: 7));
-                              context.read<TurnosBloc>().add(TurnosWeekChanged(next));
+                              final next = state.currentWeekStart
+                                  .add(const Duration(days: 7));
+                              context
+                                  .read<TurnosBloc>()
+                                  .add(TurnosWeekChanged(next));
                             },
-                            onCreateTurno: _isProfesor ? null : _showCreateDialog,
-                            onAddHoliday: _isProfesor ? null : _showHolidayDialog,
+                            onCreateTurno:
+                                _isProfesor ? null : _showCreateDialog,
+                            onAddHoliday:
+                                _isProfesor ? null : _showHolidayDialog,
                           ),
                           Expanded(
                             child: Container(
@@ -146,30 +155,38 @@ class _TurnosScreenState extends State<TurnosScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: kaliColors.espresso.withValues(alpha: 0.05),
+                                    color: kaliColors.espresso
+                                        .withValues(alpha: 0.05),
                                     blurRadius: 16,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
                               child: state.isLoading
-                                  ? const Center(child: CircularProgressIndicator())
+                                  ? const Center(
+                                      child: CircularProgressIndicator())
                                   : state.error != null
                                       ? Center(
                                           child: Text(
                                             state.error!,
-                                            style: KaliText.body(kaliColors.espresso),
+                                            style: kaliColors
+                                                .body(kaliColors.espresso),
                                           ),
                                         )
                                       : Column(
                                           children: [
-                                              Expanded(
-                                                child: WeeklySchedule(
-                                                  currentWeekStart: state.currentWeekStart,
-                                                  sessions: state.filteredSessions,
-                                                  selectedTurno: state.selectedTurno,
-                                                  onTurnoSelected: (turno) {
-                                                  context.read<TurnosBloc>().add(
+                                            Expanded(
+                                              child: WeeklySchedule(
+                                                currentWeekStart:
+                                                    state.currentWeekStart,
+                                                sessions:
+                                                    state.filteredSessions,
+                                                selectedTurno:
+                                                    state.selectedTurno,
+                                                onTurnoSelected: (turno) {
+                                                  context
+                                                      .read<TurnosBloc>()
+                                                      .add(
                                                         TurnoSelected(turno),
                                                       );
                                                 },
@@ -198,7 +215,9 @@ class _TurnosScreenState extends State<TurnosScreen> {
                               child: TurnoDetailPanel(
                                 turno: state.selectedTurno!,
                                 onClose: () {
-                                  context.read<TurnosBloc>().add(TurnoDeselected());
+                                  context
+                                      .read<TurnosBloc>()
+                                      .add(TurnoDeselected());
                                 },
                               ),
                             )

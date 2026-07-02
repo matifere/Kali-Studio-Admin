@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,10 +43,12 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
     _description = t.description;
 
     final startParts = t.startTime.split(':');
-    _startTime = TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1]));
+    _startTime = TimeOfDay(
+        hour: int.parse(startParts[0]), minute: int.parse(startParts[1]));
 
     final endParts = t.endTime.split(':');
-    _endTime = TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]));
+    _endTime =
+        TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]));
   }
 
   Future<void> _loadInstructors() async {
@@ -66,13 +67,13 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
 
       final res = await query.order('full_name', ascending: true);
       final list = (res as List).map((e) => e['full_name'] as String).toList();
-      
+
       if (mounted) {
         setState(() {
           _instructors = list;
           _isLoadingInstructors = false;
           if (_instructor != null && !_instructors.contains(_instructor)) {
-             _instructors.add(_instructor!);
+            _instructors.add(_instructor!);
           }
         });
       }
@@ -138,9 +139,11 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
       status: widget.turno.status,
     );
 
-    context.read<TurnosBloc>().add(TurnoEdited(updatedTurno, editFutureSessions: _editFutureSessions));
+    context.read<TurnosBloc>().add(
+        TurnoEdited(updatedTurno, editFutureSessions: _editFutureSessions));
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Turno actualizado existosamente')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Turno actualizado existosamente')));
   }
 
   @override
@@ -161,40 +164,49 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
               children: [
                 Text(
                   'Editar Turno',
-                  style: KaliText.heading(kaliColors.espresso, size: 24),
+                  style: kaliColors.heading(kaliColors.espresso, size: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Si editas la fecha u horario, asegúrate de avisar a los alumnos inscriptos.',
-                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 24),
 
                 // Name
-                Text('Nombre de la Clase', style: KaliText.label(kaliColors.espresso)),
+                Text('Nombre de la Clase',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
-                    style: KaliText.body(kaliColors.espresso),
+                  style: kaliColors.body(kaliColors.espresso),
                   initialValue: _name,
-                  decoration: _inputDecoration('Ej. Reformer Funcional', kaliColors),
+                  decoration:
+                      _inputDecoration('Ej. Reformer Funcional', kaliColors),
                   validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
                   onSaved: (v) => _name = v!,
                 ),
                 const SizedBox(height: 16),
 
                 // Instructor
-                Text('Instructor', style: KaliText.label(kaliColors.espresso)),
+                Text('Instructor',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 _isLoadingInstructors
-                    ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator())
                     : DropdownButtonFormField<String>(
-                                    style: KaliText.body(kaliColors.espresso),
+                        style: kaliColors.body(kaliColors.espresso),
                         initialValue: _instructor,
                         hint: const Text('Sin instructor'),
-                        decoration: _inputDecoration('Seleccionar...', kaliColors),
+                        decoration:
+                            _inputDecoration('Seleccionar...', kaliColors),
                         items: [
-                          const DropdownMenuItem(value: null, child: Text('Sin instructor')),
-                          ..._instructors.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+                          const DropdownMenuItem(
+                              value: null, child: Text('Sin instructor')),
+                          ..._instructors.map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e))),
                         ],
                         onChanged: (val) {
                           setState(() => _instructor = val);
@@ -203,17 +215,19 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 const SizedBox(height: 16),
 
                 // Capacity
-                Text('Capacidad (Aforo)', style: KaliText.label(kaliColors.espresso)),
+                Text('Capacidad (Aforo)',
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
-                    style: KaliText.body(kaliColors.espresso),
+                  style: kaliColors.body(kaliColors.espresso),
                   initialValue: _capacity.toString(),
                   keyboardType: TextInputType.number,
                   decoration: _inputDecoration('Ej. 6', kaliColors),
                   validator: (v) {
                     final c = int.tryParse(v ?? '');
                     if (c == null) return 'Número inválido';
-                    if (c < widget.turno.enrolled) return 'No puede ser menor a los inscriptos (${widget.turno.enrolled})';
+                    if (c < widget.turno.enrolled)
+                      return 'No puede ser menor a los inscriptos (${widget.turno.enrolled})';
                     return null;
                   },
                   onSaved: (v) => _capacity = int.parse(v!),
@@ -221,26 +235,30 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 const SizedBox(height: 16),
 
                 // Date
-                Text('Fecha', style: KaliText.label(kaliColors.espresso)),
+                Text('Fecha', style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: _pickDate,
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     decoration: BoxDecoration(
                       color: kaliColors.background,
-                      border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                      border: Border.all(
+                          color: kaliColors.espresso.withValues(alpha: 0.1)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          DateFormat("EEEE dd 'de' MMMM", "es_ES").format(_date),
-                          style: KaliText.body(kaliColors.espresso),
+                          DateFormat("EEEE dd 'de' MMMM", "es_ES")
+                              .format(_date),
+                          style: kaliColors.body(kaliColors.espresso),
                         ),
-                        Icon(Icons.calendar_month_outlined, color: kaliColors.espresso.withValues(alpha: 0.5)),
+                        Icon(Icons.calendar_month_outlined,
+                            color: kaliColors.espresso.withValues(alpha: 0.5)),
                       ],
                     ),
                   ),
@@ -254,19 +272,24 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Hora de Inicio', style: KaliText.label(kaliColors.espresso)),
+                          Text('Hora de Inicio',
+                              style: kaliColors.label(kaliColors.espresso)),
                           const SizedBox(height: 8),
                           InkWell(
                             onTap: () => _pickTime(true),
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 16),
                               decoration: BoxDecoration(
                                 color: kaliColors.background,
-                                border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                                border: Border.all(
+                                    color: kaliColors.espresso
+                                        .withValues(alpha: 0.1)),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(_formatTime(_startTime), style: KaliText.body(kaliColors.espresso)),
+                              child: Text(_formatTime(_startTime),
+                                  style: kaliColors.body(kaliColors.espresso)),
                             ),
                           ),
                         ],
@@ -277,19 +300,24 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Hora de Fin', style: KaliText.label(kaliColors.espresso)),
+                          Text('Hora de Fin',
+                              style: kaliColors.label(kaliColors.espresso)),
                           const SizedBox(height: 8),
                           InkWell(
                             onTap: () => _pickTime(false),
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 16),
                               decoration: BoxDecoration(
                                 color: kaliColors.background,
-                                border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                                border: Border.all(
+                                    color: kaliColors.espresso
+                                        .withValues(alpha: 0.1)),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(_formatTime(_endTime), style: KaliText.body(kaliColors.espresso)),
+                              child: Text(_formatTime(_endTime),
+                                  style: kaliColors.body(kaliColors.espresso)),
                             ),
                           ),
                         ],
@@ -297,22 +325,30 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                     ),
                   ],
                 ),
-                
+
                 if (widget.turno.groupId != null) ...[
                   const SizedBox(height: 24),
                   Container(
                     decoration: BoxDecoration(
                       color: kaliColors.sand.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                      border: Border.all(
+                          color: kaliColors.espresso.withValues(alpha: 0.1)),
                     ),
                     child: CheckboxListTile(
-                      title: Text('Modificar turnos futuros también', style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600)),
-                      subtitle: Text('Aplica los cambios a todos los turnos de este grupo en la misma franja horaria hacia adelante.', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6), size: 12)),
+                      title: Text('Modificar turnos futuros también',
+                          style: kaliColors.body(kaliColors.espresso,
+                              weight: FontWeight.w600)),
+                      subtitle: Text(
+                          'Aplica los cambios a todos los turnos de este grupo en la misma franja horaria hacia adelante.',
+                          style: kaliColors.body(
+                              kaliColors.espresso.withValues(alpha: 0.6),
+                              size: 12)),
                       value: _editFutureSessions,
                       activeColor: kaliColors.espresso,
                       onChanged: (val) {
-                        if (val != null) setState(() => _editFutureSessions = val);
+                        if (val != null)
+                          setState(() => _editFutureSessions = val);
                       },
                     ),
                   ),
@@ -324,19 +360,24 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+                      child: Text('Cancelar',
+                          style: kaliColors.body(
+                              kaliColors.espresso.withValues(alpha: 0.6))),
                     ),
                     const SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kaliColors.espresso,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text('Guardar Modificaciones', style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600)),
+                      child: Text('Guardar Modificaciones',
+                          style: kaliColors.body(kaliColors.warmWhite,
+                              weight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -348,17 +389,22 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
-    return InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+  InputDecoration _inputDecoration(
+      String hint, KaliColorsExtension kaliColors) {
+    return InputDecoration(
+      filled: true,
+      fillColor: kaliColors.background,
+      hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.5)),
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+        borderSide:
+            BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );

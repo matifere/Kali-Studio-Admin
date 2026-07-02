@@ -78,7 +78,8 @@ void main() {
       );
     });
 
-    test('El perfil se crea en la tabla profiles con datos correctos', () async {
+    test('El perfil se crea en la tabla profiles con datos correctos',
+        () async {
       // Iniciamos sesión directamente (sin pasar por logInUsuario) para
       // inspeccionar el estado crudo de la DB sin que el control de roles interfiera.
       final client = Supabase.instance.client;
@@ -156,8 +157,7 @@ void main() {
       expect(
         result,
         equals('Ok'),
-        reason:
-            'El login de un usuario sudo debe ser exitoso. '
+        reason: 'El login de un usuario sudo debe ser exitoso. '
             'Resultado recibido: "$result"',
       );
 

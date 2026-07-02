@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 
@@ -68,26 +67,29 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
               children: [
                 Text(
                   'Agregar Feriado',
-                  style: KaliText.heading(kaliColors.espresso, size: 24),
+                  style: kaliColors.heading(kaliColors.espresso, size: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Se cancelarán todas las clases del día elegido y se devolverá '
                   'el crédito a cada alumno inscripto (no cuenta como clase perdida).',
-                  style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                  style: kaliColors
+                      .body(kaliColors.espresso.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 24),
-
-                Text('Fecha', style: KaliText.label(kaliColors.espresso)),
+                Text('Fecha', style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: _pickDate,
                   borderRadius: BorderRadius.circular(12),
                   child: InputDecorator(
-                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
-                      border:
-                          OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: kaliColors.background,
+                      hintStyle: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 14),
                     ),
@@ -99,28 +101,29 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                         const SizedBox(width: 12),
                         Text(
                           fechaLarga[0].toUpperCase() + fechaLarga.substring(1),
-                          style: KaliText.body(kaliColors.espresso),
+                          style: kaliColors.body(kaliColors.espresso),
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 Text('Motivo (Opcional)',
-                    style: KaliText.label(kaliColors.espresso)),
+                    style: kaliColors.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextField(
-                  style: KaliText.body(kaliColors.espresso),
+                  style: kaliColors.body(kaliColors.espresso),
                   controller: _reasonController,
-                  decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: kaliColors.background,
+                    hintStyle: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.5)),
                     hintText: 'Ej. Feriado nacional',
-                    border:
-                        OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -128,7 +131,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text('Cancelar',
-                          style: KaliText.body(
+                          style: kaliColors.body(
                               kaliColors.espresso.withValues(alpha: 0.6))),
                     ),
                     const SizedBox(width: 16),
@@ -143,7 +146,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                         ),
                       ),
                       child: Text('Cancelar Clases del Día',
-                          style: KaliText.body(kaliColors.warmWhite,
+                          style: kaliColors.body(kaliColors.warmWhite,
                               weight: FontWeight.w600)),
                     ),
                   ],

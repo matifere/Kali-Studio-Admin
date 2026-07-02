@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 
@@ -58,7 +57,7 @@ class _TrainerRowState extends State<TrainerRow> {
                     backgroundColor: kaliColors.clay.withValues(alpha: 0.35),
                     child: Text(
                       _initials,
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso,
                         weight: FontWeight.w700,
                         size: 13,
@@ -69,7 +68,7 @@ class _TrainerRowState extends State<TrainerRow> {
                   Expanded(
                     child: Text(
                       name,
-                      style: KaliText.body(kaliColors.espresso,
+                      style: kaliColors.body(kaliColors.espresso,
                           weight: FontWeight.w600, size: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -83,7 +82,7 @@ class _TrainerRowState extends State<TrainerRow> {
               flex: 4,
               child: Text(
                 email,
-                style: KaliText.body(
+                style: kaliColors.body(
                     kaliColors.espresso.withValues(alpha: 0.55),
                     size: 13),
                 overflow: TextOverflow.ellipsis,
@@ -104,7 +103,8 @@ class _TrainerRowState extends State<TrainerRow> {
                   const SizedBox(width: 8),
                   Text(
                     isActive ? 'Activo' : 'Inactivo',
-                    style: KaliText.body(statusColor, weight: FontWeight.w500),
+                    style:
+                        kaliColors.body(statusColor, weight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -114,7 +114,8 @@ class _TrainerRowState extends State<TrainerRow> {
             Expanded(
               flex: 2,
               child: isSudo
-                  ? const SizedBox.shrink() // El dueño (sudo) no se puede eliminar
+                  ? const SizedBox
+                      .shrink() // El dueño (sudo) no se puede eliminar
                   : KaliIconButton.action(
                       Icons.delete_outline,
                       tooltip: 'Eliminar',

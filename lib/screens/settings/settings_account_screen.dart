@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
@@ -47,7 +46,8 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
     final newPassword = _passwordController.text;
     if (newPassword.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('La contraseña debe tener al menos 6 caracteres')),
+        const SnackBar(
+            content: Text('La contraseña debe tener al menos 6 caracteres')),
       );
       return;
     }
@@ -115,16 +115,12 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                 children: [
                   Text(
                     'Cuenta',
-                    style: GoogleFonts.cormorantGaramond(
-                      fontSize: isSmall ? 36 : 46,
-                      fontWeight: FontWeight.w600,
-                      color: kaliColors.espresso,
-                    ),
+                    style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 36 : 46).copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Gestioná tu información personal y de seguridad.',
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.espresso.withValues(alpha: 0.6),
                       size: 14,
                     ),
@@ -148,7 +144,9 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Información Pública', style: KaliText.heading(kaliColors.espresso, size: 20)),
+                        Text('Información Pública',
+                            style: kaliColors.heading(kaliColors.espresso,
+                                size: 20)),
                         const SizedBox(height: 24),
                         KaliTextField(
                           controller: _nameController,
@@ -163,14 +161,18 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: kaliColors.espresso,
                               foregroundColor: kaliColors.warmWhite,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             child: _isSavingName
                                 ? SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: kaliColors.warmWhite),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: kaliColors.warmWhite),
                                   )
                                 : const Text('Guardar Nombre'),
                           ),
@@ -198,13 +200,16 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Seguridad de la Cuenta', style: KaliText.heading(kaliColors.espresso, size: 20)),
+                        Text('Seguridad de la Cuenta',
+                            style: kaliColors.heading(kaliColors.espresso,
+                                size: 20)),
                         const SizedBox(height: 24),
                         KaliTextField(
                           controller: TextEditingController(text: email),
                           label: 'Correo electrónico',
                           hint: '',
-                          readOnly: true, // El correo no se puede cambiar directamente
+                          readOnly:
+                              true, // El correo no se puede cambiar directamente
                         ),
                         const SizedBox(height: 16),
                         KaliTextField(
@@ -212,8 +217,11 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                           label: 'Nueva contraseña',
                           hint: 'Mínimo 6 caracteres',
                           obscureText: _obscurePassword,
-                          suffixIcon: _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          onSuffixTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                          suffixIcon: _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          onSuffixTap: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
                         ),
                         const SizedBox(height: 16),
                         Align(
@@ -223,14 +231,18 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: kaliColors.espresso,
                               foregroundColor: kaliColors.warmWhite,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             child: _isSavingPassword
                                 ? SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: kaliColors.warmWhite),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: kaliColors.warmWhite),
                                   )
                                 : const Text('Actualizar Contraseña'),
                           ),
@@ -249,10 +261,12 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                       icon: const Icon(Icons.logout, color: Color(0xFFD4685C)),
                       label: Text(
                         'Cerrar sesión',
-                        style: KaliText.body(const Color(0xFFD4685C), weight: FontWeight.w600),
+                        style: kaliColors.body(const Color(0xFFD4685C),
+                            weight: FontWeight.w600),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
                       ),
                     ),
                   ),

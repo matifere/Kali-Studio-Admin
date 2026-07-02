@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/turnos/edit_turno_dialog.dart';
@@ -74,7 +73,7 @@ class TurnoDetailPanel extends StatelessWidget {
         children: [
           Text(
             'Detalles de Clase',
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso,
               weight: FontWeight.w700,
               size: 16,
@@ -108,7 +107,7 @@ class TurnoDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'TURNO SELECCIONADO',
-                style: KaliText.label(
+                style: kaliColors.label(
                   kaliColors.espresso.withValues(alpha: 0.5),
                 ),
               ),
@@ -122,13 +121,16 @@ class TurnoDetailPanel extends StatelessWidget {
                 ),
                 child: Text(
                   turno.occupancyText,
-                  style: KaliText.label(
-                    turno.isFull
-                        ? const Color(0xFFD4685C)
-                        : kaliColors.espresso.withValues(alpha: 0.7),
-                  ).copyWith(
-                      fontWeight:
-                          turno.isFull ? FontWeight.bold : FontWeight.normal),
+                  style: kaliColors
+                      .label(
+                        turno.isFull
+                            ? const Color(0xFFD4685C)
+                            : kaliColors.espresso.withValues(alpha: 0.7),
+                      )
+                      .copyWith(
+                          fontWeight: turno.isFull
+                              ? FontWeight.bold
+                              : FontWeight.normal),
                 ),
               ),
             ],
@@ -136,7 +138,7 @@ class TurnoDetailPanel extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             turno.name,
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso,
               weight: FontWeight.w700,
               size: 16,
@@ -145,14 +147,14 @@ class TurnoDetailPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '${turno.startTimeFormatted} - ${turno.endTimeFormatted}',
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             turno.instructorName ?? 'Sin instructor',
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
@@ -169,14 +171,14 @@ class TurnoDetailPanel extends StatelessWidget {
         children: [
           Text(
             'DESCRIPCIÓN',
-            style: KaliText.label(
+            style: kaliColors.label(
               kaliColors.espresso.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             turno.description!,
-            style: KaliText.body(
+            style: kaliColors.body(
               kaliColors.espresso.withValues(alpha: 0.7),
               size: 14,
             ),
@@ -187,7 +189,8 @@ class TurnoDetailPanel extends StatelessWidget {
   }
 
   // ── Alumnos inscriptos ──────────────────────────────────────────────────────
-  Widget _buildEnrolledStudents(BuildContext context, KaliColorsExtension kaliColors) {
+  Widget _buildEnrolledStudents(
+      BuildContext context, KaliColorsExtension kaliColors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -198,8 +201,8 @@ class TurnoDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'ALUMNOS INSCRIPTOS',
-                style:
-                    KaliText.label(kaliColors.espresso.withValues(alpha: 0.5)),
+                style: kaliColors
+                    .label(kaliColors.espresso.withValues(alpha: 0.5)),
               ),
               if (!turno.isFull && _canModifyStudents)
                 InkWell(
@@ -214,10 +217,10 @@ class TurnoDetailPanel extends StatelessWidget {
                   },
                   child: Text(
                     '+ Inscribir',
-                    style: KaliText.label(kaliColors.espresso).copyWith(
-                      color: kaliColors.espresso,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: kaliColors.label(kaliColors.espresso).copyWith(
+                          color: kaliColors.espresso,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
             ],
@@ -229,8 +232,8 @@ class TurnoDetailPanel extends StatelessWidget {
               ? Center(
                   child: Text(
                     'No hay alumnos inscriptos.',
-                    style: KaliText.body(
-                        kaliColors.espresso.withValues(alpha: 0.5)),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.5)),
                   ),
                 )
               : ListView.builder(
@@ -255,7 +258,7 @@ class TurnoDetailPanel extends StatelessWidget {
                       ),
                       title: Text(
                         student.studentName,
-                        style: KaliText.body(kaliColors.espresso,
+                        style: kaliColors.body(kaliColors.espresso,
                             weight: FontWeight.w500),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -439,7 +442,7 @@ class _ActionButtonState extends State<_ActionButton> {
               const SizedBox(width: 10),
               Text(
                 widget.label,
-                style: KaliText.body(
+                style: kaliColors.body(
                   color,
                   weight: FontWeight.w600,
                   size: 13,

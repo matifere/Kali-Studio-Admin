@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/models/student.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
@@ -29,19 +28,24 @@ class _StudentRowState extends State<StudentRow> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Eliminar alumno', style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 18)),
+        title: Text('Eliminar alumno',
+            style: kaliColors.body(kaliColors.espresso,
+                weight: FontWeight.w600, size: 18)),
         content: Text(
           '¿Seguro que querés eliminar a ${widget.student.name}? Esta acción no se puede deshacer.',
-          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.7)),
+          style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso)),
+            child:
+                Text('Cancelar', style: kaliColors.body(kaliColors.espresso)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Eliminar', style: KaliText.body(const Color(0xFFD4685C), weight: FontWeight.w600)),
+            child: Text('Eliminar',
+                style: kaliColors.body(const Color(0xFFD4685C),
+                    weight: FontWeight.w600)),
           ),
         ],
       ),
@@ -75,7 +79,8 @@ class _StudentRowState extends State<StudentRow> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No se pudo eliminar el alumno. Intentá nuevamente.'),
+              content:
+                  Text('No se pudo eliminar el alumno. Intentá nuevamente.'),
               duration: Duration(seconds: 6),
             ),
           );
@@ -102,19 +107,23 @@ class _StudentRowState extends State<StudentRow> {
           .select('id, is_active');
 
       if (result.isEmpty) {
-        throw Exception('No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
+        throw Exception(
+            'No se actualizó ningún registro. Verificá las políticas RLS en Supabase.');
       }
 
       messenger.showSnackBar(
         SnackBar(
-          content: Text(newValue ? '${s.name} ahora está activo' : '${s.name} ahora está inactivo'),
+          content: Text(newValue
+              ? '${s.name} ahora está activo'
+              : '${s.name} ahora está inactivo'),
         ),
       );
     } catch (e) {
       bloc.add(AlumnosStudentStatusChanged(s.id, s.isActive));
       messenger.showSnackBar(
         const SnackBar(
-          content: Text('No se pudo cambiar el estado del alumno. Intentá nuevamente.'),
+          content: Text(
+              'No se pudo cambiar el estado del alumno. Intentá nuevamente.'),
           duration: Duration(seconds: 6),
         ),
       );
@@ -127,8 +136,12 @@ class _StudentRowState extends State<StudentRow> {
     final s = widget.student;
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.bounceInOut,
@@ -149,13 +162,15 @@ class _StudentRowState extends State<StudentRow> {
                       children: [
                         Text(
                           s.name,
-                          style: KaliText.body(kaliColors.espresso, weight: FontWeight.w600, size: 14),
+                          style: kaliColors.body(kaliColors.espresso,
+                              weight: FontWeight.w600, size: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           s.email,
-                          style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                          style: kaliColors
+                              .body(kaliColors.espresso.withValues(alpha: 0.5)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -250,7 +265,8 @@ class _PatologiasCell extends StatelessWidget {
     if (patologias.isEmpty) {
       return Text(
         'Ninguna',
-        style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.35), size: 13),
+        style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.35),
+            size: 13),
       );
     }
 
@@ -293,7 +309,7 @@ class _PatologiaChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: KaliText.label(
+        style: kaliColors.label(
           kaliColors.espresso.withValues(alpha: muted ? 0.45 : 0.75),
         ),
         overflow: TextOverflow.ellipsis,
@@ -311,14 +327,16 @@ class _AttendanceCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final hasAttended = count > 0;
-    final color = hasAttended ? const Color(0xFF5C9E6C) : kaliColors.espresso.withValues(alpha: 0.3);
+    final color = hasAttended
+        ? const Color(0xFF5C9E6C)
+        : kaliColors.espresso.withValues(alpha: 0.3);
     return Row(
       children: [
         Icon(Icons.check_circle_outline_rounded, size: 14, color: color),
         const SizedBox(width: 6),
         Text(
           '$count ${count == 1 ? 'clase' : 'clases'}',
-          style: KaliText.body(color, weight: FontWeight.w500, size: 13),
+          style: kaliColors.body(color, weight: FontWeight.w500, size: 13),
         ),
       ],
     );
@@ -336,6 +354,7 @@ class _StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final color = isActive ? _activeColor : _inactiveColor;
 
     return Tooltip(
@@ -356,7 +375,7 @@ class _StatusIndicator extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 isActive ? 'Activo' : 'Inactivo',
-                style: KaliText.body(color, weight: FontWeight.w500),
+                style: kaliColors.body(color, weight: FontWeight.w500),
               ),
             ],
           ),
@@ -386,7 +405,7 @@ class _ShiftInfo extends StatelessWidget {
       children: [
         Text(
           nextShift,
-          style: KaliText.body(
+          style: kaliColors.body(
             reactivate
                 ? kaliColors.espresso.withValues(alpha: 0.4)
                 : kaliColors.espresso,
@@ -396,7 +415,7 @@ class _ShiftInfo extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           shiftClass,
-          style: KaliText.label(
+          style: kaliColors.label(
             reactivate
                 ? const Color(0xFFD4685C)
                 : kaliColors.espresso.withValues(alpha: 0.45),

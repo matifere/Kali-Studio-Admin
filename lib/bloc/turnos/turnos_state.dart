@@ -3,6 +3,7 @@ part of 'turnos_bloc.dart';
 /// Estado del calendario de turnos.
 class TurnosState {
   final List<ClassSession> sessions;
+
   /// La fecha representa siempre al lunes de la semana focalizada.
   final DateTime currentWeekStart;
   final bool isLoading;
@@ -50,7 +51,8 @@ class TurnosState {
   }();
 
   late final List<ClassSession> filteredSessions = () {
-    final noInstructor = selectedInstructor == null || selectedInstructor!.isEmpty;
+    final noInstructor =
+        selectedInstructor == null || selectedInstructor!.isEmpty;
     final noRoom = selectedRoom == null || selectedRoom!.isEmpty;
     if (noInstructor && noRoom) return sessions;
     return sessions.where((s) {
@@ -79,8 +81,11 @@ class TurnosState {
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       infoMessage: clearInfoMessage ? null : (infoMessage ?? this.infoMessage),
-      selectedTurno: clearSelection ? null : (selectedTurno ?? this.selectedTurno),
-      selectedInstructor: selectedInstructor != null ? selectedInstructor() : this.selectedInstructor,
+      selectedTurno:
+          clearSelection ? null : (selectedTurno ?? this.selectedTurno),
+      selectedInstructor: selectedInstructor != null
+          ? selectedInstructor()
+          : this.selectedInstructor,
       selectedRoom: selectedRoom != null ? selectedRoom() : this.selectedRoom,
     );
   }

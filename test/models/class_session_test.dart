@@ -34,14 +34,30 @@ void main() {
     test('enrolled counts only non-cancelled reservations', () {
       final json = base()
         ..['reservations'] = [
-          {'id': 'r1', 'user_id': 'u1', 'status': 'confirmed', 'profiles': {'full_name': 'Pedro'}},
-          {'id': 'r2', 'user_id': 'u2', 'status': 'cancelled', 'profiles': {'full_name': 'María'}},
-          {'id': 'r3', 'user_id': 'u3', 'status': 'attended', 'profiles': {'full_name': 'Lucas'}},
+          {
+            'id': 'r1',
+            'user_id': 'u1',
+            'status': 'confirmed',
+            'profiles': {'full_name': 'Pedro'}
+          },
+          {
+            'id': 'r2',
+            'user_id': 'u2',
+            'status': 'cancelled',
+            'profiles': {'full_name': 'María'}
+          },
+          {
+            'id': 'r3',
+            'user_id': 'u3',
+            'status': 'attended',
+            'profiles': {'full_name': 'Lucas'}
+          },
         ];
       final s = ClassSession.fromJson(json);
       expect(s.enrolled, 2);
       expect(s.enrolledStudents.length, 2);
-      expect(s.enrolledStudents.map((r) => r.studentName), containsAll(['Pedro', 'Lucas']));
+      expect(s.enrolledStudents.map((r) => r.studentName),
+          containsAll(['Pedro', 'Lucas']));
     });
 
     test('enrolled is 0 when reservations is null', () {
@@ -134,11 +150,13 @@ void main() {
         });
 
     test('name with "reformer" → reformerPilates', () {
-      expect(makeNamed('Reformer Pilates').uiTurnoType, TurnoType.reformerPilates);
+      expect(
+          makeNamed('Reformer Pilates').uiTurnoType, TurnoType.reformerPilates);
     });
 
     test('case-insensitive reformer match', () {
-      expect(makeNamed('REFORMER AVANZADO').uiTurnoType, TurnoType.reformerPilates);
+      expect(makeNamed('REFORMER AVANZADO').uiTurnoType,
+          TurnoType.reformerPilates);
     });
 
     test('name with "mat" → matPilates', () {
@@ -165,8 +183,18 @@ void main() {
         'capacity': 10,
         'status': 'scheduled',
         'reservations': [
-          {'id': 'r1', 'user_id': 'u1', 'status': 'confirmed', 'profiles': {'full_name': 'A'}},
-          {'id': 'r2', 'user_id': 'u2', 'status': 'confirmed', 'profiles': {'full_name': 'B'}},
+          {
+            'id': 'r1',
+            'user_id': 'u1',
+            'status': 'confirmed',
+            'profiles': {'full_name': 'A'}
+          },
+          {
+            'id': 'r2',
+            'user_id': 'u2',
+            'status': 'confirmed',
+            'profiles': {'full_name': 'B'}
+          },
         ],
       });
       expect(s.occupancyText, '2/10');
@@ -182,7 +210,12 @@ void main() {
         'capacity': 1,
         'status': 'scheduled',
         'reservations': [
-          {'id': 'r1', 'user_id': 'u1', 'status': 'confirmed', 'profiles': {'full_name': 'A'}},
+          {
+            'id': 'r1',
+            'user_id': 'u1',
+            'status': 'confirmed',
+            'profiles': {'full_name': 'A'}
+          },
         ],
       });
       expect(s.isFull, isTrue);
@@ -202,8 +235,6 @@ void main() {
       expect(s.isFull, isFalse);
     });
   });
-
-
 
   group('TurnoReservation.fromJson', () {
     test('extracts studentName from profiles', () {

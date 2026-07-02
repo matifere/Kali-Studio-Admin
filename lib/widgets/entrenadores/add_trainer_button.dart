@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/entrenadores/create_trainer_dialog.dart';
 
@@ -48,7 +47,7 @@ class _AddTrainerButtonState extends State<AddTrainerButton> {
               const SizedBox(width: 6),
               Text(
                 'Añadir Entrenador',
-                style: KaliText.body(kaliColors.warmWhite,
+                style: kaliColors.body(kaliColors.warmWhite,
                     weight: FontWeight.w600, size: 13),
               ),
             ],

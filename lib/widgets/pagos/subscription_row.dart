@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
@@ -27,11 +26,16 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
     final s = widget.subscription;
 
     final avatarColors = [kaliColors.clay, kaliColors.sand, kaliColors.sage];
-    final avatarColor = avatarColors[s.studentName.length % avatarColors.length];
+    final avatarColor =
+        avatarColors[s.studentName.length % avatarColors.length];
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         color: _hovered
@@ -45,7 +49,9 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               flex: 4,
               child: Row(
                 children: [
-                  if (s.avatarUrl != null && s.avatarUrl!.isNotEmpty && AvatarProvider.fromUrl(s.avatarUrl) != null)
+                  if (s.avatarUrl != null &&
+                      s.avatarUrl!.isNotEmpty &&
+                      AvatarProvider.fromUrl(s.avatarUrl) != null)
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: avatarColor,
@@ -57,7 +63,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                       backgroundColor: avatarColor,
                       child: Text(
                         s.studentInitials,
-                        style: KaliText.body(
+                        style: kaliColors.body(
                           kaliColors.espresso,
                           weight: FontWeight.w700,
                           size: 11,
@@ -68,7 +74,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   Expanded(
                     child: Text(
                       s.studentName,
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso,
                         weight: FontWeight.w600,
                         size: 14,
@@ -85,7 +91,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               flex: 3,
               child: Text(
                 s.planName,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso.withValues(alpha: 0.8),
                   size: 13,
                   weight: FontWeight.w500,
@@ -102,7 +108,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                 children: [
                   Text(
                     s.startDateFormatted,
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.espresso.withValues(alpha: 0.6),
                       size: 12,
                     ),
@@ -110,7 +116,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   const SizedBox(height: 2),
                   Text(
                     s.endDateFormatted,
-                    style: KaliText.body(
+                    style: kaliColors.body(
                       kaliColors.espresso.withValues(alpha: 0.45),
                       size: 11,
                     ),
@@ -130,7 +136,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
               flex: 2,
               child: Text(
                 s.amountFormatted,
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso,
                   weight: FontWeight.w700,
                   size: 15,
@@ -178,21 +184,25 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Eliminar asignación', style: KaliText.heading(kaliColors.espresso, size: 20)),
+        title: Text('Eliminar asignación',
+            style: kaliColors.heading(kaliColors.espresso, size: 20)),
         content: Text(
           '¿Eliminar el plan "${s.planName}" asignado a ${s.studentName}? '
           'Se borrará también el pago asociado. Esta acción no se puede deshacer.',
-          style: KaliText.body(kaliColors.espresso),
+          style: kaliColors.body(kaliColors.espresso),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+            child: Text('Cancelar',
+                style: kaliColors
+                    .body(kaliColors.espresso.withValues(alpha: 0.6))),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Eliminar',
-                style: TextStyle(color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    color: Color(0xFFD4685C), fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -215,7 +225,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
-    
+
     Color statusBgColor;
     Color statusColor;
     switch (subscription.status) {
@@ -270,7 +280,8 @@ class _StatusBadge extends StatelessWidget {
             children: [
               Text(
                 subscription.statusLabel,
-                style: KaliText.label(statusColor)
+                style: kaliColors
+                    .label(statusColor)
                     .copyWith(fontSize: 8, letterSpacing: 1.0),
               ),
               const SizedBox(width: 4),

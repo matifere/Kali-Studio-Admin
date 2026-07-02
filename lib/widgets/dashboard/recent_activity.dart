@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/activity/activity_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 class DashboardRecentActivity extends StatelessWidget {
@@ -28,12 +27,14 @@ class DashboardRecentActivity extends StatelessWidget {
                 children: [
                   Text(
                     'Actividad Reciente',
-                    style: KaliText.headingItalic(kaliColors.espresso, size: 28)
+                    style: kaliColors
+                        .headingItalic(kaliColors.espresso, size: 28)
                         .copyWith(fontWeight: FontWeight.w600),
                   ),
                   if (state.entries.isNotEmpty)
                     _ClearButton(
-                      onTap: () => context.read<ActivityBloc>().add(ActivityCleared()),
+                      onTap: () =>
+                          context.read<ActivityBloc>().add(ActivityCleared()),
                     ),
                 ],
               ),
@@ -74,10 +75,15 @@ class _ClearButtonState extends State<_ClearButton> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedOpacity(
@@ -85,7 +91,8 @@ class _ClearButtonState extends State<_ClearButton> {
           opacity: _hovered ? 1.0 : 0.5,
           child: Text(
             'LIMPIAR',
-            style: KaliText.label(Theme.of(context).extension<KaliColorsExtension>()!.espresso),
+            style: kaliColors.label(
+                Theme.of(context).extension<KaliColorsExtension>()!.espresso),
           ),
         ),
       ),
@@ -111,12 +118,14 @@ class _EmptyFeed extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Aún no hay actividad registrada.',
-              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.45)),
+              style:
+                  kaliColors.body(kaliColors.espresso.withValues(alpha: 0.45)),
             ),
             const SizedBox(height: 4),
             Text(
               'Los cambios que hagas aparecerán aquí.',
-              style: KaliText.caption(kaliColors.espresso.withValues(alpha: 0.35)),
+              style: kaliColors
+                  .caption(kaliColors.espresso.withValues(alpha: 0.35)),
             ),
           ],
         ),
@@ -134,10 +143,22 @@ class _ActivityItem extends StatelessWidget {
 
   /// Icono y color por categoría.
   (IconData, Color) get _iconAndColor => switch (activityEntry.category) {
-        ActivityCategory.alumno => (Icons.person_add_rounded, const Color(0xFF7A9E7E)),
-        ActivityCategory.turno  => (Icons.event_rounded,      const Color(0xFF8A7C6E)),
-        ActivityCategory.pago   => (Icons.payment_rounded,    const Color(0xFF5C9E6C)),
-        ActivityCategory.perfil => (Icons.manage_accounts_rounded, const Color(0xFFC2A98E)),
+        ActivityCategory.alumno => (
+            Icons.person_add_rounded,
+            const Color(0xFF7A9E7E)
+          ),
+        ActivityCategory.turno => (
+            Icons.event_rounded,
+            const Color(0xFF8A7C6E)
+          ),
+        ActivityCategory.pago => (
+            Icons.payment_rounded,
+            const Color(0xFF5C9E6C)
+          ),
+        ActivityCategory.perfil => (
+            Icons.manage_accounts_rounded,
+            const Color(0xFFC2A98E)
+          ),
       };
 
   String _formatTime(DateTime ts) {
@@ -193,17 +214,20 @@ class _ActivityItem extends StatelessWidget {
                 children: [
                   Text(
                     _formatTime(activityEntry.timestamp),
-                    style: KaliText.label(kaliColors.espresso.withValues(alpha: 0.45)),
+                    style: kaliColors
+                        .label(kaliColors.espresso.withValues(alpha: 0.45)),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     activityEntry.title,
-                    style: KaliText.body(kaliColors.espresso, weight: FontWeight.bold),
+                    style: kaliColors.body(kaliColors.espresso,
+                        weight: FontWeight.bold),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     activityEntry.subtitle,
-                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.65)),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.65)),
                   ),
                 ],
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/screens/register_screen.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
@@ -61,22 +60,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 Text(
                   '¿Olvidaste tu contraseña?',
-                  style: KaliText.heading(kaliColors.espresso, size: 22),
+                  style: kaliColors.heading(kaliColors.espresso, size: 22),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Ingresá tu email y te enviamos un link para crear una nueva contraseña.',
-                  style: KaliText.body(kaliColors.clayDark, size: 14),
+                  style: kaliColors.body(kaliColors.clayDark, size: 14),
                 ),
                 const SizedBox(height: 24),
                 TextField(
                   controller: emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   autofocus: true,
-                  style: KaliText.body(kaliColors.espresso),
+                  style: kaliColors.body(kaliColors.espresso),
                   decoration: InputDecoration(
                     hintText: 'tu@email.com',
-                    hintStyle: KaliText.body(kaliColors.clay),
+                    hintStyle: kaliColors.body(kaliColors.clay),
                     prefixIcon:
                         Icon(Icons.mail_outline, color: kaliColors.clay),
                     filled: true,
@@ -106,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () => Navigator.of(ctx).pop(false),
                       child: Text(
                         'Cancelar',
-                        style: KaliText.body(kaliColors.clayDark),
+                        style: kaliColors.body(kaliColors.clayDark),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -222,12 +221,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       Text(
                         "Bienvenid@ de nuevo",
-                        style: KaliText.loginDisplay(kaliColors.espresso),
+                        style: kaliColors.loginDisplay(kaliColors.espresso),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         "Accede a tu panel de gestion",
-                        style: KaliText.loginBody(kaliColors.espresso),
+                        style: kaliColors.loginBody(kaliColors.espresso),
                       ),
                     ],
                   ),
@@ -274,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Text(
                                     '¿Olvidé mi contraseña?',
                                     style:
-                                        KaliText.caption(kaliColors.clayDark),
+                                        kaliColors.caption(kaliColors.clayDark),
                                   ),
                                 ),
                               ],

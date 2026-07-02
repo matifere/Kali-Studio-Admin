@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -72,7 +71,15 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
   // 0 = Lunes, 6 = Domingo
   final Set<int> _selectedDays = {};
 
-  final List<String> _dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  final List<String> _dayNames = [
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom'
+  ];
 
   int _weeksUntilEndOfYear(DateTime from) {
     final endOfYear = DateTime(from.year, 12, 31);
@@ -90,7 +97,8 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
         if (isStart) {
           _startTime = picked;
           // Auto-adjust end time to be 1 hour later
-          _endTime = TimeOfDay(hour: (picked.hour + 1) % 24, minute: picked.minute);
+          _endTime =
+              TimeOfDay(hour: (picked.hour + 1) % 24, minute: picked.minute);
         } else {
           _endTime = picked;
         }
@@ -102,31 +110,37 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
     if (_formKey.currentState!.validate()) {
       if (_selectedDays.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por favor, selecciona al menos un día de la semana')),
+          const SnackBar(
+              content:
+                  Text('Por favor, selecciona al menos un día de la semana')),
         );
         return;
       }
 
       final weekStart = context.read<TurnosBloc>().state.currentWeekStart;
       final weeks = switch (_recurrenceOption) {
-        _RecurrenceOption.oneMonth   => 4,
-        _RecurrenceOption.twoMonths  => 8,
+        _RecurrenceOption.oneMonth => 4,
+        _RecurrenceOption.twoMonths => 8,
         _RecurrenceOption.restOfYear => _weeksUntilEndOfYear(weekStart),
       };
 
-      final String startTimeStr = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
-      final String endTimeStr = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
+      final String startTimeStr =
+          '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}';
+      final String endTimeStr =
+          '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}';
 
       context.read<TurnosBloc>().add(TurnoCreated(
-        name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-        instructorName: _selectedInstructor,
-        capacity: int.parse(_capacityController.text.trim()),
-        startTime: startTimeStr,
-        endTime: endTimeStr,
-        daysOfWeek: _selectedDays.toList(),
-        recurrenceWeeks: weeks,
-      ));
+            name: _nameController.text.trim(),
+            description: _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
+            instructorName: _selectedInstructor,
+            capacity: int.parse(_capacityController.text.trim()),
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            daysOfWeek: _selectedDays.toList(),
+            recurrenceWeeks: weeks,
+          ));
 
       Navigator.of(context).pop();
     }
@@ -159,39 +173,51 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                 children: [
                   Text(
                     'Crear Turnos (Grupo)',
-                    style: KaliText.heading(kaliColors.espresso, size: 24),
+                    style: kaliColors.heading(kaliColors.espresso, size: 24),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Agendando a partir de la semana del ${DateFormat("dd MMM", "es_ES").format(context.read<TurnosBloc>().state.currentWeekStart)}.',
-                    style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                    style: kaliColors
+                        .body(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                   const SizedBox(height: 24),
-                  
-                  Text('Nombre de la Clase', style: KaliText.label(kaliColors.espresso)),
+
+                  Text('Nombre de la Clase',
+                      style: kaliColors.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
-                    style: KaliText.body(kaliColors.espresso),
+                    style: kaliColors.body(kaliColors.espresso),
                     controller: _nameController,
-                    validator: (val) => val == null || val.trim().isEmpty ? 'Requerido' : null,
-                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                    validator: (val) =>
+                        val == null || val.trim().isEmpty ? 'Requerido' : null,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: kaliColors.background,
+                      hintStyle: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
                       hintText: 'Ej. Reformer Pilates',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Descripción (Opcional)', style: KaliText.label(kaliColors.espresso)),
+                  Text('Descripción (Opcional)',
+                      style: kaliColors.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
-                    style: KaliText.body(kaliColors.espresso),
+                    style: kaliColors.body(kaliColors.espresso),
                     controller: _descriptionController,
                     maxLines: 3,
-                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: kaliColors.background,
+                      hintStyle: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
                       hintText: 'Ej. Nivel intermedio, traer mat propia',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -202,22 +228,37 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Instructor (Opcional)', style: KaliText.label(kaliColors.espresso)),
+                            Text('Instructor (Opcional)',
+                                style: kaliColors.label(kaliColors.espresso)),
                             const SizedBox(height: 8),
                             _isLoadingInstructors
-                                ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator())
                                 : DropdownButtonFormField<String>(
-                                    style: KaliText.body(kaliColors.espresso),
+                                    style: kaliColors.body(kaliColors.espresso),
                                     initialValue: _selectedInstructor,
                                     hint: const Text('Sin instructor'),
-                                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: kaliColors.background,
+                                      hintStyle: kaliColors.body(kaliColors
+                                          .espresso
+                                          .withValues(alpha: 0.5)),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
                                     ),
                                     items: [
-                                      const DropdownMenuItem(value: null, child: Text('Sin instructor')),
-                                      ..._instructors.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+                                      const DropdownMenuItem(
+                                          value: null,
+                                          child: Text('Sin instructor')),
+                                      ..._instructors.map((e) =>
+                                          DropdownMenuItem(
+                                              value: e, child: Text(e))),
                                     ],
                                     onChanged: (val) {
                                       setState(() => _selectedInstructor = val);
@@ -231,21 +272,28 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Capacidad', style: KaliText.label(kaliColors.espresso)),
+                            Text('Capacidad',
+                                style: kaliColors.label(kaliColors.espresso)),
                             const SizedBox(height: 8),
                             TextFormField(
-                    style: KaliText.body(kaliColors.espresso),
+                              style: kaliColors.body(kaliColors.espresso),
                               controller: _capacityController,
                               keyboardType: TextInputType.number,
                               validator: (val) {
-                                if (val == null || val.trim().isEmpty) return 'Requerido';
-                                if (int.tryParse(val.trim()) == null) return 'Debe ser número';
+                                if (val == null || val.trim().isEmpty)
+                                  return 'Requerido';
+                                if (int.tryParse(val.trim()) == null)
+                                  return 'Debe ser número';
                                 return null;
                               },
-                              decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: kaliColors.background,
+                                hintStyle: kaliColors.body(
+                                    kaliColors.espresso.withValues(alpha: 0.5)),
                                 hintText: 'Ej. 8',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
                           ],
@@ -255,7 +303,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Horario', style: KaliText.label(kaliColors.espresso)),
+                  Text('Horario', style: kaliColors.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -263,12 +311,17 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: InkWell(
                           onTap: () => _selectTime(context, true),
                           child: InputDecorator(
-                            decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: kaliColors.background,
+                              hintStyle: kaliColors.body(
+                                  kaliColors.espresso.withValues(alpha: 0.5)),
                               labelText: 'Hora de Inicio',
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: Text(_startTime.format(context), style: KaliText.body(kaliColors.espresso)),
+                            child: Text(_startTime.format(context),
+                                style: kaliColors.body(kaliColors.espresso)),
                           ),
                         ),
                       ),
@@ -277,12 +330,17 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                         child: InkWell(
                           onTap: () => _selectTime(context, false),
                           child: InputDecorator(
-                            decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: kaliColors.background,
+                              hintStyle: kaliColors.body(
+                                  kaliColors.espresso.withValues(alpha: 0.5)),
                               labelText: 'Hora de Fin',
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: Text(_endTime.format(context), style: KaliText.body(kaliColors.espresso)),
+                            child: Text(_endTime.format(context),
+                                style: kaliColors.body(kaliColors.espresso)),
                           ),
                         ),
                       ),
@@ -290,7 +348,8 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   ),
                   const SizedBox(height: 16),
 
-                  Text('Días de la semana', style: KaliText.label(kaliColors.espresso)),
+                  Text('Días de la semana',
+                      style: kaliColors.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -298,7 +357,10 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                     children: List.generate(7, (index) {
                       final isSelected = _selectedDays.contains(index);
                       return ChoiceChip(
-                        label: Text(_dayNames[index], style: KaliText.body(isSelected ? kaliColors.warmWhite : kaliColors.espresso)),
+                        label: Text(_dayNames[index],
+                            style: kaliColors.body(isSelected
+                                ? kaliColors.warmWhite
+                                : kaliColors.espresso)),
                         selected: isSelected,
                         selectedColor: kaliColors.espresso,
                         backgroundColor: kaliColors.background,
@@ -318,18 +380,24 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   const SizedBox(height: 16),
 
                   // Frecuencia
-                  Text('Duración', style: KaliText.label(kaliColors.espresso)),
+                  Text('Duración',
+                      style: kaliColors.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<_RecurrenceOption>(
-                    style: KaliText.body(kaliColors.espresso),
+                    style: kaliColors.body(kaliColors.espresso),
                     initialValue: _recurrenceOption,
-                    decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
-                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: kaliColors.background,
+                      hintStyle: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                        borderSide: BorderSide(
+                            color: kaliColors.espresso.withValues(alpha: 0.1)),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     items: const [
                       DropdownMenuItem(
@@ -349,26 +417,31 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                       if (val != null) setState(() => _recurrenceOption = val);
                     },
                   ),
-                  
+
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text('Cancelar', style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6))),
+                        child: Text('Cancelar',
+                            style: kaliColors.body(
+                                kaliColors.espresso.withValues(alpha: 0.6))),
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: kaliColors.espresso,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text('Crear Turnos', style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600)),
+                        child: Text('Crear Turnos',
+                            style: kaliColors.body(kaliColors.warmWhite,
+                                weight: FontWeight.w600)),
                       ),
                     ],
                   ),

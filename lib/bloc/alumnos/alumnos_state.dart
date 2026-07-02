@@ -53,7 +53,7 @@ class AlumnosLoaded extends AlumnosState {
       bool matches = true;
       if (queryLower.isNotEmpty) {
         matches = s.name.toLowerCase().contains(queryLower) ||
-                  s.email.toLowerCase().contains(queryLower);
+            s.email.toLowerCase().contains(queryLower);
       }
       if (matches && patologiaLower != null && patologiaLower.isNotEmpty) {
         matches = s.patologias.any((p) => p.toLowerCase() == patologiaLower);

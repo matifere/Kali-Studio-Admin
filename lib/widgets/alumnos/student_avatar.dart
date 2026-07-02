@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/student.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/avatar_provider.dart';
 
@@ -39,7 +38,7 @@ class StudentAvatar extends StatelessWidget {
       backgroundColor: avatarColor,
       child: Text(
         student.initials,
-        style: KaliText.body(
+        style: kaliColors.body(
           kaliColors.espresso,
           weight: FontWeight.w700,
           size: radius * 0.6,

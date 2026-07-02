@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
@@ -135,7 +134,7 @@ class _InstitutionSelectionScreenState
                   children: [
                     Text(
                       'Crea una nueva institución para empezar a gestionar tu estudio.',
-                      style: KaliText.body(kaliColors.clayDark),
+                      style: kaliColors.body(kaliColors.clayDark),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -174,14 +173,16 @@ class _InstitutionSelectionScreenState
                         onPressed: _isLoading ? null : _handleCreate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: kaliColors.espresso,
-                          foregroundColor: kaliColors.getContrastColor(kaliColors.espresso),
+                          foregroundColor:
+                              kaliColors.getContrastColor(kaliColors.espresso),
                         ),
                         child: _isLoading
                             ? SizedBox(
                                 width: 24,
                                 height: 24,
                                 child: CircularProgressIndicator(
-                                    color: kaliColors.getContrastColor(kaliColors.espresso),
+                                    color: kaliColors
+                                        .getContrastColor(kaliColors.espresso),
                                     strokeWidth: 2))
                             : const Text('CREAR Y CONTINUAR'),
                       ),

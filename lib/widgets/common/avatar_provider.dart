@@ -15,7 +15,7 @@ class AvatarProvider {
         return MemoryImage(base64Decode(avatarUrl)); // Fallback
       }
     }
-    
+
     return NetworkImage(avatarUrl);
   }
 }

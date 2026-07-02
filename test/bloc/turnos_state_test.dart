@@ -15,7 +15,8 @@ ClassSession makeSession({
   return ClassSession.fromJson({
     'id': id,
     'name': name,
-    'date': '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+    'date':
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
     'start_time': startTime,
     'end_time': endTime,
     'capacity': 8,

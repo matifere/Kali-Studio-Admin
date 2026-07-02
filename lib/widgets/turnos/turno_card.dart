@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/models/turno.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Tarjeta visual de un turno dentro del calendario semanal.
@@ -26,7 +25,7 @@ class _TurnoCardState extends State<TurnoCard> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final t = widget.turno;
-    
+
     Color bg;
     Color fg;
     final isPrivate = t.uiTurnoType == TurnoType.privateSpecial;
@@ -47,8 +46,12 @@ class _TurnoCardState extends State<TurnoCard> {
     }
 
     return MouseRegion(
-      onEnter: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true); },
-      onExit: (e) { if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false); },
+      onEnter: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = true);
+      },
+      onExit: (e) {
+        if (e.kind == PointerDeviceKind.mouse) setState(() => _hovered = false);
+      },
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -84,10 +87,10 @@ class _TurnoCardState extends State<TurnoCard> {
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: vPad),
                 child: Text(
                   t.name,
-                  style: KaliText.label(fg.withValues(alpha: 0.9)).copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: kaliColors.label(fg.withValues(alpha: 0.9)).copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

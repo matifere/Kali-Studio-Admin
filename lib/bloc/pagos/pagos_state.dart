@@ -24,16 +24,19 @@ class PagosLoaded extends PagosState {
 
   List<Subscription> get filteredPayments {
     var filtered = payments;
-    
+
     if (selectedStatuses.isNotEmpty) {
-      filtered = filtered.where((p) => selectedStatuses.contains(p.status)).toList();
+      filtered =
+          filtered.where((p) => selectedStatuses.contains(p.status)).toList();
     }
-    
+
     if (searchQuery.trim().isNotEmpty) {
       final q = searchQuery.trim().toLowerCase();
-      filtered = filtered.where((p) => p.studentName.toLowerCase().contains(q)).toList();
+      filtered = filtered
+          .where((p) => p.studentName.toLowerCase().contains(q))
+          .toList();
     }
-    
+
     return filtered;
   }
 
@@ -91,6 +94,5 @@ class PagosLoaded extends PagosState {
   }
 
   /// Crea una copia con la página actualizada (sin recargar datos).
-  PagosLoaded copyWithPage(int page) =>
-      copyWith(currentPage: page);
+  PagosLoaded copyWithPage(int page) => copyWith(currentPage: page);
 }

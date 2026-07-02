@@ -80,7 +80,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     TurnosLoadRequested event,
     Emitter<TurnosState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, clearError: true, clearInfoMessage: true));
+    emit(state.copyWith(
+        isLoading: true, clearError: true, clearInfoMessage: true));
     try {
       final start = event.weekStart;
       final end = start
@@ -127,8 +128,6 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     emit(state.copyWith(currentWeekStart: startOfWeek, clearSelection: true));
     add(TurnosLoadRequested(startOfWeek));
   }
-
-
 
   Future<void> _onTurnoCreated(
     TurnoCreated event,
@@ -192,7 +191,8 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
 
         _activityBloc?.add(ActivityLogged(ActivityEntry(
           title: 'Serie de turnos cancelada',
-          subtitle: 'Se eliminaron las clases de ${event.session.name} hasta fin de año.',
+          subtitle:
+              'Se eliminaron las clases de ${event.session.name} hasta fin de año.',
           category: ActivityCategory.turno,
           timestamp: DateTime.now(),
         )));

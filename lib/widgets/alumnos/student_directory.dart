@@ -6,7 +6,6 @@ import 'package:csv/csv.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/models/student.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/alumnos/student_row.dart';
 import 'package:argrity/widgets/common/kali_empty_state.dart';
@@ -45,7 +44,7 @@ class _StudentDirectoryState extends State<StudentDirectory> {
 
   Future<void> _exportToCsv(List<Student> students) async {
     List<List<dynamic>> rows = [];
-    
+
     // Encabezados
     rows.add([
       "Nombre",
@@ -120,7 +119,9 @@ class _StudentDirectoryState extends State<StudentDirectory> {
                   padding: const EdgeInsets.all(40.0),
                   child: Text(
                     'Error: $message',
-                    style: KaliText.body(Theme.of(context).extension<KaliColorsExtension>()!.espresso),
+                    style: kaliColors.body(Theme.of(context)
+                        .extension<KaliColorsExtension>()!
+                        .espresso),
                   ),
                 ),
               ),
@@ -150,7 +151,8 @@ class _StudentDirectoryState extends State<StudentDirectory> {
                         final tableRows = Column(
                           children: [
                             _buildColumnHeaders(),
-                            ...state.pageStudents.map((s) => StudentRow(student: s)),
+                            ...state.pageStudents
+                                .map((s) => StudentRow(student: s)),
                           ],
                         );
                         if (constraints.maxWidth < minWidth) {
@@ -168,7 +170,9 @@ class _StudentDirectoryState extends State<StudentDirectory> {
                       showingCount: state.pageStudents.length,
                       totalCount: state.filteredStudents.length,
                       onPageChanged: (page) {
-                        context.read<AlumnosBloc>().add(AlumnosPageChanged(page));
+                        context
+                            .read<AlumnosBloc>()
+                            .add(AlumnosPageChanged(page));
                       },
                     ),
                   ],
@@ -184,7 +188,8 @@ class _StudentDirectoryState extends State<StudentDirectory> {
   }
 
   // ── Header ─────────────────────────────────────────────────────────────────
-  Widget _buildHeader(BuildContext context, AlumnosLoaded state, TextEditingController searchController) {
+  Widget _buildHeader(BuildContext context, AlumnosLoaded state,
+      TextEditingController searchController) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final hasFilters = state.searchQuery.isNotEmpty ||
         state.patologiaFilter != null ||
@@ -201,17 +206,27 @@ class _StudentDirectoryState extends State<StudentDirectory> {
                 isActiveFilter: state.isActiveFilter,
               ));
         },
-        style: KaliText.body(kaliColors.espresso, size: 14),
+        style: kaliColors.body(kaliColors.espresso, size: 14),
         decoration: InputDecoration(
           hintText: 'Buscar alumno...',
-          hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.4), size: 14),
-          prefixIcon: Icon(Icons.search, size: 18, color: kaliColors.espresso.withValues(alpha: 0.4)),
+          hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.4),
+              size: 14),
+          prefixIcon: Icon(Icons.search,
+              size: 18, color: kaliColors.espresso.withValues(alpha: 0.4)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           filled: true,
           fillColor: kaliColors.warmWhite,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1))),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso)),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                  color: kaliColors.espresso.withValues(alpha: 0.1))),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                  color: kaliColors.espresso.withValues(alpha: 0.1))),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: kaliColors.espresso)),
         ),
       ),
     );
@@ -223,7 +238,9 @@ class _StudentDirectoryState extends State<StudentDirectory> {
           Icons.tune_rounded,
           tooltip: 'Filtrar',
           color: hasFilters ? kaliColors.clayDark : null,
-          onTap: () => showDialog(context: context, builder: (_) => AlumnosFilterDialog(state: state)),
+          onTap: () => showDialog(
+              context: context,
+              builder: (_) => AlumnosFilterDialog(state: state)),
         ),
         const SizedBox(width: 8),
         KaliIconButton(
@@ -243,7 +260,9 @@ class _StudentDirectoryState extends State<StudentDirectory> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Directorio de Alumnos', style: KaliText.headingItalic(kaliColors.espresso, size: 20)),
+                Text('Directorio de Alumnos',
+                    style: kaliColors.headingItalic(kaliColors.espresso,
+                        size: 20)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -261,7 +280,9 @@ class _StudentDirectoryState extends State<StudentDirectory> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Directorio de Alumnos', style: KaliText.headingItalic(kaliColors.espresso, size: 22)),
+              Text('Directorio de Alumnos',
+                  style:
+                      kaliColors.headingItalic(kaliColors.espresso, size: 22)),
               Row(
                 children: [
                   SizedBox(width: 250, child: searchField),
@@ -278,7 +299,11 @@ class _StudentDirectoryState extends State<StudentDirectory> {
 
   // ── Encabezados de columna ─────────────────────────────────────────────────
   Widget _buildColumnHeaders() {
-    final style = KaliText.label(Theme.of(context).extension<KaliColorsExtension>()!.espresso.withValues(alpha: 0.45));
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    final style = kaliColors.label(Theme.of(context)
+        .extension<KaliColorsExtension>()!
+        .espresso
+        .withValues(alpha: 0.45));
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 0),
       child: Row(

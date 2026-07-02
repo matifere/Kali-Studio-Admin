@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 class AlumnosFilterDialog extends StatefulWidget {
@@ -68,11 +67,7 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
               children: [
                 Text(
                   'Filtrar Alumnos',
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w600,
-                    color: kaliColors.espresso,
-                  ),
+                  style: kaliColors.heading(kaliColors.espresso, size: 32).copyWith(fontWeight: FontWeight.w600),
                 ),
                 IconButton(
                   icon: Icon(Icons.close, color: kaliColors.espresso),
@@ -84,12 +79,14 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
             const SizedBox(height: 8),
             Text(
               'Aplica filtros para encontrar alumnos específicos.',
-              style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+              style:
+                  kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 32),
 
             // Filtro de Estado
-            Text('Estado del Alumno', style: KaliText.label(kaliColors.espresso)),
+            Text('Estado del Alumno',
+                style: kaliColors.label(kaliColors.espresso)),
             const SizedBox(height: 8),
             _buildDropdown<bool?>(
               value: _isActive,
@@ -104,14 +101,14 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
             const SizedBox(height: 24),
 
             // Filtro de Patología
-            Text('Patología', style: KaliText.label(kaliColors.espresso)),
+            Text('Patología', style: kaliColors.label(kaliColors.espresso)),
             const SizedBox(height: 8),
             widget.state.availablePatologias.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Text(
                       'No hay patologías registradas aún.',
-                      style: KaliText.body(
+                      style: kaliColors.body(
                         kaliColors.espresso.withValues(alpha: 0.45),
                         size: 13,
                       ),
@@ -120,12 +117,14 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
                 : _buildDropdown<String?>(
                     value: _selectedPatologia,
                     items: [
-                      const DropdownMenuItem(value: null, child: Text('Cualquier patología')),
+                      const DropdownMenuItem(
+                          value: null, child: Text('Cualquier patología')),
                       ...widget.state.availablePatologias.map(
                         (p) => DropdownMenuItem(value: p, child: Text(p)),
                       ),
                     ],
-                    onChanged: (val) => setState(() => _selectedPatologia = val),
+                    onChanged: (val) =>
+                        setState(() => _selectedPatologia = val),
                     kaliColors: kaliColors,
                   ),
             const SizedBox(height: 40),
@@ -139,7 +138,8 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
                     onPressed: _clearFilters,
                     child: Text(
                       'Limpiar filtros',
-                      style: KaliText.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                      style: kaliColors
+                          .body(kaliColors.espresso.withValues(alpha: 0.6)),
                     ),
                   ),
                 if (hasActiveFilters) const SizedBox(width: 8),
@@ -149,14 +149,15 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
                     onTap: _applyFilters,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
                         color: kaliColors.espresso,
                         borderRadius: BorderRadius.circular(28),
                       ),
                       child: Text(
                         'Aplicar',
-                        style: KaliText.body(kaliColors.warmWhite,
+                        style: kaliColors.body(kaliColors.warmWhite,
                             weight: FontWeight.w600, size: 13),
                       ),
                     ),
@@ -187,9 +188,10 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
         child: DropdownButton<T>(
           value: value,
           isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: kaliColors.clayDark),
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: kaliColors.clayDark),
           dropdownColor: kaliColors.warmWhite,
-          style: KaliText.body(kaliColors.espresso, size: 14),
+          style: kaliColors.body(kaliColors.espresso, size: 14),
           items: items,
           onChanged: onChanged,
         ),

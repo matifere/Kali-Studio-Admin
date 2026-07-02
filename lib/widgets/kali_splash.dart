@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Pantalla de carga con branding. Se muestra mientras la app verifica la
@@ -66,7 +65,7 @@ class _KaliSplashState extends State<KaliSplash>
               const SizedBox(height: 18),
               Text(
                 'Argity',
-                style: KaliText.heading(kaliColors.espresso, size: 30),
+                style: kaliColors.heading(kaliColors.espresso, size: 30),
               ),
               const SizedBox(height: 36),
               SizedBox(
@@ -80,7 +79,7 @@ class _KaliSplashState extends State<KaliSplash>
               const SizedBox(height: 18),
               Text(
                 widget.message ?? 'Cargando tu panel...',
-                style: KaliText.body(
+                style: kaliColors.body(
                   kaliColors.espresso.withValues(alpha: 0.55),
                   size: 13,
                 ),

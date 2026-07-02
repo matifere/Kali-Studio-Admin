@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/pagos/saas_subscription_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,7 +26,9 @@ class _InactiveScreenState extends State<InactiveScreen> {
             padding: const EdgeInsets.all(32.0),
             child: isProfileDisabled
                 ? _buildDisabledView(kaliColors)
-                : (isSudo ? _buildSudoView(kaliColors) : _buildClientView(kaliColors)),
+                : (isSudo
+                    ? _buildSudoView(kaliColors)
+                    : _buildClientView(kaliColors)),
           ),
         ),
       ),
@@ -39,13 +40,13 @@ class _InactiveScreenState extends State<InactiveScreen> {
       mainAxisSize: MainAxisSize.min,
       spacing: 24,
       children: [
-        Icon(Icons.block_rounded,
-            size: 80, color: kaliColors.espresso),
-        Text('Cuenta Deshabilitada', style: KaliText.heading(kaliColors.espresso)),
+        Icon(Icons.block_rounded, size: 80, color: kaliColors.espresso),
+        Text('Cuenta Deshabilitada',
+            style: kaliColors.heading(kaliColors.espresso)),
         Text(
           'Tu cuenta ha sido deshabilitada.\nPor favor, contactá a soporte técnico.',
           textAlign: TextAlign.center,
-          style: KaliText.body(kaliColors.clayDark),
+          style: kaliColors.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 16),
         FilledButton(
@@ -63,11 +64,12 @@ class _InactiveScreenState extends State<InactiveScreen> {
       children: [
         Icon(Icons.hourglass_empty_rounded,
             size: 80, color: kaliColors.espresso),
-        Text('Cuenta Pendiente', style: KaliText.heading(kaliColors.espresso)),
+        Text('Cuenta Pendiente',
+            style: kaliColors.heading(kaliColors.espresso)),
         Text(
           'Tu cuenta ha sido creada y está pendiente de aprobación.\nPor favor, contactá al administrador de tu institución.',
           textAlign: TextAlign.center,
-          style: KaliText.body(kaliColors.clayDark),
+          style: kaliColors.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 16),
         FilledButton(
@@ -86,11 +88,11 @@ class _InactiveScreenState extends State<InactiveScreen> {
         Icon(Icons.workspace_premium_rounded,
             size: 64, color: kaliColors.espresso),
         Text('Activa tu Institución',
-            style: KaliText.heading(kaliColors.espresso)),
+            style: kaliColors.heading(kaliColors.espresso)),
         Text(
           'Para comenzar a gestionar tu institución, por favor adquiere una suscripción.',
           textAlign: TextAlign.center,
-          style: KaliText.body(kaliColors.clayDark),
+          style: kaliColors.body(kaliColors.clayDark),
         ),
         const SizedBox(height: 24),
 

@@ -1,6 +1,8 @@
+import 'kali_typography.dart';
 import 'package:flutter/material.dart';
 
 class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
+  final KaliTypography typography;
   final Color espresso;
   final Color espressoL;
   final Color clay;
@@ -13,6 +15,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
   final Color background;
 
   const KaliColorsExtension({
+    required this.typography,
     required this.espresso,
     required this.espressoL,
     required this.clay,
@@ -27,7 +30,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
 
   // ─── Variantes predefinidas ───────────────────────────────────────────────
 
-  static const KaliColorsExtension defaultTheme = KaliColorsExtension(
+  static final KaliColorsExtension defaultTheme = KaliColorsExtension(
     espresso: Color(0xFF2C1F14),
     espressoL: Color(0xFF3D2B1A),
     clay: Color(0xFFC4A882),
@@ -38,9 +41,10 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     sageLight: Color(0xFFD4DDD3),
     warmWhite: Color(0xFFFAF7F2),
     background: Color(0xFFE8E2D8),
+    typography: KaliTypography.defaultTypography,
   );
 
-  static const KaliColorsExtension darkTheme = KaliColorsExtension(
+  static final KaliColorsExtension darkTheme = KaliColorsExtension(
     espresso: Color(0xFFF5F0E8),
     espressoL: Color(0xFF37474F),
     clay: Color(0xFFC4A882), // Accent keeping brand identity
@@ -51,9 +55,10 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     sageLight: Color(0xFF37474F),
     warmWhite: Color(0xFF121212),
     background: Color(0xFF000000),
+    typography: KaliTypography.darkTypography,
   );
 
-  static const KaliColorsExtension oceanTheme = KaliColorsExtension(
+  static final KaliColorsExtension oceanTheme = KaliColorsExtension(
     espresso: Color(0xFF0D47A1),
     espressoL: Color(0xFF1565C0),
     clay: Color(0xFF42A5F5),
@@ -64,6 +69,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     sageLight: Color(0xFF80CBC4),
     warmWhite: Color(0xFFFFFFFF),
     background: Color(0xFFF1F5F9),
+    typography: KaliTypography.oceanTypography,
   );
 
   @override
@@ -78,6 +84,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     Color? sageLight,
     Color? warmWhite,
     Color? background,
+    KaliTypography? typography,
   }) {
     return KaliColorsExtension(
       espresso: espresso ?? this.espresso,
@@ -90,6 +97,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
       sageLight: sageLight ?? this.sageLight,
       warmWhite: warmWhite ?? this.warmWhite,
       background: background ?? this.background,
+      typography: typography ?? this.typography,
     );
   }
 
@@ -112,6 +120,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
       sageLight: Color.lerp(sageLight, other.sageLight, t)!,
       warmWhite: Color.lerp(warmWhite, other.warmWhite, t)!,
       background: Color.lerp(background, other.background, t)!,
+      typography: typography.lerp(other.typography, t),
     );
   }
 
@@ -121,4 +130,19 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     // De lo contrario, retornamos warmWhite (claro).
     return backgroundColor.computeLuminance() > 0.5 ? espresso : warmWhite;
   }
+}
+
+extension KaliColorsTypography on KaliColorsExtension {
+  TextStyle display(Color color) => typography.display(color);
+  TextStyle heading(Color color, {double size = 24}) =>
+      typography.heading(color, size: size);
+  TextStyle headingItalic(Color color, {double size = 26}) =>
+      typography.headingItalic(color, size: size);
+  TextStyle body(Color color,
+          {double size = 13, FontWeight weight = FontWeight.w400}) =>
+      typography.body(color, size: size, weight: weight);
+  TextStyle label(Color color) => typography.label(color);
+  TextStyle caption(Color color) => typography.caption(color);
+  TextStyle loginDisplay(Color color) => typography.loginDisplay(color);
+  TextStyle loginBody(Color color) => typography.loginBody(color);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/turno.dart';
+
 class TurnoReservation {
   final String id;
   final String userId;
