@@ -74,6 +74,10 @@ class KaliTheme {
         confirmButtonStyle:
             TextButton.styleFrom(foregroundColor: colors.espresso),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: colors.warmWhite,
+        textStyle: colors.body(colors.espresso),
+      ),
       extensions: [colors],
     );
   }

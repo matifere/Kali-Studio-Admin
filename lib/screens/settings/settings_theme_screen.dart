@@ -65,59 +65,139 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeKaliColors =
-        Theme.of(context).extension<KaliColorsExtension>()!;
-    // En un caso real, el ThemeCubit podría guardar el themeId seleccionado actual,
-    // o podríamos adivinar si el tema activo es igual a éste. Para simplicidad de UI
-    // comparamos el fondo para saber si está (más o menos) activo, o dejamos sin marcar.
-    // Una opción robusta: que ThemeCubit exponga el ID.
-    // Comparamos colores clave para saber si es el tema activo
+    final activeKaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final isActive = activeKaliColors.espresso == themeColors.espresso &&
         activeKaliColors.background == themeColors.background;
+
+    final bool isSmall = MediaQuery.of(context).size.width < 600;
+    final double cardWidth = isSmall ? double.infinity : 380;
 
     return InkWell(
       onTap: () {
         context.read<ThemeCubit>().changeTheme(themeId);
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        width: 200,
-        padding: const EdgeInsets.all(16),
+        width: cardWidth,
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: activeKaliColors.warmWhite,
-          borderRadius: BorderRadius.circular(16),
+          color: themeColors.warmWhite,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isActive ? activeKaliColors.espresso : Colors.transparent,
-            width: 2,
+            color: isActive ? themeColors.espresso : themeColors.espresso.withValues(alpha: 0.1),
+            width: isActive ? 2 : 1,
           ),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
+            if (isActive)
+              BoxShadow(
+                color: themeColors.espresso.withValues(alpha: 0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: activeKaliColors.body(activeKaliColors.espresso,
-                  weight: FontWeight.bold),
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: themeColors.heading(themeColors.espresso, size: 24).copyWith(fontWeight: FontWeight.bold),
+                ),
+                if (isActive)
+                  Icon(Icons.check_circle_rounded, color: themeColors.espresso, size: 28),
+              ],
             ),
-            const SizedBox(height: 16),
-            // Preview de los colores
+            const SizedBox(height: 24),
+
+            // Typography Preview
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Aa',
+                  style: themeColors.display(themeColors.espresso, size: 64).copyWith(height: 1.0),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Headline', style: themeColors.heading(themeColors.espresso, size: 16)),
+                    Text('Body text example', style: themeColors.body(themeColors.espresso.withValues(alpha: 0.7))),
+                    Text('Label', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            // Color Palette
+            Text('Color Palette', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+            const SizedBox(height: 8),
             Row(
               children: [
-                _ColorCircle(color: themeColors.espresso),
+                _ColorSwatch(color: themeColors.espresso, name: 'Primary'),
                 const SizedBox(width: 8),
-                _ColorCircle(color: themeColors.clay),
+                _ColorSwatch(color: themeColors.clay, name: 'Secondary'),
                 const SizedBox(width: 8),
-                _ColorCircle(color: themeColors.sand),
+                _ColorSwatch(color: themeColors.sand, name: 'Surface'),
                 const SizedBox(width: 8),
-                _ColorCircle(color: themeColors.background),
+                _ColorSwatch(color: themeColors.background, name: 'Bg'),
               ],
+            ),
+            const SizedBox(height: 32),
+
+            // UI Elements Preview
+            Text('UI Elements', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                // Primary Button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: themeColors.espresso,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('Primary', style: themeColors.body(themeColors.getContrastColor(themeColors.espresso), weight: FontWeight.w600)),
+                ),
+                const SizedBox(width: 12),
+                // Outlined Button
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(color: themeColors.espresso.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('Outlined', style: themeColors.body(themeColors.espresso, weight: FontWeight.w600)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Fake Input
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: themeColors.sand,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search, size: 18, color: themeColors.espresso.withValues(alpha: 0.5)),
+                  const SizedBox(width: 8),
+                  Text('Search...', style: themeColors.body(themeColors.espresso.withValues(alpha: 0.5))),
+                ],
+              ),
             ),
           ],
         ),
@@ -126,20 +206,34 @@ class _ThemeCard extends StatelessWidget {
   }
 }
 
-class _ColorCircle extends StatelessWidget {
+class _ColorSwatch extends StatelessWidget {
   final Color color;
+  final String name;
 
-  const _ColorCircle({required this.color});
+  const _ColorSwatch({required this.color, required this.name});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.black12, width: 1),
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ]
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
       ),
     );
   }

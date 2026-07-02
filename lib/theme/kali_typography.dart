@@ -24,7 +24,8 @@ class KaliTypography {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
-  TextStyle display(Color color) => displayBase.copyWith(color: color);
+  TextStyle display(Color color, {double size = 36}) =>
+      displayBase.copyWith(color: color, fontSize: size);
 
   TextStyle heading(Color color, {double size = 24}) =>
       headingBase.copyWith(color: color, fontSize: size);

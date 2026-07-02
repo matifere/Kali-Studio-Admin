@@ -263,11 +263,11 @@ class _StatusBadge extends StatelessWidget {
                 );
           }
         },
-        itemBuilder: (context) => const [
-          PopupMenuItem(value: 'active', child: Text('Activo')),
-          PopupMenuItem(value: 'pending', child: Text('Pendiente')),
-          PopupMenuItem(value: 'expired', child: Text('Vencido')),
-          PopupMenuItem(value: 'cancelled', child: Text('Cancelado')),
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 'active', child: Text('Activo', style: kaliColors.body(kaliColors.espresso))),
+          PopupMenuItem(value: 'pending', child: Text('Pendiente', style: kaliColors.body(kaliColors.espresso))),
+          PopupMenuItem(value: 'expired', child: Text('Vencido', style: kaliColors.body(kaliColors.espresso))),
+          PopupMenuItem(value: 'cancelled', child: Text('Cancelado', style: kaliColors.body(kaliColors.espresso))),
         ],
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

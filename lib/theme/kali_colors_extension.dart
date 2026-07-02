@@ -133,7 +133,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
 }
 
 extension KaliColorsTypography on KaliColorsExtension {
-  TextStyle display(Color color) => typography.display(color);
+  TextStyle display(Color color, {double size = 36}) => typography.display(color, size: size);
   TextStyle heading(Color color, {double size = 24}) =>
       typography.heading(color, size: size);
   TextStyle headingItalic(Color color, {double size = 26}) =>
