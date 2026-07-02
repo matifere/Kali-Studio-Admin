@@ -316,7 +316,7 @@ class _ClayPlanCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5D9B8),
+        color: kaliColors.clay,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
