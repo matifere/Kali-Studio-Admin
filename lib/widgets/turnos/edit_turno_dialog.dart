@@ -229,6 +229,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     decoration: BoxDecoration(
+                      color: kaliColors.background,
                       border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -261,10 +262,11 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               decoration: BoxDecoration(
+                                color: kaliColors.background,
                                 border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(_formatTime(_startTime)),
+                              child: Text(_formatTime(_startTime), style: KaliText.body(kaliColors.espresso)),
                             ),
                           ),
                         ],
@@ -283,10 +285,11 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               decoration: BoxDecoration(
+                                color: kaliColors.background,
                                 border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(_formatTime(_endTime)),
+                              child: Text(_formatTime(_endTime), style: KaliText.body(kaliColors.espresso)),
                             ),
                           ),
                         ],

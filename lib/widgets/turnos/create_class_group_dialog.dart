@@ -268,7 +268,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                               labelText: 'Hora de Inicio',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: Text(_startTime.format(context)),
+                            child: Text(_startTime.format(context), style: KaliText.body(kaliColors.espresso)),
                           ),
                         ),
                       ),
@@ -282,7 +282,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                               labelText: 'Hora de Fin',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: Text(_endTime.format(context)),
+                            child: Text(_endTime.format(context), style: KaliText.body(kaliColors.espresso)),
                           ),
                         ),
                       ),
@@ -298,8 +298,10 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                     children: List.generate(7, (index) {
                       final isSelected = _selectedDays.contains(index);
                       return ChoiceChip(
-                        label: Text(_dayNames[index]),
+                        label: Text(_dayNames[index], style: KaliText.body(isSelected ? kaliColors.warmWhite : kaliColors.espresso)),
                         selected: isSelected,
+                        selectedColor: kaliColors.espresso,
+                        backgroundColor: kaliColors.background,
                         onSelected: (selected) {
                           setState(() {
                             if (selected) {
