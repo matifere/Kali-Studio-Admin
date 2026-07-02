@@ -160,11 +160,11 @@ class _PlansTableState extends State<PlansTable> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: kaliColors.espresso.withValues(alpha: 0.03),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -366,7 +366,7 @@ class _PlanRowState extends State<_PlanRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeIn,
-        color: _hovered ? kaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : kaliColors.warmWhite,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
           children: [

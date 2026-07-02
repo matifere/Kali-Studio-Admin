@@ -68,7 +68,7 @@ class _TurnoCardState extends State<TurnoCard> {
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: kaliColors.espresso.withValues(alpha: 0.08),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

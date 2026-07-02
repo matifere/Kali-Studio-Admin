@@ -145,7 +145,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
         child: SingleChildScrollView(
@@ -354,7 +354,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text('Crear Turnos', style: KaliText.body(Colors.white, weight: FontWeight.w600)),
+                        child: Text('Crear Turnos', style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600)),
                       ),
                     ],
                   ),

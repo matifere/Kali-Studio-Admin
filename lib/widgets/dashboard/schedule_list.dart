@@ -140,11 +140,11 @@ class _SessionItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isActive ? kaliColors.espresso : Colors.white,
+          color: isActive ? kaliColors.espresso : kaliColors.warmWhite,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isActive ? 0.08 : 0.02),
+              color: kaliColors.espresso.withValues(alpha: isActive ? 0.08 : 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )

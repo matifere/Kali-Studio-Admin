@@ -148,7 +148,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450),
         padding: const EdgeInsets.all(24),
@@ -330,7 +330,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text('Guardar Modificaciones', style: KaliText.body(Colors.white, weight: FontWeight.w600)),
+                      child: Text('Guardar Modificaciones', style: KaliText.body(kaliColors.warmWhite, weight: FontWeight.w600)),
                     ),
                   ],
                 ),

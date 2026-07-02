@@ -88,7 +88,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         tileColor: isActive
-            ? Colors.black.withValues(alpha: 0.05)
+            ? kaliColors.espresso.withValues(alpha: 0.05)
             : Colors.transparent,
         leading: Icon(
           icon,

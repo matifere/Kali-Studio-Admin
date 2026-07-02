@@ -44,7 +44,7 @@ class _TrainerRowState extends State<TrainerRow> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        color: _hovered ? kaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : kaliColors.warmWhite,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         child: Row(
           children: [

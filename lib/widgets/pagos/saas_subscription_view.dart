@@ -252,7 +252,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             border: Border.all(color: kaliColors.clayDark, width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: kaliColors.espresso.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               )
@@ -397,7 +397,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: highlight ? 0.1 : 0.02),
+            color: kaliColors.espresso.withValues(alpha: highlight ? 0.1 : 0.02),
             blurRadius: 16,
             offset: const Offset(0, 8),
           )

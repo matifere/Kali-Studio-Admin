@@ -97,11 +97,11 @@ class _RevenueCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: kaliColors.espresso.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -158,11 +158,11 @@ class _OutstandingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: kaliColors.espresso.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -237,7 +237,7 @@ class _PaidSessionsCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: percentage,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              backgroundColor: kaliColors.warmWhite.withValues(alpha: 0.2),
               valueColor:
                   AlwaysStoppedAnimation<Color>(kaliColors.sand),
               minHeight: 4,

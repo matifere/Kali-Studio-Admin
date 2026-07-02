@@ -19,7 +19,7 @@ class StudentProfileDialog extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kaliColors.warmWhite,
           borderRadius: BorderRadius.circular(20),
         ),
         child: SingleChildScrollView(child: Column(

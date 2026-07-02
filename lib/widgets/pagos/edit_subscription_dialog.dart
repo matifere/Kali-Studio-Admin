@@ -136,7 +136,7 @@ class _EditSubscriptionDialogState extends State<EditSubscriptionDialog> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450),
         padding: const EdgeInsets.all(24),

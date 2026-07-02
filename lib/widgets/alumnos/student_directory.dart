@@ -92,16 +92,17 @@ class _StudentDirectoryState extends State<StudentDirectory> {
 
   @override
   Widget build(BuildContext context) {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return BlocBuilder<AlumnosBloc, AlumnosState>(
       builder: (context, state) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            color: kaliColors.warmWhite,
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 16,
+                color: kaliColors.espresso.withValues(alpha: 0.05),
+                blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -207,7 +208,7 @@ class _StudentDirectoryState extends State<StudentDirectory> {
           prefixIcon: Icon(Icons.search, size: 18, color: kaliColors.espresso.withValues(alpha: 0.4)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: kaliColors.warmWhite,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1))),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1))),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: kaliColors.espresso)),

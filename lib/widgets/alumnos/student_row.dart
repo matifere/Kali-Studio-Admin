@@ -132,7 +132,7 @@ class _StudentRowState extends State<StudentRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.bounceInOut,
-        color: _hovered ? kaliColors.warmWhite : Colors.white,
+        color: _hovered ? kaliColors.warmWhite : kaliColors.warmWhite,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         child: Row(
           children: [

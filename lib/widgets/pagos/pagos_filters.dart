@@ -78,7 +78,7 @@ class PagosFilters extends StatelessWidget {
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: kaliColors.warmWhite,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
@@ -257,7 +257,7 @@ class _StatusChip extends StatelessWidget {
       label: Text(
         label,
         style: KaliText.body(
-          isSelected ? Colors.white : kaliColors.espresso,
+          isSelected ? kaliColors.warmWhite : kaliColors.espresso,
           weight: FontWeight.w500,
           size: 13,
         ),
@@ -265,8 +265,8 @@ class _StatusChip extends StatelessWidget {
       selected: isSelected,
       onSelected: onToggle,
       selectedColor: kaliColors.espresso,
-      backgroundColor: Colors.white,
-      checkmarkColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
+      checkmarkColor: kaliColors.warmWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
@@ -305,7 +305,7 @@ class _OutlinedActionBtnState extends State<_OutlinedActionBtn> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: _hovered ? kaliColors.sand : Colors.white,
+            color: _hovered ? kaliColors.sand : kaliColors.warmWhite,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: kaliColors.espresso.withValues(alpha: 0.15),

@@ -24,7 +24,7 @@ class ScheduleBottomBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(
           horizontal: isSmall ? 16 : 28, vertical: isSmall ? 10 : 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(20),
         ),

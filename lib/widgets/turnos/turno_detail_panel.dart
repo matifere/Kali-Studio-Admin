@@ -37,11 +37,11 @@ class TurnoDetailPanel extends StatelessWidget {
     return Container(
       width: 320,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: kaliColors.espresso.withValues(alpha: 0.06),
             blurRadius: 24,
             offset: const Offset(-4, 0),
           ),
@@ -248,8 +248,8 @@ class TurnoDetailPanel extends StatelessWidget {
                             student.studentName.isNotEmpty
                                 ? student.studentName[0].toUpperCase()
                                 : '?',
-                            style: const TextStyle(
-                                color: Colors.white,
+                            style: TextStyle(
+                                color: kaliColors.warmWhite,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold)),
                       ),

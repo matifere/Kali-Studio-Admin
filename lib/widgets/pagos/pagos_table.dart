@@ -21,11 +21,11 @@ class PagosTable extends StatelessWidget {
       builder: (context, state) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: kaliColors.warmWhite,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: kaliColors.espresso.withValues(alpha: 0.03),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),

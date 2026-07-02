@@ -56,7 +56,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
         child: SingleChildScrollView(
@@ -140,7 +140,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                         ),
                       ),
                       child: Text('Cancelar Clases del Día',
-                          style: KaliText.body(Colors.white,
+                          style: KaliText.body(kaliColors.warmWhite,
                               weight: FontWeight.w600)),
                     ),
                   ],

@@ -215,7 +215,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: kaliColors.warmWhite,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450, maxHeight: 600),
         padding: const EdgeInsets.all(24),
@@ -318,7 +318,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                               backgroundColor: kaliColors.clay,
                               backgroundImage: AvatarProvider.fromUrl(p['avatar_url']),
                               child: p['avatar_url'] == null 
-                                ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 12))
+                                ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: TextStyle(color: kaliColors.warmWhite, fontSize: 12))
                                 : null,
                             ),
                             title: Text(name, style: KaliText.body(

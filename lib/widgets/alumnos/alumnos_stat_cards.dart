@@ -153,11 +153,11 @@ class AlumnosStatCards extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: kaliColors.espresso.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           )

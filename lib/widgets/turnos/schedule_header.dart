@@ -148,7 +148,7 @@ class ScheduleHeader extends StatelessWidget {
         compact ? const BoxConstraints(minWidth: 36, minHeight: 36) : null;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kaliColors.warmWhite,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
       ),
@@ -235,10 +235,10 @@ class ScheduleHeader extends StatelessWidget {
       if (onCreateTurno != null)
         ElevatedButton.icon(
           onPressed: onCreateTurno,
-          icon: Icon(Icons.add_rounded, size: compact ? 18 : 20, color: Colors.white),
+          icon: Icon(Icons.add_rounded, size: compact ? 18 : 20, color: kaliColors.warmWhite),
           label: Text(
             compact ? 'Turno' : 'Nuevo Turno',
-            style: KaliText.body(Colors.white,
+            style: KaliText.body(kaliColors.warmWhite,
                 weight: FontWeight.w600, size: 13),
           ),
           style: ElevatedButton.styleFrom(
@@ -280,7 +280,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
       tooltip: '',
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white,
+      color: kaliColors.warmWhite,
       elevation: 8,
       onSelected: widget.onChanged,
       itemBuilder: (context) => widget.options.map((option) {
@@ -303,7 +303,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: _hovered ? kaliColors.sand : Colors.white,
+            color: _hovered ? kaliColors.sand : kaliColors.warmWhite,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: kaliColors.espresso.withValues(alpha: 0.1),
