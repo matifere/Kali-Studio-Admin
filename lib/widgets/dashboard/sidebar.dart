@@ -57,8 +57,8 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                       children: [
                         Image.asset(
                           'assets/images/argity_logo.png',
-                          width: 36,
-                          height: 36,
+                          width: 40,
+                          height: 40,
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 12),
@@ -74,7 +74,10 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    Divider(color: kaliColors.espresso.withValues(alpha: 0.1), thickness: 1, height: 1),
+                    Divider(
+                        color: kaliColors.espresso.withValues(alpha: 0.1),
+                        thickness: 1,
+                        height: 1),
                   ],
                 ),
               ),
@@ -124,7 +127,8 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
     );
   }
 
-  Widget _buildBottomMenuItem(IconData icon, String title, KaliColorsExtension kaliColors) {
+  Widget _buildBottomMenuItem(
+      IconData icon, String title, KaliColorsExtension kaliColors) {
     return InkWell(
       onTap: () async {
         final url = Uri.parse('https://argity.com');
