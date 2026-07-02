@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -122,10 +123,11 @@ class _DashboardHomeState extends State<_DashboardHome> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _greeting,
-                  style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 32 : 40).copyWith(fontWeight: FontWeight.w600),
-                ),
+                AutoSizeText(_greeting,
+                    style: kaliColors
+                        .heading(kaliColors.espresso, size: isSmall ? 32 : 40)
+                        .copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1),
                 const SizedBox(height: 8),
                 Text(
                   'Esto es lo que está pasando hoy.',

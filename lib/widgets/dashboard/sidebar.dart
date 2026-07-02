@@ -1,5 +1,5 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -61,9 +61,10 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 12),
-                        Text(
+                        AutoSizeText(
                           'Argity',
                           style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -106,8 +107,9 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
               ? kaliColors.espresso
               : kaliColors.espresso.withValues(alpha: 0.6),
         ),
-        title: Text(
+        title: AutoSizeText(
           title,
+          maxLines: 1,
           style: kaliColors.body(
             isActive
                 ? kaliColors.espresso
@@ -139,10 +141,13 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             Icon(icon,
                 color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style:
-                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+            Expanded(
+              child: AutoSizeText(
+                title,
+                maxLines: 1,
+                style:
+                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+              ),
             ),
           ],
         ),
@@ -166,10 +171,13 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
             Icon(Icons.settings_outlined,
                 color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
             const SizedBox(width: 12),
-            Text(
-              'CONFIGURACIÓN',
-              style:
-                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+            Expanded(
+              child: AutoSizeText(
+                'CONFIGURACIÓN',
+                maxLines: 1,
+                style:
+                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+              ),
             ),
           ],
         ),
@@ -190,13 +198,16 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         padding: const EdgeInsets.only(left: 40, top: 8, bottom: 8, right: 8),
         child: Row(
           children: [
-            Text(
-              title,
-              style: kaliColors.body(
-                isActive
-                    ? kaliColors.espresso
-                    : kaliColors.espresso.withValues(alpha: 0.6),
-                weight: isActive ? FontWeight.bold : FontWeight.w500,
+            Expanded(
+              child: AutoSizeText(
+                title,
+                maxLines: 1,
+                style: kaliColors.body(
+                  isActive
+                      ? kaliColors.espresso
+                      : kaliColors.espresso.withValues(alpha: 0.6),
+                  weight: isActive ? FontWeight.bold : FontWeight.w500,
+                ),
               ),
             ),
           ],

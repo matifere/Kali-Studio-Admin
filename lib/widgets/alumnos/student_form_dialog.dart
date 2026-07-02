@@ -5,7 +5,6 @@ import 'package:argrity/models/student.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/services/auth_service.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class StudentFormDialog extends StatefulWidget {
   final Student? student;

@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
@@ -23,10 +24,11 @@ class SettingsSubscriptionScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Suscripción',
-                  style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 36 : 46).copyWith(fontWeight: FontWeight.w600),
-                ),
+                AutoSizeText('Suscripción',
+                    style: kaliColors
+                        .heading(kaliColors.espresso, size: isSmall ? 36 : 46)
+                        .copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1),
                 const SizedBox(height: 4),
                 Text(
                   'Gestioná tu plan y pagos de Argity.',

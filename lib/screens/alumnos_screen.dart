@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,10 +51,11 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Alumnos',
-                        style: kaliColors.heading(kaliColors.espresso, size: 36).copyWith(fontWeight: FontWeight.w600),
-                      ),
+                      AutoSizeText('Alumnos',
+                          style: kaliColors
+                              .heading(kaliColors.espresso, size: 36)
+                              .copyWith(fontWeight: FontWeight.w600),
+                          maxLines: 1),
                       if (!_isProfesor) ...[
                         const SizedBox(height: 16),
                         const _AddStudentButton(),
@@ -68,10 +70,11 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Alumnos',
-                            style: kaliColors.heading(kaliColors.espresso, size: 46).copyWith(fontWeight: FontWeight.w600),
-                          ),
+                          AutoSizeText('Alumnos',
+                              style: kaliColors
+                                  .heading(kaliColors.espresso, size: 46)
+                                  .copyWith(fontWeight: FontWeight.w600),
+                              maxLines: 1),
                           const SizedBox(height: 4),
                           Text(
                             'Gestiona tu comunidad.',

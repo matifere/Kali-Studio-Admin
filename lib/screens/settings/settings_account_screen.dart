@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -113,10 +114,11 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Cuenta',
-                    style: kaliColors.heading(kaliColors.espresso, size: isSmall ? 36 : 46).copyWith(fontWeight: FontWeight.w600),
-                  ),
+                  AutoSizeText('Cuenta',
+                      style: kaliColors
+                          .heading(kaliColors.espresso, size: isSmall ? 36 : 46)
+                          .copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 1),
                   const SizedBox(height: 4),
                   Text(
                     'Gestioná tu información personal y de seguridad.',
@@ -144,9 +146,10 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Información Pública',
+                        AutoSizeText('Información Pública',
                             style: kaliColors.heading(kaliColors.espresso,
-                                size: 20)),
+                                size: 20),
+                            maxLines: 1),
                         const SizedBox(height: 24),
                         KaliTextField(
                           controller: _nameController,
@@ -200,9 +203,10 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Seguridad de la Cuenta',
+                        AutoSizeText('Seguridad de la Cuenta',
                             style: kaliColors.heading(kaliColors.espresso,
-                                size: 20)),
+                                size: 20),
+                            maxLines: 1),
                         const SizedBox(height: 24),
                         KaliTextField(
                           controller: TextEditingController(text: email),
