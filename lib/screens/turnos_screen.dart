@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
-import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/turnos/schedule_header.dart';
 import 'package:argrity/widgets/turnos/weekly_schedule.dart';
 import 'package:argrity/widgets/turnos/schedule_bottom_bar.dart';
@@ -103,8 +102,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
         final isMobile = MediaQuery.of(context).size.width < 700;
         return Column(
           children: [
-            const DashboardTopNavBar(),
-            Expanded(
+                Expanded(
               child: Row(
                 children: [
                   // ── Contenido principal ─────────────────────────────────

@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
-import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:argrity/widgets/alumnos/student_directory.dart';
 import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
@@ -39,7 +38,6 @@ class _AlumnosScreenState extends State<AlumnosScreen> {
 
     return Column(
       children: [
-        const DashboardTopNavBar(),
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(

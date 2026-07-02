@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
-import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/pagos/pagos_stat_cards.dart';
 import 'package:argrity/widgets/pagos/pagos_filters.dart';
 import 'package:argrity/widgets/pagos/pagos_table.dart';
@@ -35,8 +34,7 @@ class _PagosScreenState extends State<PagosScreen> {
       length: 2,
       child: Column(
         children: [
-          const DashboardTopNavBar(),
-          Expanded(
+            Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isSmall ? 20 : 40,

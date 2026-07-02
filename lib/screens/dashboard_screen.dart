@@ -5,7 +5,6 @@ import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/sidebar.dart';
-import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/dashboard/stat_cards.dart';
 import 'package:argrity/widgets/dashboard/schedule_list.dart';
 import 'package:argrity/screens/alumnos_screen.dart';
@@ -109,7 +108,6 @@ class _DashboardHomeState extends State<_DashboardHome> {
 
     return Column(
       children: [
-        const DashboardTopNavBar(),
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(

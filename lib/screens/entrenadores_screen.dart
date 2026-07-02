@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
-import 'package:argrity/widgets/dashboard/top_navbar.dart';
 import 'package:argrity/widgets/entrenadores/entrenadores_table.dart';
 
 class EntrenadoresScreen extends StatelessWidget {
@@ -15,7 +14,6 @@ class EntrenadoresScreen extends StatelessWidget {
 
     return Column(
       children: [
-        const DashboardTopNavBar(),
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
