@@ -82,9 +82,9 @@ class _TurnosScreenState extends State<TurnosScreen> {
             value: ctx.read<TurnosBloc>(),
             child: Container(
               height: MediaQuery.of(ctx).size.height * 0.88,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              decoration: BoxDecoration(
+                color: kaliColors.warmWhite,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: TurnoDetailPanel(
                 turno: state.selectedTurno!,
@@ -144,11 +144,11 @@ class _TurnosScreenState extends State<TurnosScreen> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: kaliColors.warmWhite,
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
+                                    color: kaliColors.espresso.withValues(alpha: 0.05),
                                     blurRadius: 16,
                                     offset: const Offset(0, 4),
                                   ),
