@@ -15,6 +15,7 @@ import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/screens/login_screen.dart';
 import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/services/auth_service.dart';
 import 'package:argrity/screens/new_password_screen.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:argrity/widgets/kali_splash.dart';
@@ -82,8 +83,8 @@ Future<void> main() async {
   await Supabase.initialize(
     url: url,
     publishableKey: anon,
-  ); // Ignorando deprecation por ahora si la librería base aún la usa
-  // SupaAuthClass no es del core de Supabase, veamos.
+  );
+  SupaAuthClass.configure(url: url, anonKey: anon);
 
   final prefs = await SharedPreferences.getInstance();
   final initialThemeId = prefs.getString('selected_theme') ?? 'default';
