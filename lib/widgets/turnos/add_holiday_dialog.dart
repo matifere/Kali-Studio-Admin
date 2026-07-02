@@ -85,6 +85,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                   borderRadius: BorderRadius.circular(12),
                   child: InputDecorator(
                     decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                       border:
                           OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       contentPadding: const EdgeInsets.symmetric(
@@ -110,8 +111,10 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                     style: KaliText.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextField(
+                  style: KaliText.body(kaliColors.espresso),
                   controller: _reasonController,
                   decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                     hintText: 'Ej. Feriado nacional',
                     border:
                         OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

@@ -171,9 +171,11 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   Text('Nombre de la Clase', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
+                    style: KaliText.body(kaliColors.espresso),
                     controller: _nameController,
                     validator: (val) => val == null || val.trim().isEmpty ? 'Requerido' : null,
                     decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                       hintText: 'Ej. Reformer Pilates',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -183,9 +185,11 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   Text('Descripción (Opcional)', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   TextFormField(
+                    style: KaliText.body(kaliColors.espresso),
                     controller: _descriptionController,
                     maxLines: 3,
                     decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                       hintText: 'Ej. Nivel intermedio, traer mat propia',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -203,9 +207,11 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                             _isLoadingInstructors
                                 ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
                                 : DropdownButtonFormField<String>(
+                                    style: KaliText.body(kaliColors.espresso),
                                     initialValue: _selectedInstructor,
                                     hint: const Text('Sin instructor'),
                                     decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     ),
@@ -228,6 +234,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                             Text('Capacidad', style: KaliText.label(kaliColors.espresso)),
                             const SizedBox(height: 8),
                             TextFormField(
+                    style: KaliText.body(kaliColors.espresso),
                               controller: _capacityController,
                               keyboardType: TextInputType.number,
                               validator: (val) {
@@ -236,6 +243,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                                 return null;
                               },
                               decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                                 hintText: 'Ej. 8',
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               ),
@@ -256,6 +264,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                           onTap: () => _selectTime(context, true),
                           child: InputDecorator(
                             decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                               labelText: 'Hora de Inicio',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -269,6 +278,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                           onTap: () => _selectTime(context, false),
                           child: InputDecorator(
                             decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                               labelText: 'Hora de Fin',
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -309,8 +319,10 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                   Text('Duración', style: KaliText.label(kaliColors.espresso)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<_RecurrenceOption>(
+                    style: KaliText.body(kaliColors.espresso),
                     initialValue: _recurrenceOption,
                     decoration: InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: kaliColors.espresso.withValues(alpha: 0.1)),

@@ -174,6 +174,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 Text('Nombre de la Clase', style: KaliText.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
+                    style: KaliText.body(kaliColors.espresso),
                   initialValue: _name,
                   decoration: _inputDecoration('Ej. Reformer Funcional', kaliColors),
                   validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
@@ -187,6 +188,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 _isLoadingInstructors
                     ? const Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator())
                     : DropdownButtonFormField<String>(
+                                    style: KaliText.body(kaliColors.espresso),
                         initialValue: _instructor,
                         hint: const Text('Sin instructor'),
                         decoration: _inputDecoration('Seleccionar...', kaliColors),
@@ -204,6 +206,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                 Text('Capacidad (Aforo)', style: KaliText.label(kaliColors.espresso)),
                 const SizedBox(height: 8),
                 TextFormField(
+                    style: KaliText.body(kaliColors.espresso),
                   initialValue: _capacity.toString(),
                   keyboardType: TextInputType.number,
                   decoration: _inputDecoration('Ej. 6', kaliColors),
@@ -344,6 +347,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
 
   InputDecoration _inputDecoration(String hint, KaliColorsExtension kaliColors) {
     return InputDecoration(filled: true, fillColor: kaliColors.background,
+                      hintStyle: KaliText.body(kaliColors.espresso.withValues(alpha: 0.5)),
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
