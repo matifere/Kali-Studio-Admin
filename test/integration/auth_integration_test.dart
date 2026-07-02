@@ -34,8 +34,8 @@ void main() {
 
   setUpAll(() async {
     await dotenv.load(fileName: '.env');
-    final url = dotenv.env['SUPABASE_URL'] ?? '';
-    final anon = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+    final url = dotenv.env['URL'] ?? '';
+    final anon = dotenv.env['ANON'] ?? '';
 
     try {
       // Inicializar supabase para los tests usando las credenciales seguras

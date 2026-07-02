@@ -80,8 +80,8 @@ Future<void> main() async {
 
   await initializeDateFormatting('es_ES', null);
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: url,
+    publishableKey: anon,
   ); // Ignorando deprecation por ahora si la librería base aún la usa
   // SupaAuthClass no es del core de Supabase, veamos.
 
