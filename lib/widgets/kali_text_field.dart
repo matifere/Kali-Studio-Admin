@@ -8,6 +8,7 @@ class KaliTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final bool obscureText;
   final TextEditingController? controller;
+  final bool readOnly;
   final VoidCallback? onSuffixTap;
   final String? actionLabel;
   final VoidCallback? onActionTap;
@@ -19,6 +20,7 @@ class KaliTextField extends StatelessWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.controller,
+    this.readOnly = false,
     this.onSuffixTap,
     this.actionLabel,
     this.onActionTap,
@@ -55,6 +57,7 @@ class KaliTextField extends StatelessWidget {
         TextField(
           controller: controller,
           obscureText: obscureText,
+          readOnly: readOnly,
           style: KaliText.body(kaliColors.espresso, size: 14),
           cursorColor: kaliColors.clay,
           decoration: InputDecoration(

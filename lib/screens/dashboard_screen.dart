@@ -13,6 +13,7 @@ import 'package:argrity/screens/turnos_screen.dart';
 import 'package:argrity/screens/pagos_screen.dart';
 import 'package:argrity/screens/settings/settings_theme_screen.dart';
 import 'package:argrity/screens/settings/settings_subscription_screen.dart';
+import 'package:argrity/screens/settings/settings_account_screen.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -28,6 +29,8 @@ class DashboardScreen extends StatelessWidget {
         return const TurnosScreen();
       case 'Pagos':
         return const PagosScreen();
+      case 'Cuenta':
+        return const SettingsAccountScreen();
       case 'Suscripción':
         return const SettingsSubscriptionScreen();
       case 'Tema':
