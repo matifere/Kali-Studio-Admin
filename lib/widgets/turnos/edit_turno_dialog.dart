@@ -226,8 +226,9 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                   validator: (v) {
                     final c = int.tryParse(v ?? '');
                     if (c == null) return 'Número inválido';
-                    if (c < widget.turno.enrolled)
+                    if (c < widget.turno.enrolled) {
                       return 'No puede ser menor a los inscriptos (${widget.turno.enrolled})';
+                    }
                     return null;
                   },
                   onSaved: (v) => _capacity = int.parse(v!),
@@ -347,8 +348,9 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                       value: _editFutureSessions,
                       activeColor: kaliColors.espresso,
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setState(() => _editFutureSessions = val);
+                        }
                       },
                     ),
                   ),

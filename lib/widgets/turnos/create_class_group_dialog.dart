@@ -280,10 +280,12 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                               controller: _capacityController,
                               keyboardType: TextInputType.number,
                               validator: (val) {
-                                if (val == null || val.trim().isEmpty)
+                                if (val == null || val.trim().isEmpty) {
                                   return 'Requerido';
-                                if (int.tryParse(val.trim()) == null)
+                                }
+                                if (int.tryParse(val.trim()) == null) {
                                   return 'Debe ser número';
+                                }
                                 return null;
                               },
                               decoration: InputDecoration(

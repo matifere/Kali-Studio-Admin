@@ -305,12 +305,14 @@ class _FilterDropdownState extends State<_FilterDropdown> {
       }).toList(),
       child: MouseRegion(
         onEnter: (e) {
-          if (e.kind == PointerDeviceKind.mouse)
+          if (e.kind == PointerDeviceKind.mouse) {
             setState(() => _hovered = true);
+          }
         },
         onExit: (e) {
-          if (e.kind == PointerDeviceKind.mouse)
+          if (e.kind == PointerDeviceKind.mouse) {
             setState(() => _hovered = false);
+          }
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),

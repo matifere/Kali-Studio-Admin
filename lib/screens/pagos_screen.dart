@@ -1,7 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/pagos/pagos_stat_cards.dart';
