@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 
 /// Botón de ícono reutilizable con tooltip.

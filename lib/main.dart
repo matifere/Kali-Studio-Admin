@@ -14,7 +14,6 @@ import 'package:argrity/bloc/turnos/turnos_bloc.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/screens/login_screen.dart';
-import 'package:argrity/services/auth_service.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/screens/new_password_screen.dart';
 import 'package:argrity/widgets/auth_wrapper.dart';
@@ -80,7 +79,10 @@ Future<void> main() async {
   }
 
   await initializeDateFormatting('es_ES', null);
-  await Supabase.initialize(url: url, anonKey: anon); // Ignorando deprecation por ahora si la librería base aún la usa
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  ); // Ignorando deprecation por ahora si la librería base aún la usa
   // SupaAuthClass no es del core de Supabase, veamos.
 
   final prefs = await SharedPreferences.getInstance();

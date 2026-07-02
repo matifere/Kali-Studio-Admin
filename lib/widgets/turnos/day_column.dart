@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/models/class_session.dart';
-import 'package:argrity/theme/kali_theme.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/turnos/turno_card.dart';
 

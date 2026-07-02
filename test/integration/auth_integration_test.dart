@@ -34,15 +34,14 @@ void main() {
 
   setUpAll(() async {
     await dotenv.load(fileName: '.env');
-    final url = dotenv.env['URL'] ?? '';
-    final anon = dotenv.env['ANON'] ?? '';
+    final url = dotenv.env['SUPABASE_URL'] ?? '';
+    final anon = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
     try {
-      // EmptyLocalStorage evita depender del plugin shared_preferences
-      // (que no está disponible en el runner de tests sin dispositivo).
+      // Inicializar supabase para los tests usando las credenciales seguras
       await Supabase.initialize(
         url: url,
-        anonKey: anon,
+        publishableKey: anon,
         authOptions: FlutterAuthClientOptions(
           localStorage: const EmptyLocalStorage(),
           pkceAsyncStorage: _InMemoryAsyncStorage(),
