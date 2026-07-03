@@ -30,20 +30,19 @@ class _TurnoCardState extends State<TurnoCard> {
     Color fg;
     final isPrivate = t.uiTurnoType == TurnoType.privateSpecial;
 
-    switch (t.uiTurnoType) {
-      case TurnoType.reformerPilates:
-        bg = kaliColors.clayDark;
-        fg = kaliColors.espresso;
-        break;
-      case TurnoType.matPilates:
-        bg = kaliColors.sand2;
-        fg = kaliColors.espresso;
-        break;
-      case TurnoType.privateSpecial:
-        bg = kaliColors.espresso;
-        fg = kaliColors.warmWhite;
-        break;
-    }
+    final palette = [
+      kaliColors.clay,
+      kaliColors.clayDark,
+      kaliColors.sage,
+      kaliColors.sageLight,
+      kaliColors.sand2,
+    ];
+
+    // Pick a color based on the class name so the same class always has the same color
+    bg = palette[t.name.hashCode.abs() % palette.length];
+    
+    // Calculate luminance to decide text color (dark or light)
+    fg = bg.computeLuminance() > 0.5 ? kaliColors.espresso : kaliColors.warmWhite;
 
     return MouseRegion(
       onEnter: (e) {

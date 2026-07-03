@@ -7,6 +7,8 @@ import 'package:argrity/screens/institution_selection_screen.dart';
 import 'package:argrity/screens/inactive_screen.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/widgets/kali_splash.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:argrity/cubits/theme/theme_cubit.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -130,7 +132,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       final data = await Supabase.instance.client
           .from('profiles')
-          .select('role, institution_id, full_name, is_active')
+          .select('role, institution_id, full_name, is_active, institutions(theme_id)')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -142,6 +144,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
         );
         ProfileCache.updateIsProfileDisabled(
             !(data['is_active'] as bool? ?? true));
+            
+        final instData = data['institutions'];
+        if (instData != null && instData['theme_id'] != null) {
+          if (mounted) {
+            context.read<ThemeCubit>().syncTheme(instData['theme_id'] as String);
+          }
+        }
       }
 
       final isSubValid = await _isSubscriptionValid();

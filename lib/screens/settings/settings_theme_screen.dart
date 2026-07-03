@@ -85,8 +85,18 @@ class _ThemeCard extends StatelessWidget {
     final double cardWidth = isSmall ? double.infinity : 380;
 
     return InkWell(
-      onTap: () {
-        context.read<ThemeCubit>().changeTheme(themeId);
+      onTap: () async {
+        if (isActive) return;
+        await context.read<ThemeCubit>().changeTheme(themeId);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Tema actualizado exitosamente.'),
+              backgroundColor: themeColors.espresso,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(24),
       child: Container(
