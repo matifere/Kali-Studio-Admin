@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/cubits/theme/theme_cubit.dart';
 import 'package:argrity/bloc/navigation/navigation_bloc.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 class SettingsThemeScreen extends StatelessWidget {
   const SettingsThemeScreen({super.key});
@@ -87,19 +88,19 @@ class SettingsThemeScreen extends StatelessWidget {
                 themeId: 'ocean',
                 title: 'Océano',
                 themeColors: KaliColorsExtension.oceanTheme,
-                isPremium: true,
+                isPremium: !ProfileCache.hasCustomThemes,
               ),
               _ThemeCard(
                 themeId: 'nature',
                 title: 'Bosque',
                 themeColors: KaliColorsExtension.natureTheme,
-                isPremium: true,
+                isPremium: !ProfileCache.hasCustomThemes,
               ),
               _ThemeCard(
                 themeId: 'magenta',
                 title: 'Magenta',
                 themeColors: KaliColorsExtension.magentaTheme,
-                isPremium: true,
+                isPremium: !ProfileCache.hasCustomThemes,
               ),
             ],
           ),

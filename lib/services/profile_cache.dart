@@ -12,11 +12,14 @@ class ProfileCache {
   static bool _isActive = false;
   static bool _isProfileDisabled = false;
 
+  static bool _hasCustomThemes = false;
+
   static String get role => _role;
   static String? get institutionId => _institutionId;
   static String? get fullName => _fullName;
   static bool get isAdmin => _role == 'admin';
   static bool get isSudo => _role == 'sudo';
+  static bool get hasCustomThemes => _hasCustomThemes;
 
   /// true si el caché fue poblado al menos una vez (sesión activa previa).
   static bool get isLoaded => _loaded;
@@ -42,6 +45,10 @@ class ProfileCache {
   static void updateIsProfileDisabled(bool value) {
     _isProfileDisabled = value;
   }
+  
+  static void updateHasCustomThemes(bool value) {
+    _hasCustomThemes = value;
+  }
 
   static void clear() {
     _role = 'client';
@@ -50,5 +57,6 @@ class ProfileCache {
     _loaded = false;
     _isActive = false;
     _isProfileDisabled = false;
+    _hasCustomThemes = false;
   }
 }

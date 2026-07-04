@@ -93,11 +93,23 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final subData = await Supabase.instance.client
           .from('tenant_subscriptions')
-          .select('status, current_period_end')
+          .select('status, current_period_end, saas_plans(features)')
           .eq('institution_id', institutionId)
           .maybeSingle();
 
-      if (subData == null) return false;
+      if (subData == null) {
+        ProfileCache.updateHasCustomThemes(false);
+        return false;
+      }
+
+      // Procesar features del plan (ej. custom_themes)
+      final saasPlans = subData['saas_plans'];
+      if (saasPlans != null && saasPlans['features'] != null) {
+        final features = saasPlans['features'] as Map<String, dynamic>;
+        ProfileCache.updateHasCustomThemes(features['custom_themes'] == true);
+      } else {
+        ProfileCache.updateHasCustomThemes(false);
+      }
 
       final status = subData['status'] as String?;
       if (status == 'active' || status == 'authorized') {
@@ -110,6 +122,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       return false;
     } catch (_) {
       // Fail-closed: ante cualquier error, denegar acceso
+      ProfileCache.updateHasCustomThemes(false);
       return false;
     }
   }
@@ -154,6 +167,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
 
       final isSubValid = await _isSubscriptionValid();
+
+      // Si no tiene el feature y está usando un tema premium, lo forzamos a default
+      if (!ProfileCache.hasCustomThemes && mounted) {
+        final currentTheme = context.read<ThemeCubit>().state.themeId;
+        if (currentTheme != 'default') {
+          await context.read<ThemeCubit>().changeTheme('default');
+        }
+      }
 
       final isActive = data != null
           ? ((data['is_active'] as bool? ?? true) && isSubValid)
