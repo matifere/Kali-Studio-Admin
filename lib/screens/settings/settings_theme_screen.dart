@@ -26,6 +26,53 @@ class SettingsThemeScreen extends StatelessWidget {
             style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.7)),
           ),
           const SizedBox(height: 32),
+          BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) {
+              return Container(
+                width: MediaQuery.of(context).size.width < 600 ? double.infinity : 380,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: kaliColors.warmWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kaliColors.espresso.withValues(alpha: 0.1)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      state.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                      color: kaliColors.espresso,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Modo Oscuro', style: kaliColors.heading(kaliColors.espresso, size: 18)),
+                          Text(
+                            'Activar colores oscuros para descansar la vista',
+                            style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Switch(
+                      value: state.isDarkMode,
+                      activeColor: kaliColors.warmWhite,
+                      activeTrackColor: kaliColors.espresso,
+                      inactiveThumbColor: kaliColors.espresso.withValues(alpha: 0.7),
+                      inactiveTrackColor: kaliColors.background,
+                      onChanged: (value) {
+                        context.read<ThemeCubit>().toggleDarkMode(value);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 32),
           Wrap(
             spacing: 24,
             runSpacing: 24,
@@ -34,11 +81,6 @@ class SettingsThemeScreen extends StatelessWidget {
                 themeId: 'default',
                 title: 'Café (Default)',
                 themeColors: KaliColorsExtension.defaultTheme,
-              ),
-              _ThemeCard(
-                themeId: 'dark',
-                title: 'Oscuro',
-                themeColors: KaliColorsExtension.darkTheme,
               ),
               _ThemeCard(
                 themeId: 'ocean',
@@ -77,9 +119,9 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeKaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
-    final isActive = activeKaliColors.espresso == themeColors.espresso &&
-        activeKaliColors.background == themeColors.background;
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    final currentState = context.watch<ThemeCubit>().state;
+    final isActive = currentState.themeId == themeId;
 
     final bool isSmall = MediaQuery.of(context).size.width < 600;
     final double cardWidth = isSmall ? double.infinity : 380;

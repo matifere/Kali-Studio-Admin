@@ -7,17 +7,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/services/profile_cache.dart';
 
-class ThemeCubit extends Cubit<ThemeData> {
+class ThemeState {
+  final ThemeData themeData;
+  final String themeId;
+  final bool isDarkMode;
+
+  const ThemeState({
+    required this.themeData,
+    required this.themeId,
+    required this.isDarkMode,
+  });
+}
+
+class ThemeCubit extends Cubit<ThemeState> {
   static const String _themeKey = 'selected_theme';
+  static const String _darkModeKey = 'is_dark_mode';
 
-  ThemeCubit({required String initialThemeId})
-      : super(_buildTheme(initialThemeId));
+  ThemeCubit({required String initialThemeId, required bool initialIsDarkMode})
+      : super(_buildState(initialThemeId, initialIsDarkMode));
 
-  /// Cambia el tema actual y lo guarda en SharedPreferences y en Supabase si es sudo
   Future<void> changeTheme(String newThemeId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, newThemeId);
-    emit(_buildTheme(newThemeId));
+    emit(_buildState(newThemeId, state.isDarkMode));
 
     if (ProfileCache.role == 'sudo' && ProfileCache.institutionId != null) {
       try {
@@ -26,38 +38,45 @@ class ThemeCubit extends Cubit<ThemeData> {
             .update({'theme_id': newThemeId})
             .eq('id', ProfileCache.institutionId!);
       } catch (e) {
-        // Ignorar el error aquí, idealmente reportar o hacer fallback
+        // Ignorar el error
       }
     }
   }
 
-  /// Sincroniza el tema desde la base de datos (sin re-guardar en Supabase)
   Future<void> syncTheme(String newThemeId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, newThemeId);
-    emit(_buildTheme(newThemeId));
+    emit(_buildState(newThemeId, state.isDarkMode));
   }
 
-  static ThemeData _buildTheme(String themeId) {
+  Future<void> toggleDarkMode(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_darkModeKey, enabled);
+    emit(_buildState(state.themeId, enabled));
+  }
+
+  static ThemeState _buildState(String themeId, bool isDarkMode) {
     KaliColorsExtension colors;
     switch (themeId) {
-      case 'dark':
-        colors = KaliColorsExtension.darkTheme;
-        break;
       case 'ocean':
-        colors = KaliColorsExtension.oceanTheme;
+        colors = isDarkMode ? KaliColorsExtension.oceanDarkTheme : KaliColorsExtension.oceanTheme;
         break;
       case 'nature':
-        colors = KaliColorsExtension.natureTheme;
+        colors = isDarkMode ? KaliColorsExtension.natureDarkTheme : KaliColorsExtension.natureTheme;
         break;
       case 'magenta':
-        colors = KaliColorsExtension.magentaTheme;
+        colors = isDarkMode ? KaliColorsExtension.magentaDarkTheme : KaliColorsExtension.magentaTheme;
         break;
       case 'default':
       default:
-        colors = KaliColorsExtension.defaultTheme;
+        colors = isDarkMode ? KaliColorsExtension.darkTheme : KaliColorsExtension.defaultTheme;
         break;
     }
-    return KaliTheme.buildTheme(colors);
+    return ThemeState(
+      themeData: KaliTheme.buildTheme(colors),
+      themeId: themeId,
+      isDarkMode: isDarkMode,
+    );
   }
 }
+

@@ -100,6 +100,48 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     typography: KaliTypography.magentaTypography,
   );
 
+  static final KaliColorsExtension oceanDarkTheme = KaliColorsExtension(
+    espresso: const Color(0xFFE2E8F0),
+    espressoL: const Color(0xFF94A3B8),
+    clay: const Color(0xFF3B82F6),
+    clayDark: const Color(0xFF2563EB),
+    sand: const Color(0xFF1E293B),
+    sand2: const Color(0xFF0F172A),
+    sage: const Color(0xFF0EA5E9),
+    sageLight: const Color(0xFF334155),
+    warmWhite: const Color(0xFF0F172A),
+    background: const Color(0xFF020617),
+    typography: KaliTypography.oceanTypography,
+  );
+
+  static final KaliColorsExtension natureDarkTheme = KaliColorsExtension(
+    espresso: const Color(0xFFD1D5DB),
+    espressoL: const Color(0xFF9CA3AF),
+    clay: const Color(0xFF10B981),
+    clayDark: const Color(0xFF059669),
+    sand: const Color(0xFF1F2937),
+    sand2: const Color(0xFF111827),
+    sage: const Color(0xFF34D399),
+    sageLight: const Color(0xFF374151),
+    warmWhite: const Color(0xFF111827),
+    background: const Color(0xFF030712),
+    typography: KaliTypography.natureTypography,
+  );
+
+  static final KaliColorsExtension magentaDarkTheme = KaliColorsExtension(
+    espresso: const Color(0xFFE4E4E7),
+    espressoL: const Color(0xFFA1A1AA),
+    clay: const Color(0xFFEC4899),
+    clayDark: const Color(0xFFDB2777),
+    sand: const Color(0xFF27272A),
+    sand2: const Color(0xFF18181B),
+    sage: const Color(0xFFF472B6),
+    sageLight: const Color(0xFF3F3F46),
+    warmWhite: const Color(0xFF18181B),
+    background: const Color(0xFF09090B),
+    typography: KaliTypography.magentaTypography,
+  );
+
   @override
   ThemeExtension<KaliColorsExtension> copyWith({
     Color? espresso,

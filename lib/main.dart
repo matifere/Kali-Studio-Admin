@@ -88,8 +88,9 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final initialThemeId = prefs.getString('selected_theme') ?? 'default';
+  final initialIsDarkMode = prefs.getBool('is_dark_mode') ?? false;
 
-  runApp(KaliApp(initialThemeId: initialThemeId));
+  runApp(KaliApp(initialThemeId: initialThemeId, initialIsDarkMode: initialIsDarkMode));
 }
 
 // ─── KaliApp: crea y posee los BLoCs ─────────────────────────────────────────
@@ -98,7 +99,8 @@ Future<void> main() async {
 // al Estado del widget raíz, y no se recreen en cada hot reload / rebuild.
 class KaliApp extends StatefulWidget {
   final String initialThemeId;
-  const KaliApp({super.key, required this.initialThemeId});
+  final bool initialIsDarkMode;
+  const KaliApp({super.key, required this.initialThemeId, required this.initialIsDarkMode});
 
   @override
   State<KaliApp> createState() => _KaliAppState();
@@ -140,7 +142,10 @@ class _KaliAppState extends State<KaliApp> {
     _pagosBloc = PagosBloc(repository: pagosRepo)..add(PagosLoadRequested());
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
-    _themeCubit = ThemeCubit(initialThemeId: widget.initialThemeId);
+    _themeCubit = ThemeCubit(
+      initialThemeId: widget.initialThemeId, 
+      initialIsDarkMode: widget.initialIsDarkMode
+    );
   }
 
   @override
@@ -245,11 +250,11 @@ class _KaliAppViewState extends State<_KaliAppView> {
     // toda la navegación la maneja _navigatorKey dinámicamente.
     Widget home = const KaliSplash();
 
-    return BlocBuilder<ThemeCubit, ThemeData>(builder: (context, themeData) {
+    return BlocBuilder<ThemeCubit, ThemeState>(builder: (context, themeState) {
       return MaterialApp(
         navigatorKey: _navigatorKey,
         title: 'Argity',
-        theme: themeData,
+        theme: themeState.themeData,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
