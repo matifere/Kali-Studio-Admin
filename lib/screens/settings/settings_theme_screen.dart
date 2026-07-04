@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/cubits/theme/theme_cubit.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 
 class SettingsThemeScreen extends StatelessWidget {
   const SettingsThemeScreen({super.key});
@@ -86,16 +87,19 @@ class SettingsThemeScreen extends StatelessWidget {
                 themeId: 'ocean',
                 title: 'Océano',
                 themeColors: KaliColorsExtension.oceanTheme,
+                isPremium: true,
               ),
               _ThemeCard(
                 themeId: 'nature',
                 title: 'Bosque',
                 themeColors: KaliColorsExtension.natureTheme,
+                isPremium: true,
               ),
               _ThemeCard(
                 themeId: 'magenta',
                 title: 'Magenta',
                 themeColors: KaliColorsExtension.magentaTheme,
+                isPremium: true,
               ),
             ],
           ),
@@ -110,11 +114,13 @@ class _ThemeCard extends StatelessWidget {
   final String themeId;
   final String title;
   final KaliColorsExtension themeColors;
+  final bool isPremium;
 
   const _ThemeCard({
     required this.themeId,
     required this.title,
     required this.themeColors,
+    this.isPremium = false,
   });
 
   @override
@@ -127,19 +133,23 @@ class _ThemeCard extends StatelessWidget {
     final double cardWidth = isSmall ? double.infinity : 380;
 
     return InkWell(
-      onTap: () async {
-        if (isActive) return;
-        await context.read<ThemeCubit>().changeTheme(themeId);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Tema actualizado exitosamente.'),
-              backgroundColor: themeColors.espresso,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
+      onTap: isPremium
+          ? () {
+              context.read<NavigationBloc>().add(NavigationPageChanged('Suscripción'));
+            }
+          : () async {
+              if (isActive) return;
+              await context.read<ThemeCubit>().changeTheme(themeId);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Tema actualizado exitosamente.'),
+                    backgroundColor: themeColors.espresso,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
       borderRadius: BorderRadius.circular(24),
       child: Container(
         width: cardWidth,
@@ -173,12 +183,41 @@ class _ThemeCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: themeColors.heading(themeColors.espresso, size: 24).copyWith(fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Text(
+                        title,
+                        style: themeColors.heading(themeColors.espresso, size: 24).copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      if (isPremium) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFFEAB308), Color(0xFFF59E0B)]),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star_rounded, color: Colors.white, size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                'PRO',
+                                style: themeColors.label(Colors.white).copyWith(fontWeight: FontWeight.bold, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 if (isActive)
-                  Icon(Icons.check_circle_rounded, color: themeColors.espresso, size: 28),
+                  Icon(Icons.check_circle_rounded, color: themeColors.espresso, size: 28)
+                else if (isPremium)
+                  Icon(Icons.lock_rounded, color: themeColors.espresso.withValues(alpha: 0.5), size: 28),
               ],
             ),
             const SizedBox(height: 24),
