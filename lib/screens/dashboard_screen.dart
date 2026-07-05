@@ -48,6 +48,19 @@ class DashboardScreen extends StatelessWidget {
       builder: (context, navState) {
         return Scaffold(
           backgroundColor: kaliColors.warmWhite,
+          appBar: isMobile
+              ? AppBar(
+                  backgroundColor: kaliColors.warmWhite,
+                  elevation: 0,
+                  iconTheme: IconThemeData(color: kaliColors.espresso),
+                  title: Text(
+                    'Argity',
+                    style: kaliColors
+                        .heading(kaliColors.espresso, size: 20)
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                )
+              : null,
           drawer: isMobile
               ? Drawer(
                   child: DashboardSidebar(
