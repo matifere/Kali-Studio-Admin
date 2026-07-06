@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/screens/dashboard_screen.dart';
 import 'package:argrity/screens/institution_selection_screen.dart';
 import 'package:argrity/screens/inactive_screen.dart';
+import 'package:argrity/screens/admin_onboarding_screen.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/widgets/kali_splash.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +27,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   // Arrancamos con el último valor conocido: si el usuario ya estaba activo,
   // un remount no debe mostrar InactiveScreen mientras se re-verifica.
   bool _isActive = ProfileCache.isActive;
+  bool _hasPlans = true;
 
   /// true una vez que _checkProfile() completó la verificación de suscripción.
   /// Mientras sea false, el stream listener NO puede sobreescribir _isActive
@@ -181,10 +183,24 @@ class _AuthWrapperState extends State<AuthWrapper> {
           : false;
       ProfileCache.updateIsActive(isActive);
 
+      bool hasPlans = true;
+      if (isActive && ProfileCache.role == 'sudo' && ProfileCache.institutionId != null) {
+        try {
+          final plansRes = await Supabase.instance.client
+              .from('plans')
+              .select('id')
+              .limit(1);
+          hasPlans = (plansRes as List).isNotEmpty;
+        } catch (_) {
+          hasPlans = true;
+        }
+      }
+
       if (mounted) {
         setState(() {
           _isActive = isActive;
           _hasInstitution = data != null && data['institution_id'] != null;
+          _hasPlans = hasPlans;
           _profileChecked = true;
           _subscriptionChecked = true;
         });
@@ -212,6 +228,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     if (!_hasInstitution) return const InstitutionSelectionScreen();
     if (!_isActive) return const InactiveScreen();
+    if (!_hasPlans) {
+      return AdminOnboardingScreen(
+        onCompleted: () {
+          setState(() {
+            _hasPlans = true;
+          });
+        },
+      );
+    }
     return const DashboardScreen();
   }
 }
