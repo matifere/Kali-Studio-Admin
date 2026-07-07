@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
+import 'package:argrity/widgets/dashboard/chimpy_assistant.dart';
 import 'package:argrity/widgets/dashboard/sidebar.dart';
 import 'package:argrity/widgets/dashboard/stat_cards.dart';
 import 'package:argrity/widgets/dashboard/schedule_list.dart';
@@ -124,38 +125,48 @@ class _DashboardHomeState extends State<_DashboardHome> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
 
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmall ? 20 : 40,
-              vertical: 32,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizeText(_greeting,
-                    style: kaliColors
-                        .heading(kaliColors.espresso, size: isSmall ? 32 : 40)
-                        .copyWith(fontWeight: FontWeight.w600),
-                    maxLines: 1),
-                const SizedBox(height: 8),
-                Text(
-                  'Esto es lo que está pasando hoy.',
-                  style: kaliColors.body(
-                    kaliColors.espresso.withValues(alpha: 0.6),
-                    size: 16,
-                  ),
+        Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmall ? 20 : 40,
+                  vertical: 32,
                 ),
-                const SizedBox(height: 40),
-                const DashboardStatCards(),
-                const SizedBox(height: 32),
-                const DashboardScheduleList(),
-                const SizedBox(height: 40),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AutoSizeText(_greeting,
+                        style: kaliColors
+                            .heading(kaliColors.espresso,
+                                size: isSmall ? 32 : 40)
+                            .copyWith(fontWeight: FontWeight.w600),
+                        maxLines: 1),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Esto es lo que está pasando hoy.',
+                      style: kaliColors.body(
+                        kaliColors.espresso.withValues(alpha: 0.6),
+                        size: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    const DashboardStatCards(),
+                    const SizedBox(height: 32),
+                    const DashboardScheduleList(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
+        ),
+        Positioned(
+          right: isSmall ? 16 : 24,
+          bottom: isSmall ? 16 : 24,
+          child: const ChimpyAssistant(),
         ),
       ],
     );

@@ -99,13 +99,22 @@ class TurnoStudentAttendanceToggled extends TurnosEvent {
   });
 }
 
-/// El admin marca un día como feriado: cancela las clases de ese día y devuelve
-/// el crédito a cada alumno inscripto.
+/// El admin marca un día (o rango de vacaciones) como feriado: cancela las
+/// clases comprendidas entre [date] y [endDate] inclusive. Si [refundCredits]
+/// es true, devuelve el crédito a cada alumno inscripto; si es false, la clase
+/// se pierde (la reserva queda marcada como ausente y no libera cupo).
 class HolidayAdded extends TurnosEvent {
   final DateTime date;
+  final DateTime? endDate;
   final String? reason;
+  final bool refundCredits;
 
-  HolidayAdded({required this.date, this.reason});
+  HolidayAdded({
+    required this.date,
+    this.endDate,
+    this.reason,
+    this.refundCredits = true,
+  });
 }
 
 /// El usuario cambió los filtros de instructores o salas

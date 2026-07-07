@@ -21,15 +21,20 @@ class AlumnosStatCards extends StatelessWidget {
         int expiringCount = 0;
 
         if (state is AlumnosLoaded) {
-          activeCount = state.students.length.toString();
-
           final now = DateTime.now();
           final nextWeek = now.add(const Duration(days: 7));
           int thisMonthCount = 0;
+          int activeStudents = 0;
           for (var s in state.students) {
-            if (s.createdAt.year == now.year &&
-                s.createdAt.month == now.month) {
-              thisMonthCount++;
+            // La tarjeta y el badge de crecimiento son sobre ALUMNOS ACTIVOS:
+            // solo contamos is_active == true, tanto el total como las altas
+            // del mes, para que el número grande y el % sean coherentes.
+            if (s.isActive) {
+              activeStudents++;
+              if (s.createdAt.year == now.year &&
+                  s.createdAt.month == now.month) {
+                thisMonthCount++;
+              }
             }
             // Aprovechar el mismo bucle para contar por plan
             final plan = s.plan.isNotEmpty ? s.plan : 'Sin plan';
@@ -48,7 +53,10 @@ class AlumnosStatCards extends StatelessWidget {
             }
           }
 
-          int previousTotal = state.students.length - thisMonthCount;
+          activeCount = activeStudents.toString();
+
+          // Base = alumnos activos que ya existían antes de este mes.
+          int previousTotal = activeStudents - thisMonthCount;
           if (previousTotal == 0) {
             if (thisMonthCount > 0) {
               percentGrowthStr = '100+%';

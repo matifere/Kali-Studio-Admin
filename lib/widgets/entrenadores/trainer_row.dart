@@ -6,8 +6,14 @@ import 'package:argrity/widgets/common/kali_icon_button.dart';
 class TrainerRow extends StatefulWidget {
   final Map<String, dynamic> trainer;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
-  const TrainerRow({super.key, required this.trainer, required this.onDelete});
+  const TrainerRow({
+    super.key,
+    required this.trainer,
+    required this.onDelete,
+    required this.onEdit,
+  });
 
   @override
   State<TrainerRow> createState() => _TrainerRowState();
@@ -115,12 +121,22 @@ class _TrainerRowState extends State<TrainerRow> {
               flex: 2,
               child: isSudo
                   ? const SizedBox
-                      .shrink() // El dueño (sudo) no se puede eliminar
-                  : KaliIconButton.action(
-                      Icons.delete_outline,
-                      tooltip: 'Eliminar',
-                      color: const Color(0xFFD4685C),
-                      onTap: widget.onDelete,
+                      .shrink() // El dueño (sudo) no se edita ni elimina acá
+                  : Row(
+                      children: [
+                        KaliIconButton.action(
+                          Icons.edit_outlined,
+                          tooltip: 'Editar',
+                          onTap: widget.onEdit,
+                        ),
+                        const SizedBox(width: 4),
+                        KaliIconButton.action(
+                          Icons.delete_outline,
+                          tooltip: 'Eliminar',
+                          color: const Color(0xFFD4685C),
+                          onTap: widget.onDelete,
+                        ),
+                      ],
                     ),
             ),
           ],

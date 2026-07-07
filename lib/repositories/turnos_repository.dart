@@ -137,9 +137,11 @@ class TurnosRepository {
   }
 
   /// Devuelve las sesiones futuras (desde el día siguiente a [session.date]
-  /// hasta [untilDate] inclusive) de la misma serie recurrente: por group_id
-  /// si el turno está agrupado, o por plantilla (nombre + horario + institución)
-  /// cuando no lo está. Así la proyección funciona también para turnos sueltos.
+  /// hasta [untilDate] inclusive) que ocupan el MISMO slot semanal que
+  /// [session]: mismo día de la semana, mismo horario, mismo nombre y misma
+  /// institución. Deliberadamente NO se filtra por group_id, así la proyección
+  /// recurrente alcanza también a las clases de ese día y horario que hayan
+  /// sido creadas en momentos distintos (series separadas, no agrupadas).
   Future<List<Map<String, dynamic>>> getFutureSeriesSessions({
     required ClassSession session,
     required DateTime untilDate,
@@ -151,21 +153,26 @@ class TurnosRepository {
     var query = _client
         .from('class_sessions')
         .select('id, date')
+        // No proyectar sobre clases canceladas (feriados/vacaciones).
+        .or('status.is.null,status.neq.cancelled')
         .gte('date', startIso)
-        .lte('date', endIso);
+        .lte('date', endIso)
+        .eq('name', session.name)
+        .eq('start_time', session.startTime);
 
-    if (session.groupId != null) {
-      query = query.eq('group_id', session.groupId!);
-    } else {
-      query =
-          query.eq('name', session.name).eq('start_time', session.startTime);
-      if (session.institutionId != null) {
-        query = query.eq('institution_id', session.institutionId!);
-      }
+    if (session.institutionId != null) {
+      query = query.eq('institution_id', session.institutionId!);
     }
 
     final res = await query.order('date', ascending: true);
-    return List<Map<String, dynamic>>.from(res);
+
+    // El día de la semana no se puede filtrar en la query (la columna `date`
+    // es un date), así que nos quedamos con el mismo weekday en el cliente.
+    final targetWeekday = session.date.weekday;
+    return List<Map<String, dynamic>>.from(res).where((row) {
+      final d = DateTime.parse(row['date'] as String);
+      return d.weekday == targetWeekday;
+    }).toList();
   }
 
   Future<void> assignStudent({
@@ -291,6 +298,25 @@ class TurnosRepository {
       'p_date': DateFormat('yyyy-MM-dd').format(date),
       'p_reason':
           (reason == null || reason.trim().isEmpty) ? null : reason.trim(),
+    });
+    return Map<String, dynamic>.from(res as Map);
+  }
+
+  /// Cancela todas las clases entre [startDate] y [endDate] inclusive
+  /// (vacaciones). Si [refundCredits] es true devuelve el crédito a cada
+  /// alumno afectado; si es false la clase se pierde (la reserva se marca como
+  /// ausente y no libera cupo mensual). Corre en el servidor de forma atómica
+  /// (RPC security-definer) y notifica a los alumnos. Devuelve el JSON del RPC
+  /// con la cantidad de clases y reservas afectadas.
+  Future<Map<String, dynamic>> cancelRangeAsHoliday(
+      DateTime startDate, DateTime endDate, String? reason,
+      {required bool refundCredits}) async {
+    final res = await _client.rpc('cancel_range_as_holiday', params: {
+      'p_start_date': DateFormat('yyyy-MM-dd').format(startDate),
+      'p_end_date': DateFormat('yyyy-MM-dd').format(endDate),
+      'p_reason':
+          (reason == null || reason.trim().isEmpty) ? null : reason.trim(),
+      'p_refund_credits': refundCredits,
     });
     return Map<String, dynamic>.from(res as Map);
   }

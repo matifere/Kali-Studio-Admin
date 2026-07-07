@@ -35,31 +35,57 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     Emitter<TurnosState> emit,
   ) async {
     try {
-      final result =
-          await _repository.cancelDayAsHoliday(event.date, event.reason);
+      final startDate = event.date;
+      final endDate = event.endDate ?? event.date;
+      final refund = event.refundCredits;
+
+      final result = await _repository.cancelRangeAsHoliday(
+        startDate,
+        endDate,
+        event.reason,
+        refundCredits: refund,
+      );
       final sessions = (result['sessions'] as int?) ?? 0;
       final reservations = (result['reservations'] as int?) ?? 0;
-      final fecha = DateFormat('dd/MM', 'es_ES').format(event.date);
+
+      final bool isRange = startDate.year != endDate.year ||
+          startDate.month != endDate.month ||
+          startDate.day != endDate.day;
+      final fechaInicio = DateFormat('dd/MM', 'es_ES').format(startDate);
+      final fechaFin = DateFormat('dd/MM', 'es_ES').format(endDate);
+      final periodo = isRange ? 'del $fechaInicio al $fechaFin' : 'el $fechaInicio';
+
+      final String creditosMsg;
+      if (reservations == 0) {
+        creditosMsg = '';
+      } else if (refund) {
+        creditosMsg =
+            ', $reservations ${reservations == 1 ? 'crédito devuelto' : 'créditos devueltos'}';
+      } else {
+        creditosMsg =
+            ', $reservations ${reservations == 1 ? 'clase perdida' : 'clases perdidas'}';
+      }
 
       final String message = sessions == 0
-          ? 'No había clases agendadas el $fecha.'
-          : 'Feriado aplicado el $fecha: $sessions ${sessions == 1 ? 'clase cancelada' : 'clases canceladas'}'
-              '${reservations > 0 ? ', $reservations ${reservations == 1 ? 'crédito devuelto' : 'créditos devueltos'}' : ''}.';
+          ? 'No había clases agendadas $periodo.'
+          : 'Vacaciones aplicadas $periodo: $sessions ${sessions == 1 ? 'clase cancelada' : 'clases canceladas'}'
+              '$creditosMsg.';
 
       emit(state.copyWith(infoMessage: message, clearSelection: true));
 
       if (sessions > 0) {
         _activityBloc?.add(ActivityLogged(ActivityEntry(
-          title: 'Feriado aplicado',
-          subtitle:
-              'Se cancelaron $sessions clase(s) del $fecha y se devolvieron $reservations crédito(s).',
+          title: 'Vacaciones aplicadas',
+          subtitle: refund
+              ? 'Se cancelaron $sessions clase(s) $periodo y se devolvieron $reservations crédito(s).'
+              : 'Se cancelaron $sessions clase(s) $periodo; $reservations clase(s) perdida(s) sin reintegro.',
           category: ActivityCategory.turno,
           timestamp: DateTime.now(),
         )));
       }
       add(TurnosLoadRequested(state.currentWeekStart));
     } catch (e) {
-      emit(state.copyWith(error: 'Error al aplicar el feriado: $e'));
+      emit(state.copyWith(error: 'Error al aplicar las vacaciones: $e'));
     }
   }
 

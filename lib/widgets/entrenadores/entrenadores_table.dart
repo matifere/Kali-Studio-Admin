@@ -4,6 +4,7 @@ import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/entrenadores/add_trainer_button.dart';
+import 'package:argrity/widgets/entrenadores/edit_trainer_dialog.dart';
 import 'package:argrity/widgets/entrenadores/trainer_row.dart';
 
 class EntrenadoresTable extends StatefulWidget {
@@ -66,6 +67,26 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
           (a['full_name'] as String? ?? '')
               .compareTo(b['full_name'] as String? ?? ''));
     });
+  }
+
+  Future<void> _editTrainer(Map<String, dynamic> trainer) async {
+    final updated = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (_) => EditTrainerDialog(trainer: trainer),
+    );
+
+    if (updated == null || !mounted) return;
+
+    setState(() {
+      _trainers = [
+        for (final t in _trainers)
+          t['id'] == updated['id'] ? {...t, ...updated} : t,
+      ]..sort((a, b) => (a['full_name'] as String? ?? '')
+          .compareTo(b['full_name'] as String? ?? ''));
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Entrenador actualizado')),
+    );
   }
 
   Future<void> _deleteTrainer(Map<String, dynamic> trainer) async {
@@ -195,6 +216,7 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
                     ..._trainers.map((t) => TrainerRow(
                           trainer: t,
                           onDelete: () => _deleteTrainer(t),
+                          onEdit: () => _editTrainer(t),
                         )),
                     const SizedBox(height: 24),
                   ],

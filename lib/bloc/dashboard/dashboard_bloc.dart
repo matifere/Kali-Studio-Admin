@@ -63,6 +63,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
       final today = DateTime(now.year, now.month, now.day);
       double ingresos = 0.0;
+      int vencimientosProximos = 0;
       for (final sub in subsData) {
         // Filtro de institución (igual que PagosBloc).
         if (instId != null) {
@@ -77,9 +78,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         if (sub['status'] != 'active') continue;
         final endStr = sub['end_date'] as String?;
         final end = endStr != null ? DateTime.tryParse(endStr) : null;
-        if (end != null &&
-            today.isAfter(DateTime(end.year, end.month, end.day))) {
-          continue;
+        if (end != null) {
+          final endDay = DateTime(end.year, end.month, end.day);
+          if (today.isAfter(endDay)) continue;
+          if (endDay.difference(today).inDays <= 7) vencimientosProximos++;
         }
         final plan = sub['plans'];
         final planMap =
@@ -93,6 +95,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         alumnosPresentesHoy: alumnosPresentes,
         capacidadTotalHoy: capacidadTotal,
         ingresosMensuales: ingresos,
+        vencimientosProximos: vencimientosProximos,
         isLoading: false,
         hasLoaded: true,
       ));
