@@ -44,50 +44,71 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         child: Container(
           width: 240,
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/images/argity_logo.png',
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(width: 12),
-                        AutoSizeText(
-                          'Argity',
-                          style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Divider(
-                        color: kaliColors.espresso.withValues(alpha: 0.1),
-                        thickness: 1,
-                        height: 1),
-                  ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/argity_logo.png',
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    AutoSizeText(
+                                      'Argity',
+                                      style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                                      maxLines: 1,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                Divider(
+                                    color: kaliColors.espresso.withValues(alpha: 0.1),
+                                    thickness: 1,
+                                    height: 1),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+                          _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
+                          _buildMenuItem(Icons.people_outline, 'Alumnos'),
+                          if (_role != 'admin')
+                            _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
+                          _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
+                          if (_role != 'admin')
+                            _buildMenuItem(Icons.payment_outlined, 'Pagos'),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildBottomMenuItem(Icons.help_outline, 'SOPORTE', kaliColors),
+                          _buildSettingsMenu(kaliColors),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 48),
-              _buildMenuItem(Icons.grid_view_rounded, 'Panel'),
-              _buildMenuItem(Icons.people_outline, 'Alumnos'),
-              if (_role != 'admin')
-                _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
-              _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
-              if (_role != 'admin')
-                _buildMenuItem(Icons.payment_outlined, 'Pagos'),
-              const Spacer(),
-              _buildBottomMenuItem(Icons.help_outline, 'SOPORTE', kaliColors),
-              _buildSettingsMenu(kaliColors),
-            ],
+              );
+            },
           ),
         ));
   }
