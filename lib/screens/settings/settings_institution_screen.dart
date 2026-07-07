@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
+import 'package:argrity/services/profile_cache.dart';
 
 class SettingsInstitutionScreen extends StatefulWidget {
   const SettingsInstitutionScreen({super.key});
@@ -17,6 +19,44 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
   final _paymentAliasController = TextEditingController();
 
   bool _isLoading = false;
+  bool _isLoadingData = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInstitutionData();
+  }
+
+  Future<void> _loadInstitutionData() async {
+    final instId = ProfileCache.institutionId;
+    if (instId == null) {
+      setState(() => _isLoadingData = false);
+      return;
+    }
+
+    try {
+      final data = await Supabase.instance.client
+          .from('institutions')
+          .select('name, address, phone, payment_alias')
+          .eq('id', instId)
+          .single();
+
+      if (mounted) {
+        setState(() {
+          _nameController.text = data['name'] ?? '';
+          _addressController.text = data['address'] ?? '';
+          _phoneController.text = data['phone'] ?? '';
+          _paymentAliasController.text = data['payment_alias'] ?? '';
+          _isLoadingData = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading institution: $e');
+      if (mounted) {
+        setState(() => _isLoadingData = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -29,24 +69,47 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
 
   void _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    final instId = ProfileCache.institutionId;
+    if (instId == null) return;
 
     setState(() => _isLoading = true);
-
-    // TODO: Implementar la actualización en la base de datos Supabase
-    await Future.delayed(const Duration(seconds: 1)); // Simulación de carga
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            const Text('Datos de la institución actualizados exitosamente.'),
-        backgroundColor: kaliColors.espresso,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    
+    try {
+      await Supabase.instance.client
+          .from('institutions')
+          .update({
+            'name': _nameController.text.trim(),
+            'address': _addressController.text.trim(),
+            'phone': _phoneController.text.trim(),
+            'payment_alias': _paymentAliasController.text.trim(),
+          })
+          .eq('id', instId);
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Datos de la institución actualizados exitosamente.'),
+          backgroundColor: kaliColors.espresso,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error updating institution: $e');
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Error al actualizar los datos. Intente nuevamente.'),
+          backgroundColor: Colors.red.shade400,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -78,9 +141,18 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                         .body(kaliColors.espresso.withValues(alpha: 0.7)),
                   ),
                   const SizedBox(height: 32),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
+                  
+                  if (_isLoadingData)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(48.0),
+                        child: CircularProgressIndicator(color: kaliColors.espresso),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: kaliColors.warmWhite,
                       borderRadius: BorderRadius.circular(24),
@@ -112,20 +184,25 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                           controller: _addressController,
                           icon: Icons.location_on_rounded,
                           kaliColors: kaliColors,
+                          validator: (value) => value == null || value.isEmpty ? 'La dirección es requerida' : null,
                         ),
                         const SizedBox(height: 20),
+                        
                         _buildTextField(
                           label: 'Teléfono',
                           controller: _phoneController,
                           icon: Icons.phone_rounded,
                           kaliColors: kaliColors,
+                          validator: (value) => value == null || value.isEmpty ? 'El teléfono es requerido' : null,
                         ),
                         const SizedBox(height: 20),
+                        
                         _buildTextField(
                           label: 'Alias de pago (MercadoPago / Transferencia)',
                           controller: _paymentAliasController,
                           icon: Icons.payment_rounded,
                           kaliColors: kaliColors,
+                          validator: (value) => value == null || value.isEmpty ? 'El alias de pago es requerido' : null,
                         ),
                         const SizedBox(height: 32),
                         SizedBox(
