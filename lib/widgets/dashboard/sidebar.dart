@@ -183,6 +183,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         ),
         children: [
           _buildSubMenuItem('Cuenta', kaliColors),
+          _buildSubMenuItem('Institución', kaliColors),
           _buildSubMenuItem('Suscripción', kaliColors),
           _buildSubMenuItem('Tema', kaliColors),
         ],
