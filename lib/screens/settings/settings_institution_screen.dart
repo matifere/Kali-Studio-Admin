@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/services/profile_cache.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SettingsInstitutionScreen extends StatefulWidget {
   const SettingsInstitutionScreen({super.key});
@@ -17,6 +19,9 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _paymentAliasController = TextEditingController();
+
+  Uint8List? _selectedImageBytes;
+  String? _currentLogoUrl; // To be implemented for fetching logo from DB
 
   bool _isLoading = false;
   bool _isLoadingData = true;
@@ -37,7 +42,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     try {
       final data = await Supabase.instance.client
           .from('institutions')
-          .select('name, address, phone, payment_alias')
+          .select('name, address, phone, payment_alias, logo_url')
           .eq('id', instId)
           .single();
 
@@ -47,6 +52,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           _addressController.text = data['address'] ?? '';
           _phoneController.text = data['phone'] ?? '';
           _paymentAliasController.text = data['payment_alias'] ?? '';
+          _currentLogoUrl = data['logo_url'];
           _isLoadingData = false;
         });
       }
@@ -67,6 +73,25 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true, // Importante para web
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final bytes = result.files.first.bytes;
+        if (bytes != null) {
+          setState(() {
+            _selectedImageBytes = bytes;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
   void _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
     
@@ -77,6 +102,24 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     
     try {
+      String? logoUrl = _currentLogoUrl;
+      
+      if (_selectedImageBytes != null) {
+        final path = '$instId/logo_${DateTime.now().millisecondsSinceEpoch}.png';
+        
+        await Supabase.instance.client.storage
+            .from('institutions_logos')
+            .uploadBinary(
+              path,
+              _selectedImageBytes!,
+              fileOptions: const FileOptions(upsert: true, contentType: 'image/png'),
+            );
+            
+        logoUrl = Supabase.instance.client.storage
+            .from('institutions_logos')
+            .getPublicUrl(path);
+      }
+
       await Supabase.instance.client
           .from('institutions')
           .update({
@@ -84,6 +127,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             'address': _addressController.text.trim(),
             'phone': _phoneController.text.trim(),
             'payment_alias': _paymentAliasController.text.trim(),
+            if (logoUrl != null) 'logo_url': logoUrl,
           })
           .eq('id', instId);
 
@@ -169,6 +213,63 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Center(
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: kaliColors.sand.withValues(alpha: 0.5),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: kaliColors.espresso.withValues(alpha: 0.2),
+                                      width: 2,
+                                    ),
+                                    image: _selectedImageBytes != null
+                                        ? DecorationImage(
+                                            image: MemoryImage(_selectedImageBytes!),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : _currentLogoUrl != null
+                                            ? DecorationImage(
+                                                image: NetworkImage(_currentLogoUrl!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                  ),
+                                  child: (_selectedImageBytes == null && _currentLogoUrl == null)
+                                      ? Icon(
+                                          Icons.add_a_photo_rounded,
+                                          size: 40,
+                                          color: kaliColors.espresso.withValues(alpha: 0.5),
+                                        )
+                                      : null,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: kaliColors.espresso,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: kaliColors.warmWhite,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.edit_rounded,
+                                    size: 16,
+                                    color: kaliColors.warmWhite,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
                         _buildTextField(
                           label: 'Nombre de la institución',
                           controller: _nameController,

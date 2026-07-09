@@ -51,10 +51,17 @@ BEGIN
 END \$\$;
 "
 
-# Ejecutamos el SQL a través de SSH pasando la contraseña de sudo en la primera línea del stdin
-ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i supabase-db psql -U postgres -d postgres" << EOF
+if [ -n "$SUPABASE_DB_URL" ]; then
+  echo "Usando conexión directa a la base de datos (modo producción)..."
+  psql "$SUPABASE_DB_URL" << EOF
+$SQL
+EOF
+else
+  # Ejecutamos el SQL a través de SSH pasando la contraseña de sudo en la primera línea del stdin
+  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i supabase-db psql -U postgres -d postgres" << EOF
 $SERVER_PASS
 $SQL
 EOF
+fi
 
 echo "Proceso terminado."
