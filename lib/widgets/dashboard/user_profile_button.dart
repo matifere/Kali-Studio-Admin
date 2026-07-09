@@ -65,7 +65,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
                     Text(
                       widget.displayRole,
                       style: kaliColors
-                          .label(kaliColors.espresso.withValues(alpha: 0.5)),
+                          .label(kaliColors.espresso.withValues(alpha: 0.65)),
                     ),
                   ],
                 ),
@@ -135,7 +135,7 @@ class _UserProfileButtonState extends State<UserProfileButton> {
               Text(
                 widget.displayRole,
                 style: kaliColors
-                    .caption(kaliColors.espresso.withValues(alpha: 0.5)),
+                    .caption(kaliColors.espresso.withValues(alpha: 0.65)),
               ),
               const SizedBox(height: 8),
               Divider(color: kaliColors.sand2, height: 1),

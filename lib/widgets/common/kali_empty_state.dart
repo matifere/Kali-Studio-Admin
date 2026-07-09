@@ -34,7 +34,7 @@ class KaliEmptyState extends StatelessWidget {
             Text(
               title,
               style: kaliColors.body(
-                kaliColors.espresso.withValues(alpha: 0.5),
+                kaliColors.espresso.withValues(alpha: 0.65),
                 weight: FontWeight.w600,
                 size: 16,
               ),
@@ -43,7 +43,7 @@ class KaliEmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: kaliColors.body(
-                kaliColors.espresso.withValues(alpha: 0.35),
+                kaliColors.espresso.withValues(alpha: 0.5),
                 size: 13,
               ),
             ),

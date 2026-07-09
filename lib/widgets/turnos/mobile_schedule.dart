@@ -95,7 +95,7 @@ class _MobileDayScheduleState extends State<MobileDaySchedule> {
                         .label(
                           isSelected
                               ? kaliColors.espresso
-                              : kaliColors.espresso.withValues(alpha: 0.45),
+                              : kaliColors.espresso.withValues(alpha: 0.6),
                         )
                         .copyWith(fontSize: 11, letterSpacing: 0.5),
                   ),

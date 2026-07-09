@@ -267,7 +267,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           style: kaliColors.body(kaliColors.espresso),
           decoration: InputDecoration(
             prefixIcon:
-                Icon(icon, color: kaliColors.espresso.withValues(alpha: 0.5)),
+                Icon(icon, color: kaliColors.espresso.withValues(alpha: 0.65)),
             filled: true,
             fillColor: kaliColors.sand.withValues(alpha: 0.3),
             border: OutlineInputBorder(

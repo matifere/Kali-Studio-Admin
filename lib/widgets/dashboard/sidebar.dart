@@ -160,14 +160,14 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         child: Row(
           children: [
             Icon(icon,
-                color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
+                color: kaliColors.espresso.withValues(alpha: 0.65), size: 18),
             const SizedBox(width: 12),
             Expanded(
               child: AutoSizeText(
                 title,
                 maxLines: 1,
                 style:
-                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.65)),
               ),
             ),
           ],
@@ -185,19 +185,19 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-        collapsedIconColor: kaliColors.espresso.withValues(alpha: 0.5),
-        iconColor: kaliColors.espresso.withValues(alpha: 0.5),
+        collapsedIconColor: kaliColors.espresso.withValues(alpha: 0.65),
+        iconColor: kaliColors.espresso.withValues(alpha: 0.65),
         title: Row(
           children: [
             Icon(Icons.settings_outlined,
-                color: kaliColors.espresso.withValues(alpha: 0.5), size: 18),
+                color: kaliColors.espresso.withValues(alpha: 0.65), size: 18),
             const SizedBox(width: 12),
             Expanded(
               child: AutoSizeText(
                 'CONFIGURACIÓN',
                 maxLines: 1,
                 style:
-                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5)),
+                    kaliColors.label(kaliColors.espresso.withValues(alpha: 0.65)),
               ),
             ),
           ],

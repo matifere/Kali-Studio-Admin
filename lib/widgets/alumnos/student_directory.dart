@@ -303,7 +303,7 @@ class _StudentDirectoryState extends State<StudentDirectory> {
     final style = kaliColors.label(Theme.of(context)
         .extension<KaliColorsExtension>()!
         .espresso
-        .withValues(alpha: 0.45));
+        .withValues(alpha: 0.6));
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 0),
       child: Row(

@@ -108,7 +108,7 @@ class TurnoDetailPanel extends StatelessWidget {
               Text(
                 'TURNO SELECCIONADO',
                 style: kaliColors.label(
-                  kaliColors.espresso.withValues(alpha: 0.5),
+                  kaliColors.espresso.withValues(alpha: 0.65),
                 ),
               ),
               Container(
@@ -155,7 +155,7 @@ class TurnoDetailPanel extends StatelessWidget {
           Text(
             turno.instructorName ?? 'Sin instructor',
             style: kaliColors.body(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
             ),
           ),
         ],
@@ -172,7 +172,7 @@ class TurnoDetailPanel extends StatelessWidget {
           Text(
             'DESCRIPCIÓN',
             style: kaliColors.label(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
             ),
           ),
           const SizedBox(height: 8),
@@ -202,7 +202,7 @@ class TurnoDetailPanel extends StatelessWidget {
               Text(
                 'ALUMNOS INSCRIPTOS',
                 style: kaliColors
-                    .label(kaliColors.espresso.withValues(alpha: 0.5)),
+                    .label(kaliColors.espresso.withValues(alpha: 0.65)),
               ),
               if (!turno.isFull && _canModifyStudents)
                 InkWell(
@@ -233,7 +233,7 @@ class TurnoDetailPanel extends StatelessWidget {
                   child: Text(
                     'No hay alumnos inscriptos.',
                     style: kaliColors
-                        .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                        .body(kaliColors.espresso.withValues(alpha: 0.65)),
                   ),
                 )
               : ListView.builder(
@@ -292,7 +292,7 @@ class TurnoDetailPanel extends StatelessWidget {
                                   icon: Icon(Icons.close,
                                       size: 16,
                                       color: kaliColors.espresso
-                                          .withValues(alpha: 0.5)),
+                                          .withValues(alpha: 0.65)),
                                   onPressed: () {
                                     context
                                         .read<TurnosBloc>()

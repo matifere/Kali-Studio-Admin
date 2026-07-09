@@ -110,7 +110,7 @@ class ScheduleHeader extends StatelessWidget {
           Text(
             _weekRange,
             style: kaliColors.body(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
               size: 14,
             ),
           ),
@@ -339,7 +339,7 @@ class _FilterDropdownState extends State<_FilterDropdown> {
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
-                color: kaliColors.espresso.withValues(alpha: 0.5),
+                color: kaliColors.espresso.withValues(alpha: 0.65),
               ),
             ],
           ),

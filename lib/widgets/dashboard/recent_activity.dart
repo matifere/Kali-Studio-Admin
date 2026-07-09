@@ -119,13 +119,13 @@ class _EmptyFeed extends StatelessWidget {
             Text(
               'Aún no hay actividad registrada.',
               style:
-                  kaliColors.body(kaliColors.espresso.withValues(alpha: 0.45)),
+                  kaliColors.body(kaliColors.espresso.withValues(alpha: 0.6)),
             ),
             const SizedBox(height: 4),
             Text(
               'Los cambios que hagas aparecerán aquí.',
               style: kaliColors
-                  .caption(kaliColors.espresso.withValues(alpha: 0.35)),
+                  .caption(kaliColors.espresso.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -215,7 +215,7 @@ class _ActivityItem extends StatelessWidget {
                   Text(
                     _formatTime(activityEntry.timestamp),
                     style: kaliColors
-                        .label(kaliColors.espresso.withValues(alpha: 0.45)),
+                        .label(kaliColors.espresso.withValues(alpha: 0.6)),
                   ),
                   const SizedBox(height: 4),
                   Text(

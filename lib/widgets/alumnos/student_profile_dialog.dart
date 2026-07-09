@@ -114,7 +114,7 @@ class StudentProfileDialog extends StatelessWidget {
                 : Text(
                     'No hay patologías registradas.',
                     style: kaliColors
-                        .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                        .body(kaliColors.espresso.withValues(alpha: 0.65)),
                   ),
           ],
         )),
@@ -129,7 +129,7 @@ class StudentProfileDialog extends StatelessWidget {
       children: [
         Text(
           label,
-          style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.5)),
+          style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.65)),
         ),
         Text(
           value,

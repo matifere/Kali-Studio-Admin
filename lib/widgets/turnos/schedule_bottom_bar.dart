@@ -94,7 +94,7 @@ class _StatChip extends StatelessWidget {
           label,
           style: kaliColors
               .label(
-                kaliColors.espresso.withValues(alpha: 0.45),
+                kaliColors.espresso.withValues(alpha: 0.6),
               )
               .copyWith(fontSize: compact ? 10 : null),
         ),

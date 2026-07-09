@@ -107,7 +107,7 @@ class WeeklySchedule extends StatelessWidget {
                     style: kaliColors.label(
                       isToday
                           ? kaliColors.espresso
-                          : kaliColors.espresso.withValues(alpha: 0.45),
+                          : kaliColors.espresso.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 6),

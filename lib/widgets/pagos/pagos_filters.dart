@@ -54,7 +54,7 @@ class PagosFilters extends StatelessWidget {
                       Text(
                         'BUSCAR USUARIO',
                         style: kaliColors.label(
-                          kaliColors.espresso.withValues(alpha: 0.45),
+                          kaliColors.espresso.withValues(alpha: 0.6),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -115,7 +115,7 @@ class PagosFilters extends StatelessWidget {
                     Text(
                       'ESTADO',
                       style: kaliColors.label(
-                        kaliColors.espresso.withValues(alpha: 0.45),
+                        kaliColors.espresso.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -157,11 +157,11 @@ class PagosFilters extends StatelessWidget {
                             icon: Icon(Icons.clear,
                                 size: 16,
                                 color:
-                                    kaliColors.espresso.withValues(alpha: 0.5)),
+                                    kaliColors.espresso.withValues(alpha: 0.65)),
                             label: Text(
                               'Limpiar',
                               style: kaliColors.body(
-                                  kaliColors.espresso.withValues(alpha: 0.5),
+                                  kaliColors.espresso.withValues(alpha: 0.65),
                                   size: 13,
                                   weight: FontWeight.w600),
                             ),

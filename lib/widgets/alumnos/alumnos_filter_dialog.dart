@@ -108,7 +108,7 @@ class _AlumnosFilterDialogState extends State<AlumnosFilterDialog> {
                     child: Text(
                       'No hay patologías registradas aún.',
                       style: kaliColors.body(
-                        kaliColors.espresso.withValues(alpha: 0.45),
+                        kaliColors.espresso.withValues(alpha: 0.6),
                         size: 13,
                       ),
                     ),

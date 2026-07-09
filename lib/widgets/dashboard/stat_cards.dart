@@ -199,7 +199,7 @@ class DashboardStatCards extends StatelessWidget {
             children: [
               Text(title,
                   style: kaliColors
-                      .label(kaliColors.espresso.withValues(alpha: 0.5))),
+                      .label(kaliColors.espresso.withValues(alpha: 0.65))),
               Icon(icon, color: kaliColors.espresso, size: 20),
             ],
           ),

@@ -112,7 +112,7 @@ class _RevenueCard extends StatelessWidget {
           Text(
             'INGRESOS MENSUALES ($currentMonthName)',
             style: kaliColors.label(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
             ),
           ),
           const SizedBox(height: 16),
@@ -173,7 +173,7 @@ class _OutstandingCard extends StatelessWidget {
           Text(
             'PENDIENTE',
             style: kaliColors.label(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
             ),
           ),
           const SizedBox(height: 16),
@@ -189,7 +189,7 @@ class _OutstandingCard extends StatelessWidget {
           Text(
             '$count facturas pendientes',
             style: kaliColors.body(
-              kaliColors.espresso.withValues(alpha: 0.5),
+              kaliColors.espresso.withValues(alpha: 0.65),
             ),
           ),
         ],

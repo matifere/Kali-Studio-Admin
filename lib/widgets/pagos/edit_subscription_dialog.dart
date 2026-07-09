@@ -307,7 +307,7 @@ class _DateField extends StatelessWidget {
                 Text(text, style: kaliColors.body(kaliColors.espresso)),
                 Icon(Icons.calendar_today_outlined,
                     size: 16,
-                    color: kaliColors.espresso.withValues(alpha: 0.5)),
+                    color: kaliColors.espresso.withValues(alpha: 0.65)),
               ],
             ),
           ),

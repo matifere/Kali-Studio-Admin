@@ -218,7 +218,7 @@ class _ThemeCard extends StatelessWidget {
                 if (isActive)
                   Icon(Icons.check_circle_rounded, color: themeColors.espresso, size: 28)
                 else if (isPremium)
-                  Icon(Icons.lock_rounded, color: themeColors.espresso.withValues(alpha: 0.5), size: 28),
+                  Icon(Icons.lock_rounded, color: themeColors.espresso.withValues(alpha: 0.65), size: 28),
               ],
             ),
             const SizedBox(height: 24),
@@ -237,7 +237,7 @@ class _ThemeCard extends StatelessWidget {
                   children: [
                     Text('Headline', style: themeColors.heading(themeColors.espresso, size: 16)),
                     Text('Body text example', style: themeColors.body(themeColors.espresso.withValues(alpha: 0.7))),
-                    Text('Label', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+                    Text('Label', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.65))),
                   ],
                 ),
               ],
@@ -245,7 +245,7 @@ class _ThemeCard extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Color Palette
-            Text('Color Palette', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+            Text('Color Palette', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.65))),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -261,7 +261,7 @@ class _ThemeCard extends StatelessWidget {
             const SizedBox(height: 32),
 
             // UI Elements Preview
-            Text('UI Elements', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.5))),
+            Text('UI Elements', style: themeColors.label(themeColors.espresso.withValues(alpha: 0.65))),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -297,9 +297,9 @@ class _ThemeCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.search, size: 18, color: themeColors.espresso.withValues(alpha: 0.5)),
+                  Icon(Icons.search, size: 18, color: themeColors.espresso.withValues(alpha: 0.65)),
                   const SizedBox(width: 8),
-                  Text('Search...', style: themeColors.body(themeColors.espresso.withValues(alpha: 0.5))),
+                  Text('Search...', style: themeColors.body(themeColors.espresso.withValues(alpha: 0.65))),
                 ],
               ),
             ),
