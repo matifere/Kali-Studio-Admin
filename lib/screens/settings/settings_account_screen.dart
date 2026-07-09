@@ -17,9 +17,12 @@ class SettingsAccountScreen extends StatefulWidget {
 class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _passwordFormKey = GlobalKey<FormState>();
   bool _isSavingName = false;
   bool _isSavingPassword = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void initState() {
@@ -31,6 +34,7 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
   void dispose() {
     _nameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -43,14 +47,9 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
   }
 
   Future<void> _savePassword() async {
+    if (!_passwordFormKey.currentState!.validate()) return;
+
     final newPassword = _passwordController.text;
-    if (newPassword.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('La contraseña debe tener al menos 6 caracteres')),
-      );
-      return;
-    }
 
     setState(() => _isSavingPassword = true);
     try {
@@ -59,6 +58,7 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
       );
       if (mounted) {
         _passwordController.clear();
+        _confirmPasswordController.clear();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Contraseña actualizada correctamente')),
         );
@@ -152,8 +152,8 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                         const SizedBox(height: 24),
                         KaliTextField(
                           controller: _nameController,
-                          label: 'Nombre de la institución o usuario',
-                          hint: 'Ej. Kali Studio',
+                          label: 'Nombre de usuario',
+                          hint: 'Ej. Juan Pérez',
                         ),
                         const SizedBox(height: 16),
                         Align(
@@ -215,16 +215,54 @@ class _SettingsAccountScreenState extends State<SettingsAccountScreen> {
                               true, // El correo no se puede cambiar directamente
                         ),
                         const SizedBox(height: 16),
-                        KaliTextField(
-                          controller: _passwordController,
-                          label: 'Nueva contraseña',
-                          hint: 'Mínimo 6 caracteres',
-                          obscureText: _obscurePassword,
-                          suffixIcon: _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          onSuffixTap: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                        Form(
+                          key: _passwordFormKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              KaliTextField(
+                                controller: _passwordController,
+                                label: 'Nueva contraseña',
+                                hint: 'Mínimo 6 caracteres',
+                                obscureText: _obscurePassword,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'La contraseña es requerida';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Debe tener al menos 6 caracteres';
+                                  }
+                                  return null;
+                                },
+                                suffixIcon: _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                onSuffixTap: () => setState(
+                                    () => _obscurePassword = !_obscurePassword),
+                              ),
+                              const SizedBox(height: 16),
+                              KaliTextField(
+                                controller: _confirmPasswordController,
+                                label: 'Confirmar nueva contraseña',
+                                hint: 'Repita la contraseña',
+                                obscureText: _obscureConfirmPassword,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Debe confirmar su contraseña';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'Las contraseñas no coinciden';
+                                  }
+                                  return null;
+                                },
+                                suffixIcon: _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                onSuffixTap: () => setState(
+                                    () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Align(

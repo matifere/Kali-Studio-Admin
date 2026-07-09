@@ -11,6 +11,8 @@ class KaliTextField extends StatelessWidget {
   final VoidCallback? onSuffixTap;
   final String? actionLabel;
   final VoidCallback? onActionTap;
+  final String? Function(String?)? validator;
+  final AutovalidateMode? autovalidateMode;
 
   const KaliTextField({
     super.key,
@@ -23,6 +25,8 @@ class KaliTextField extends StatelessWidget {
     this.onSuffixTap,
     this.actionLabel,
     this.onActionTap,
+    this.validator,
+    this.autovalidateMode,
   });
 
   @override
@@ -54,10 +58,12 @@ class KaliTextField extends StatelessWidget {
               ),
           ],
         ),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           readOnly: readOnly,
+          validator: validator,
+          autovalidateMode: autovalidateMode,
           style: kaliColors.body(kaliColors.espresso, size: 14),
           cursorColor: kaliColors.clay,
           decoration: InputDecoration(
@@ -82,6 +88,8 @@ class KaliTextField extends StatelessWidget {
             border: _border(kaliColors.sand2),
             enabledBorder: _border(kaliColors.sand2),
             focusedBorder: _border(kaliColors.clay),
+            errorBorder: _border(Colors.red.shade300),
+            focusedErrorBorder: _border(Colors.red.shade400),
 
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,

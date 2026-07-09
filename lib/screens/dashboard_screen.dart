@@ -14,6 +14,7 @@ import 'package:argrity/screens/pagos_screen.dart';
 import 'package:argrity/screens/settings/settings_theme_screen.dart';
 import 'package:argrity/screens/settings/settings_subscription_screen.dart';
 import 'package:argrity/screens/settings/settings_account_screen.dart';
+import 'package:argrity/screens/settings/settings_institution_screen.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -31,6 +32,8 @@ class DashboardScreen extends StatelessWidget {
         return const PagosScreen();
       case 'Cuenta':
         return const SettingsAccountScreen();
+      case 'Institución':
+        return const SettingsInstitutionScreen();
       case 'Suscripción':
         return const SettingsSubscriptionScreen();
       case 'Tema':
