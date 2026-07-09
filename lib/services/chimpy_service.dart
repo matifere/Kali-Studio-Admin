@@ -65,6 +65,39 @@ class ChimpyDailyStats {
   }
 }
 
+/// Estadísticas del mes en curso (del 1° hasta hoy) para el chat de Chimpy.
+class ChimpyMonthlyStats {
+  final int clases; // sesiones no canceladas del mes hasta hoy
+  final int reservas; // reservas no canceladas (incluye no-show)
+  final int presentes;
+  final int noShows;
+  final int capacidad;
+  final int pagos;
+  final double montoPagos;
+  final int alumnosNuevos;
+  final int cancelaciones;
+
+  const ChimpyMonthlyStats({
+    required this.clases,
+    required this.reservas,
+    required this.presentes,
+    required this.noShows,
+    required this.capacidad,
+    required this.pagos,
+    required this.montoPagos,
+    required this.alumnosNuevos,
+    required this.cancelaciones,
+  });
+
+  /// Mismo criterio que el resumen diario: presentes / capacidad.
+  double get ocupacion =>
+      capacidad == 0 ? 0 : (presentes / capacidad).clamp(0.0, 1.0);
+
+  /// Presentes sobre reservas activas.
+  double get presentismo =>
+      reservas == 0 ? 0 : (presentes / reservas).clamp(0.0, 1.0);
+}
+
 /// Consulta las métricas reales del día en Supabase (scope de la institución).
 class ChimpyService {
   ChimpyService._();
@@ -181,6 +214,101 @@ class ChimpyService {
       alumnosNuevosHoy: (results[2] as List<dynamic>).length,
       cancelacionesHoy: (results[3] as List<dynamic>).length,
       reservasHechasHoy: reservasHechasHoy,
+    );
+  }
+
+  static Future<ChimpyMonthlyStats> fetchMonth() async {
+    final supabase = Supabase.instance.client;
+    final instId = ProfileCache.institutionId;
+
+    final now = DateTime.now();
+    final monthStartIso =
+        DateFormat('yyyy-MM-dd').format(DateTime(now.year, now.month, 1));
+    final todayIso = DateFormat('yyyy-MM-dd').format(now);
+    // Inicio del mes local en UTC para comparar contra timestamptz.
+    final monthStartUtc =
+        DateTime(now.year, now.month, 1).toUtc().toIso8601String();
+
+    // Clases del mes hasta hoy inclusive (las futuras todavía no cuentan
+    // para asistencias ni ocupación).
+    var sessionsQuery = supabase
+        .from('class_sessions')
+        .select('capacity, reservations(status)')
+        .gte('date', monthStartIso)
+        .lte('date', todayIso)
+        .neq('status', 'cancelled');
+    if (instId != null) {
+      sessionsQuery = sessionsQuery.eq('institution_id', instId);
+    }
+
+    var paymentsQuery = supabase
+        .from('payments')
+        .select('amount')
+        .eq('status', 'completed')
+        .gte('payment_date', monthStartUtc);
+    if (instId != null) {
+      paymentsQuery = paymentsQuery.eq('institution_id', instId);
+    }
+
+    var newStudentsQuery = supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'client')
+        .gte('created_at', monthStartUtc);
+    if (instId != null) {
+      newStudentsQuery = newStudentsQuery.eq('institution_id', instId);
+    }
+
+    var cancelQuery = supabase
+        .from('reservations')
+        .select('id, class_sessions!inner(institution_id)')
+        .eq('status', 'cancelled')
+        .gte('cancelled_at', monthStartUtc);
+    if (instId != null) {
+      cancelQuery = cancelQuery.eq('class_sessions.institution_id', instId);
+    }
+
+    final results = await Future.wait([
+      sessionsQuery,
+      paymentsQuery,
+      newStudentsQuery,
+      cancelQuery,
+    ]);
+
+    int clases = 0;
+    int reservas = 0;
+    int presentes = 0;
+    int noShows = 0;
+    int capacidad = 0;
+    for (final row in results[0] as List<dynamic>) {
+      clases++;
+      capacidad += row['capacity'] as int? ?? 0;
+      final reservations = row['reservations'] as List<dynamic>? ?? [];
+      for (final res in reservations) {
+        final status = res['status'] as String?;
+        if (status == 'cancelled') continue;
+        reservas++;
+        if (status == 'attended') presentes++;
+        if (status == 'no_show') noShows++;
+      }
+    }
+
+    double montoPagos = 0;
+    final pagos = results[1] as List<dynamic>;
+    for (final p in pagos) {
+      montoPagos += ((p['amount'] as num?) ?? 0).toDouble();
+    }
+
+    return ChimpyMonthlyStats(
+      clases: clases,
+      reservas: reservas,
+      presentes: presentes,
+      noShows: noShows,
+      capacidad: capacidad,
+      pagos: pagos.length,
+      montoPagos: montoPagos,
+      alumnosNuevos: (results[2] as List<dynamic>).length,
+      cancelaciones: (results[3] as List<dynamic>).length,
     );
   }
 }
