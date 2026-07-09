@@ -108,7 +108,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
         final path = '$instId/logo_${DateTime.now().millisecondsSinceEpoch}.png';
         
         await Supabase.instance.client.storage
-            .from('institutions_logos')
+            .from('institutions')
             .uploadBinary(
               path,
               _selectedImageBytes!,
@@ -116,7 +116,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             );
             
         logoUrl = Supabase.instance.client.storage
-            .from('institutions_logos')
+            .from('institutions')
             .getPublicUrl(path);
       }
 
