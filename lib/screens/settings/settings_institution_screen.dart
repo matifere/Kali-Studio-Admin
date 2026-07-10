@@ -22,6 +22,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
 
   Uint8List? _selectedImageBytes;
   String? _currentLogoUrl; // To be implemented for fetching logo from DB
+  String? _initialLogoUrl; // Used to track and delete old images from storage
 
   bool _isLoading = false;
   bool _isLoadingData = true;
@@ -53,6 +54,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           _phoneController.text = data['phone'] ?? '';
           _paymentAliasController.text = data['payment_alias'] ?? '';
           _currentLogoUrl = data['logo_url'];
+          _initialLogoUrl = data['logo_url'];
           _isLoadingData = false;
         });
       }
@@ -130,6 +132,22 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             'logo_url': logoUrl,
           })
           .eq('id', instId);
+          
+      // Clean up old image if it was replaced or removed
+      if (_initialLogoUrl != null && _initialLogoUrl != logoUrl) {
+        final pathToRemove = _initialLogoUrl!.split('/institutions/').last;
+        if (pathToRemove.isNotEmpty) {
+          try {
+            await Supabase.instance.client.storage
+                .from('institutions')
+                .remove([pathToRemove]);
+          } catch (e) {
+            debugPrint('Error removing old logo from storage: $e');
+          }
+        }
+      }
+      
+      _initialLogoUrl = logoUrl;
           
       ProfileCache.institutionNameNotifier.value = _nameController.text.trim();
       ProfileCache.institutionLogoNotifier.value = logoUrl;
