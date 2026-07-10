@@ -27,6 +27,11 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
   String? _currentLogoUrl; // To be implemented for fetching logo from DB
   String? _initialLogoUrl; // Used to track and delete old images from storage
 
+  Uint8List? _selectedPdfBytes;
+  String? _selectedPdfName;
+  String? _currentConsentUrl;
+  String? _initialConsentUrl; // Used to track and delete old PDFs from storage
+
   bool _isLoading = false;
   bool _isLoadingData = true;
 
@@ -47,7 +52,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
       final data = await Supabase.instance.client
           .from('institutions')
           .select(
-              'name, address, phone, payment_alias, logo_url, cancellation_hours')
+              'name, address, phone, payment_alias, logo_url, cancellation_hours, consent_pdf_url')
           .eq('id', instId)
           .single();
 
@@ -59,6 +64,8 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           _paymentAliasController.text = data['payment_alias'] ?? '';
           _currentLogoUrl = data['logo_url'];
           _initialLogoUrl = data['logo_url'];
+          _currentConsentUrl = data['consent_pdf_url'];
+          _initialConsentUrl = data['consent_pdf_url'];
           _cancellationHoursController.text =
               (data['cancellation_hours'] ?? 2).toString();
           _isLoadingData = false;
@@ -106,6 +113,27 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     }
   }
 
+  Future<void> _pickConsentPdf() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        withData: true, // Importante para web
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final bytes = result.files.first.bytes;
+        if (bytes != null) {
+          setState(() {
+            _selectedPdfBytes = bytes;
+            _selectedPdfName = result.files.first.name;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking consent PDF: $e');
+    }
+  }
+
   void _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
     
@@ -134,6 +162,26 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             .getPublicUrl(path);
       }
 
+      String? consentUrl = _currentConsentUrl;
+
+      if (_selectedPdfBytes != null) {
+        final path =
+            '$instId/consentimiento_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+        await Supabase.instance.client.storage
+            .from('institutions')
+            .uploadBinary(
+              path,
+              _selectedPdfBytes!,
+              fileOptions: const FileOptions(
+                  upsert: true, contentType: 'application/pdf'),
+            );
+
+        consentUrl = Supabase.instance.client.storage
+            .from('institutions')
+            .getPublicUrl(path);
+      }
+
       await Supabase.instance.client
           .from('institutions')
           .update({
@@ -144,9 +192,10 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             'logo_url': logoUrl,
             'cancellation_hours':
                 int.parse(_cancellationHoursController.text.trim()),
+            'consent_pdf_url': consentUrl,
           })
           .eq('id', instId);
-          
+
       // Clean up old image if it was replaced or removed
       if (_initialLogoUrl != null && _initialLogoUrl != logoUrl) {
         final pathToRemove = _initialLogoUrl!.split('/institutions/').last;
@@ -160,8 +209,27 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           }
         }
       }
-      
+
       _initialLogoUrl = logoUrl;
+
+      // Clean up old consent PDF if it was replaced or removed
+      if (_initialConsentUrl != null && _initialConsentUrl != consentUrl) {
+        final pathToRemove = _initialConsentUrl!.split('/institutions/').last;
+        if (pathToRemove.isNotEmpty) {
+          try {
+            await Supabase.instance.client.storage
+                .from('institutions')
+                .remove([pathToRemove]);
+          } catch (e) {
+            debugPrint('Error removing old consent PDF from storage: $e');
+          }
+        }
+      }
+
+      _initialConsentUrl = consentUrl;
+      _currentConsentUrl = consentUrl;
+      _selectedPdfBytes = null;
+      _selectedPdfName = null;
           
       ProfileCache.institutionNameNotifier.value = _nameController.text.trim();
       ProfileCache.institutionLogoNotifier.value = logoUrl;
@@ -411,6 +479,8 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                               kaliColors.espresso.withValues(alpha: 0.65),
                               size: 13),
                         ),
+                        const SizedBox(height: 20),
+                        _buildConsentSection(kaliColors),
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
@@ -450,6 +520,80 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildConsentSection(KaliColorsExtension kaliColors) {
+    final bool hasPdf = _selectedPdfBytes != null || _currentConsentUrl != null;
+    final String statusText = _selectedPdfName ??
+        (_currentConsentUrl != null
+            ? 'PDF cargado'
+            : 'Ningún PDF cargado');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Consentimiento informado (PDF)',
+          style: kaliColors.label(kaliColors.espresso.withValues(alpha: 0.8)),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: kaliColors.sand.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: kaliColors.espresso.withValues(alpha: 0.1)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                hasPdf
+                    ? Icons.picture_as_pdf_rounded
+                    : Icons.upload_file_rounded,
+                color: kaliColors.espresso.withValues(alpha: 0.65),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  statusText,
+                  style: kaliColors.body(kaliColors.espresso),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              TextButton(
+                onPressed: _pickConsentPdf,
+                child: Text(
+                  hasPdf ? 'Reemplazar' : 'Subir PDF',
+                  style: kaliColors.label(kaliColors.espresso)
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              if (hasPdf)
+                IconButton(
+                  tooltip: 'Eliminar consentimiento',
+                  onPressed: () {
+                    setState(() {
+                      _selectedPdfBytes = null;
+                      _selectedPdfName = null;
+                      _currentConsentUrl = null;
+                    });
+                  },
+                  icon: Icon(Icons.delete_outline_rounded,
+                      color: Colors.red.shade400, size: 20),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Los alumnos lo verán en la app, en Perfil → Consentimiento. Si no cargás ninguno, se muestra el documento genérico de la app.',
+          style: kaliColors.body(
+              kaliColors.espresso.withValues(alpha: 0.65),
+              size: 13),
+        ),
+      ],
     );
   }
 
