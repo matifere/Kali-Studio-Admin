@@ -90,7 +90,8 @@ Future<void> main() async {
   final initialThemeId = prefs.getString('selected_theme') ?? 'default';
   final initialIsDarkMode = prefs.getBool('is_dark_mode') ?? false;
 
-  runApp(KaliApp(initialThemeId: initialThemeId, initialIsDarkMode: initialIsDarkMode));
+  runApp(KaliApp(
+      initialThemeId: initialThemeId, initialIsDarkMode: initialIsDarkMode));
 }
 
 // ─── KaliApp: crea y posee los BLoCs ─────────────────────────────────────────
@@ -100,7 +101,10 @@ Future<void> main() async {
 class KaliApp extends StatefulWidget {
   final String initialThemeId;
   final bool initialIsDarkMode;
-  const KaliApp({super.key, required this.initialThemeId, required this.initialIsDarkMode});
+  const KaliApp(
+      {super.key,
+      required this.initialThemeId,
+      required this.initialIsDarkMode});
 
   @override
   State<KaliApp> createState() => _KaliAppState();
@@ -143,9 +147,8 @@ class _KaliAppState extends State<KaliApp> {
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
     _themeCubit = ThemeCubit(
-      initialThemeId: widget.initialThemeId, 
-      initialIsDarkMode: widget.initialIsDarkMode
-    );
+        initialThemeId: widget.initialThemeId,
+        initialIsDarkMode: widget.initialIsDarkMode);
   }
 
   @override
