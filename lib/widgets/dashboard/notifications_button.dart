@@ -101,7 +101,7 @@ class NotificationsButton extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Text('No hay notificaciones',
                     style: kaliColors
-                        .body(kaliColors.espresso.withValues(alpha: 0.5))),
+                        .body(kaliColors.espresso.withValues(alpha: 0.65))),
               ),
             ),
           )

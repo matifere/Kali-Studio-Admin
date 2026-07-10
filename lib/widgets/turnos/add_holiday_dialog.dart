@@ -164,7 +164,7 @@ class _AddHolidayDialogState extends State<AddHolidayDialog> {
                     filled: true,
                     fillColor: kaliColors.background,
                     hintStyle: kaliColors
-                        .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                        .body(kaliColors.espresso.withValues(alpha: 0.65)),
                     hintText: 'Ej. Vacaciones de invierno',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),

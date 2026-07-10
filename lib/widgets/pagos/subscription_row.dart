@@ -117,7 +117,7 @@ class _SubscriptionRowState extends State<SubscriptionRow> {
                   Text(
                     s.endDateFormatted,
                     style: kaliColors.body(
-                      kaliColors.espresso.withValues(alpha: 0.45),
+                      kaliColors.espresso.withValues(alpha: 0.6),
                       size: 11,
                     ),
                   ),

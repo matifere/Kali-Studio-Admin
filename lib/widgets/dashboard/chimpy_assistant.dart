@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,21 +8,23 @@ import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/services/chimpy_service.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
+import 'package:argrity/widgets/dashboard/chimpy_face.dart';
 
 /// Chimpy: el mono asistente del dashboard.
 ///
-/// Burbuja flotante abajo a la derecha; al tocarla se abre un chat que
-/// responde con las métricas reales del día (asistencias, clases, pagos,
-/// reservas, cancelaciones y novedades).
-class ChimpyAssistant extends StatefulWidget {
-  const ChimpyAssistant({super.key});
+/// Botón flotante con la cara de Chimpy abajo a la derecha; al tocarlo se
+/// abre el chat (y aparece el mono colgado del saludo). Responde con las
+/// métricas reales del día (asistencias, clases, pagos, reservas,
+/// cancelaciones y novedades).
+class ChimpyAssistant extends StatelessWidget {
+  final bool open;
+  final VoidCallback onToggle;
 
-  @override
-  State<ChimpyAssistant> createState() => _ChimpyAssistantState();
-}
-
-class _ChimpyAssistantState extends State<ChimpyAssistant> {
-  bool _open = false;
+  const ChimpyAssistant({
+    super.key,
+    required this.open,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,26 +44,43 @@ class _ChimpyAssistantState extends State<ChimpyAssistant> {
               child: child,
             ),
           ),
-          child: _open
-              ? _ChimpyChatPanel(onClose: () => setState(() => _open = false))
+          child: open
+              ? _ChimpyChatPanel(onClose: onToggle)
               : const SizedBox.shrink(),
         ),
         const SizedBox(height: 12),
-        Material(
-          color: kaliColors.espresso,
-          shape: const CircleBorder(),
-          elevation: 6,
-          shadowColor: kaliColors.espresso.withValues(alpha: 0.3),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => setState(() => _open = !_open),
-            child: SizedBox(
-              width: 56,
-              height: 56,
-              child: Center(
-                child: _open
-                    ? Icon(Icons.close, color: kaliColors.warmWhite, size: 24)
-                    : const Text('🐵', style: TextStyle(fontSize: 26)),
+        GestureDetector(
+          onTap: onToggle,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Material(
+              color: kaliColors.espresso,
+              shape: const CircleBorder(),
+              elevation: 6,
+              shadowColor: kaliColors.espresso.withValues(alpha: 0.3),
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(scale: animation, child: child),
+                    ),
+                    child: open
+                        ? Icon(
+                            Icons.close,
+                            key: const ValueKey('close'),
+                            color: kaliColors.warmWhite,
+                            size: 24,
+                          )
+                        : const ChimpyFace(
+                            key: ValueKey('chimpy'),
+                            size: 48,
+                          ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -78,7 +98,7 @@ class _Msg {
 
 class _QuickAction {
   final String label;
-  final String Function() reply;
+  final FutureOr<String> Function() reply;
   const _QuickAction(this.label, this.reply);
 }
 
@@ -95,6 +115,7 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
   final ScrollController _scroll = ScrollController();
   bool _typing = false;
   ChimpyDailyStats? _stats;
+  ChimpyMonthlyStats? _monthStats;
 
   static final _money = NumberFormat('#,###', 'es_ES');
 
@@ -138,9 +159,22 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
 
   Future<void> _ask(_QuickAction action) async {
     if (_typing || _stats == null) return;
-    setState(() => _messages.add(_Msg(action.label, fromUser: true)));
+    setState(() {
+      _messages.add(_Msg(action.label, fromUser: true));
+      // Muestra los puntitos también mientras se consulta Supabase (las
+      // respuestas del mes se cargan on-demand).
+      _typing = true;
+    });
     _scrollToEnd();
-    await _botSays(action.reply());
+    String text;
+    try {
+      text = await action.reply();
+    } catch (_) {
+      text =
+          'Ups, no pude traer esos números 🙈 Probá de nuevo en un ratito.';
+    }
+    if (!mounted) return;
+    await _botSays(text);
   }
 
   void _scrollToEnd() {
@@ -190,6 +224,24 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
           '⚠️ ${_plural(venc, 'suscripción vence', 'suscripciones vencen')} en los próximos 7 días');
     }
     return 'Así viene el día:\n\n${lines.join('\n')}\n\nTocá una opción para ver el detalle 👇';
+  }
+
+  Future<String> _resumenMes() async {
+    final m = _monthStats ??= await ChimpyService.fetchMonth();
+    final mes = DateFormat('MMMM', 'es_ES').format(DateTime.now());
+    final lines = <String>[
+      '🏋️ ${_plural(m.clases, 'clase dictada', 'clases dictadas')}',
+      '✅ ${_plural(m.presentes, 'asistencia', 'asistencias')} (${(m.ocupacion * 100).toInt()}% de la capacidad del mes)',
+      '📆 ${_plural(m.reservas, 'reserva activa', 'reservas activas')}${m.reservas > 0 ? ' (${(m.presentismo * 100).toInt()}% de presentismo)' : ''}',
+      '❌ ${_plural(m.cancelaciones, 'cancelación', 'cancelaciones')}',
+      if (m.noShows > 0)
+        '👻 ${_plural(m.noShows, 'no-show', 'no-shows')}',
+      if (ProfileCache.isSudo)
+        '💰 ${_plural(m.pagos, 'pago recibido', 'pagos recibidos')}${m.pagos > 0 ? ' por \$${_money.format(m.montoPagos)}' : ''}',
+      if (m.alumnosNuevos > 0)
+        '🐣 ${_plural(m.alumnosNuevos, 'alumno nuevo', 'alumnos nuevos')}',
+    ];
+    return 'Así viene $mes (del 1° hasta hoy):\n\n${lines.join('\n')}';
   }
 
   String _clasesHoy() {
@@ -289,6 +341,7 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
         if (ProfileCache.isSudo) _QuickAction('💰 Pagos', _pagos),
         _QuickAction('✨ Novedades', _novedades),
         _QuickAction('📋 Resumen', _resumen),
+        _QuickAction('🗓️ Resumen del mes', _resumenMes),
       ];
 
   // ─── UI ───────────────────────────────────────────────────────────────────
@@ -355,17 +408,7 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: kaliColors.sand,
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text('🐵', style: TextStyle(fontSize: 18)),
-            ),
-          ),
+          const ChimpyFace(size: 38),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -380,7 +423,7 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
                 Text(
                   'Las métricas de hoy, al toque',
                   style: kaliColors.caption(
-                    kaliColors.espresso.withValues(alpha: 0.5),
+                    kaliColors.espresso.withValues(alpha: 0.65),
                   ),
                 ),
               ],
@@ -405,17 +448,7 @@ class _ChimpyChatPanelState extends State<_ChimpyChatPanel> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: kaliColors.sand,
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text('🐵', style: TextStyle(fontSize: 12)),
-            ),
-          ),
+          const ChimpyFace(size: 26),
           const SizedBox(width: 8),
           Flexible(child: bubble),
         ],

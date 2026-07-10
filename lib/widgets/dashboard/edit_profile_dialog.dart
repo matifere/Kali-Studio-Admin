@@ -169,7 +169,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                     child: Text(
                       'Si cambiás el correo, recibirás un link de confirmación en la nueva dirección.',
                       style: kaliColors
-                          .caption(kaliColors.espresso.withValues(alpha: 0.5)),
+                          .caption(kaliColors.espresso.withValues(alpha: 0.65)),
                     ),
                   ),
                 ],
@@ -186,7 +186,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 18,
-                    color: kaliColors.espresso.withValues(alpha: 0.45),
+                    color: kaliColors.espresso.withValues(alpha: 0.6),
                   ),
                   onPressed: () =>
                       setState(() => _showPassword = !_showPassword),
@@ -204,7 +204,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 18,
-                    color: kaliColors.espresso.withValues(alpha: 0.45),
+                    color: kaliColors.espresso.withValues(alpha: 0.6),
                   ),
                   onPressed: () => setState(() => _showConfirm = !_showConfirm),
                 ),
@@ -330,7 +330,7 @@ class _ProfileField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: kaliColors
-                .body(kaliColors.espresso.withValues(alpha: 0.35), size: 14),
+                .body(kaliColors.espresso.withValues(alpha: 0.5), size: 14),
             suffixIcon: suffix,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(

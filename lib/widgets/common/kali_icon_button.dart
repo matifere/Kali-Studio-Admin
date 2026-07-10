@@ -47,7 +47,7 @@ class KaliIconButton extends StatelessWidget {
           child: Icon(
             icon,
             size: iconSize,
-            color: color ?? kaliColors.espresso.withValues(alpha: 0.5),
+            color: color ?? kaliColors.espresso.withValues(alpha: 0.65),
           ),
         ),
       ),

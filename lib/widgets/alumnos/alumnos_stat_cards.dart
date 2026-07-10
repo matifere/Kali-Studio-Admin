@@ -117,7 +117,7 @@ class AlumnosStatCards extends StatelessWidget {
                 badge: Text(
                   'En los próximos 7 días',
                   style: kaliColors
-                      .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                      .body(kaliColors.espresso.withValues(alpha: 0.65)),
                 ),
                 kaliColors: kaliColors,
               ),
@@ -175,7 +175,7 @@ class AlumnosStatCards extends StatelessWidget {
         children: [
           Text(title,
               style:
-                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.5))),
+                  kaliColors.label(kaliColors.espresso.withValues(alpha: 0.65))),
           const SizedBox(height: 16),
           value != null
               ? Text(

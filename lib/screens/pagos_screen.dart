@@ -8,9 +8,14 @@ import 'package:argrity/widgets/pagos/pagos_filters.dart';
 import 'package:argrity/widgets/pagos/pagos_table.dart';
 import 'package:argrity/widgets/pagos/plans_table.dart';
 
+/// Vistas de la sección Pagos: cobros de alumnos o catálogo de planes.
+enum PagosView { alumnos, planes }
+
 /// Pantalla principal de Pagos.
 class PagosScreen extends StatefulWidget {
-  const PagosScreen({super.key});
+  final PagosView view;
+
+  const PagosScreen({super.key, this.view = PagosView.alumnos});
 
   @override
   State<PagosScreen> createState() => _PagosScreenState();
@@ -27,6 +32,7 @@ class _PagosScreenState extends State<PagosScreen> {
   Widget build(BuildContext context) {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final bool isSmall = MediaQuery.of(context).size.width < 600;
+    final bool isPlanes = widget.view == PagosView.planes;
 
     return Column(
       children: [
@@ -40,14 +46,16 @@ class _PagosScreenState extends State<PagosScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                AutoSizeText('Pagos',
+                AutoSizeText(isPlanes ? 'Planes' : 'Pagos',
                     style: kaliColors
                         .heading(kaliColors.espresso, size: isSmall ? 36 : 46)
                         .copyWith(fontWeight: FontWeight.w600),
                     maxLines: 1),
                 const SizedBox(height: 4),
                 Text(
-                  'Historial de cobros y transacciones.',
+                  isPlanes
+                      ? 'Creá y administrá los planes de tu institución.'
+                      : 'Historial de cobros y asignación de planes a alumnos.',
                   style: kaliColors.body(
                     kaliColors.espresso.withValues(alpha: 0.6),
                     size: 14,
@@ -56,21 +64,27 @@ class _PagosScreenState extends State<PagosScreen> {
                 const SizedBox(height: 24),
 
                 // Contenido
-                const Expanded(
+                Expanded(
                   child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PagosStatCards(),
-                        SizedBox(height: 32),
-                        PagosFilters(),
-                        SizedBox(height: 24),
-                        PagosTable(),
-                        SizedBox(height: 32),
-                        PlansTable(),
-                        SizedBox(height: 40),
-                      ],
-                    ),
+                    child: isPlanes
+                        ? const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              PlansTable(),
+                              SizedBox(height: 40),
+                            ],
+                          )
+                        : const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              PagosStatCards(),
+                              SizedBox(height: 32),
+                              PagosFilters(),
+                              SizedBox(height: 24),
+                              PagosTable(),
+                              SizedBox(height: 40),
+                            ],
+                          ),
                   ),
                 ),
               ],

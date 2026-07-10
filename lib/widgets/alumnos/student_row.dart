@@ -170,7 +170,7 @@ class _StudentRowState extends State<StudentRow> {
                         Text(
                           s.email,
                           style: kaliColors
-                              .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                              .body(kaliColors.espresso.withValues(alpha: 0.65)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -265,7 +265,7 @@ class _PatologiasCell extends StatelessWidget {
     if (patologias.isEmpty) {
       return Text(
         'Ninguna',
-        style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.35),
+        style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.5),
             size: 13),
       );
     }
@@ -418,7 +418,7 @@ class _ShiftInfo extends StatelessWidget {
           style: kaliColors.label(
             reactivate
                 ? const Color(0xFFD4685C)
-                : kaliColors.espresso.withValues(alpha: 0.45),
+                : kaliColors.espresso.withValues(alpha: 0.6),
           ),
         ),
       ],

@@ -259,7 +259,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
                           style: kaliColors.body(kaliColors.espresso),
                         ),
                         Icon(Icons.calendar_month_outlined,
-                            color: kaliColors.espresso.withValues(alpha: 0.5)),
+                            color: kaliColors.espresso.withValues(alpha: 0.65)),
                       ],
                     ),
                   ),
@@ -396,7 +396,7 @@ class _EditTurnoDialogState extends State<EditTurnoDialog> {
     return InputDecoration(
       filled: true,
       fillColor: kaliColors.background,
-      hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.5)),
+      hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.65)),
       hintText: hint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

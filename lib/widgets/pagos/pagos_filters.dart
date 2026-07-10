@@ -2,8 +2,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:csv/csv.dart';
+import 'package:excel/excel.dart' hide Border;
 import 'package:file_saver/file_saver.dart';
+import 'package:intl/intl.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/models/subscription.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
@@ -54,7 +55,7 @@ class PagosFilters extends StatelessWidget {
                       Text(
                         'BUSCAR USUARIO',
                         style: kaliColors.label(
-                          kaliColors.espresso.withValues(alpha: 0.45),
+                          kaliColors.espresso.withValues(alpha: 0.6),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -115,7 +116,7 @@ class PagosFilters extends StatelessWidget {
                     Text(
                       'ESTADO',
                       style: kaliColors.label(
-                        kaliColors.espresso.withValues(alpha: 0.45),
+                        kaliColors.espresso.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -157,11 +158,11 @@ class PagosFilters extends StatelessWidget {
                             icon: Icon(Icons.clear,
                                 size: 16,
                                 color:
-                                    kaliColors.espresso.withValues(alpha: 0.5)),
+                                    kaliColors.espresso.withValues(alpha: 0.65)),
                             label: Text(
                               'Limpiar',
                               style: kaliColors.body(
-                                  kaliColors.espresso.withValues(alpha: 0.5),
+                                  kaliColors.espresso.withValues(alpha: 0.65),
                                   size: 13,
                                   weight: FontWeight.w600),
                             ),
@@ -184,7 +185,7 @@ class PagosFilters extends StatelessWidget {
               children: [
                 _OutlinedActionBtn(
                   icon: Icons.download_rounded,
-                  label: 'Exportar Reporte',
+                  label: 'Exportar a Excel',
                   onTap: () {
                     if (state is PagosLoaded) {
                       _exportReport(context, state.filteredPayments);
@@ -215,40 +216,47 @@ class PagosFilters extends StatelessWidget {
   Future<void> _exportReport(
       BuildContext context, List<Subscription> payments) async {
     try {
-      List<List<dynamic>> rows = [
-        [
-          'ID',
-          'Alumno',
-          'Plan',
-          'Monto',
-          'Moneda',
-          'Fecha Inicio',
-          'Fecha Fin',
-          'Estado'
-        ]
+      final excel = Excel.createExcel();
+      final sheet = excel[excel.getDefaultSheet()!];
+
+      final headerStyle = CellStyle(bold: true);
+      final headers = [
+        'Alumno',
+        'Plan',
+        'Monto',
+        'Moneda',
+        'Fecha Inicio',
+        'Fecha Fin',
+        'Estado',
       ];
+      for (var col = 0; col < headers.length; col++) {
+        final cell = sheet.cell(
+            CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0));
+        cell.value = TextCellValue(headers[col]);
+        cell.cellStyle = headerStyle;
+      }
 
       for (var p in payments) {
-        rows.add([
-          p.id,
-          p.studentName,
-          p.planName,
-          p.price,
-          p.currency,
-          p.startDateFormatted,
-          p.endDateFormatted,
-          p.statusLabel,
+        sheet.appendRow([
+          TextCellValue(p.studentName),
+          TextCellValue(p.planName),
+          DoubleCellValue(p.price),
+          TextCellValue(p.currency),
+          TextCellValue(p.startDateFormatted),
+          TextCellValue(p.endDateFormatted),
+          TextCellValue(p.statusLabel),
         ]);
       }
 
-      String csv = const ListToCsvConverter().convert(rows);
-      Uint8List bytes = Uint8List.fromList(csv.codeUnits);
+      final encoded = excel.encode();
+      if (encoded == null) throw Exception('No se pudo generar el Excel');
 
+      final fecha = DateFormat('yyyy-MM-dd').format(DateTime.now());
       await FileSaver.instance.saveFile(
-        name: 'reporte_pagos_${DateTime.now().millisecondsSinceEpoch}',
-        bytes: bytes,
-        ext: 'csv',
-        mimeType: MimeType.csv,
+        name: 'reporte_pagos_$fecha',
+        bytes: Uint8List.fromList(encoded),
+        ext: 'xlsx',
+        mimeType: MimeType.microsoftExcel,
       );
 
       if (context.mounted) {

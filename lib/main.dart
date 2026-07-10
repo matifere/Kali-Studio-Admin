@@ -11,6 +11,7 @@ import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 import 'package:argrity/bloc/pagos/pagos_bloc.dart';
 import 'package:argrity/bloc/turnos/turnos_bloc.dart';
+import 'package:argrity/bloc/rutinas/rutinas_bloc.dart';
 import 'package:argrity/bloc/dashboard/dashboard_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/screens/login_screen.dart';
@@ -23,6 +24,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:argrity/repositories/alumnos_repository.dart';
 import 'package:argrity/repositories/turnos_repository.dart';
 import 'package:argrity/repositories/pagos_repository.dart';
+import 'package:argrity/repositories/rutinas_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,6 +120,7 @@ class _KaliAppState extends State<KaliApp> {
   late final ActivityBloc _activityBloc;
   late final AlumnosBloc _alumnosBloc;
   late final TurnosBloc _turnosBloc;
+  late final RutinasBloc _rutinasBloc;
   late final PagosBloc _pagosBloc;
   late final DashboardBloc _dashboardBloc;
   late final NotificationsCubit _notificationsCubit;
@@ -131,6 +134,7 @@ class _KaliAppState extends State<KaliApp> {
     final alumnosRepo = AlumnosRepository(client: supabaseClient);
     final turnosRepo = TurnosRepository(client: supabaseClient);
     final pagosRepo = PagosRepository(client: supabaseClient);
+    final rutinasRepo = RutinasRepository(client: supabaseClient);
 
     _authBloc = AuthBloc();
     _navigationBloc = NavigationBloc();
@@ -143,6 +147,7 @@ class _KaliAppState extends State<KaliApp> {
       activityBloc: _activityBloc,
       repository: turnosRepo,
     );
+    _rutinasBloc = RutinasBloc(repository: rutinasRepo);
     _pagosBloc = PagosBloc(repository: pagosRepo)..add(PagosLoadRequested());
     _dashboardBloc = DashboardBloc();
     _notificationsCubit = NotificationsCubit();
@@ -158,6 +163,7 @@ class _KaliAppState extends State<KaliApp> {
     _activityBloc.close();
     _alumnosBloc.close();
     _turnosBloc.close();
+    _rutinasBloc.close();
     _pagosBloc.close();
     _dashboardBloc.close();
     _notificationsCubit.close();
@@ -174,6 +180,7 @@ class _KaliAppState extends State<KaliApp> {
         BlocProvider.value(value: _activityBloc),
         BlocProvider.value(value: _alumnosBloc),
         BlocProvider.value(value: _turnosBloc),
+        BlocProvider.value(value: _rutinasBloc),
         BlocProvider.value(value: _pagosBloc),
         BlocProvider.value(value: _dashboardBloc),
         BlocProvider.value(value: _notificationsCubit),

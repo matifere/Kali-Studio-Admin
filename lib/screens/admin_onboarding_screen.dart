@@ -141,7 +141,7 @@ class _AdminOnboardingScreenState extends State<AdminOnboardingScreen> {
                         _currentPage == 5 ? '¡Empezar!' : 'Siguiente',
                         style: kaliColors.body(
                           _currentPage == 1 && !_planCreated
-                            ? kaliColors.espresso.withValues(alpha: 0.5)
+                            ? kaliColors.espresso.withValues(alpha: 0.65)
                             : kaliColors.warmWhite,
                           weight: FontWeight.bold,
                         ),

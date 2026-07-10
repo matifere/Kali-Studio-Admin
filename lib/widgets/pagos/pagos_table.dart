@@ -85,7 +85,7 @@ class PagosTable extends StatelessWidget {
 
   // ── Encabezados de columna ─────────────────────────────────────────────────
   Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
-    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.45));
+    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.6));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),

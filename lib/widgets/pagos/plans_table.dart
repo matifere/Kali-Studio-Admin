@@ -211,7 +211,7 @@ class _PlansTableState extends State<PlansTable> {
                 child: Text(
                   'Aún no hay planes creados.',
                   style: kaliColors
-                      .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                      .body(kaliColors.espresso.withValues(alpha: 0.65)),
                 ),
               ),
             )
@@ -280,7 +280,7 @@ class _PlansTableState extends State<PlansTable> {
   }
 
   Widget _buildColumnHeaders(KaliColorsExtension kaliColors) {
-    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.45));
+    final style = kaliColors.label(kaliColors.espresso.withValues(alpha: 0.6));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
@@ -414,7 +414,7 @@ class _PlanRowState extends State<_PlanRow> {
                     Text(
                       description,
                       style: kaliColors.body(
-                        kaliColors.espresso.withValues(alpha: 0.5),
+                        kaliColors.espresso.withValues(alpha: 0.65),
                         size: 12,
                       ),
                     ),

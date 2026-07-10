@@ -10,6 +10,7 @@ import 'package:argrity/widgets/dashboard/schedule_list.dart';
 import 'package:argrity/screens/alumnos_screen.dart';
 import 'package:argrity/screens/entrenadores_screen.dart';
 import 'package:argrity/screens/turnos_screen.dart';
+import 'package:argrity/screens/rutinas_screen.dart';
 import 'package:argrity/screens/pagos_screen.dart';
 import 'package:argrity/screens/settings/settings_theme_screen.dart';
 import 'package:argrity/screens/settings/settings_subscription_screen.dart';
@@ -28,8 +29,12 @@ class DashboardScreen extends StatelessWidget {
         return const EntrenadoresScreen();
       case 'Turnos':
         return const TurnosScreen();
+      case 'Rutinas':
+        return const RutinasScreen();
       case 'Pagos':
-        return const PagosScreen();
+        return const PagosScreen(view: PagosView.alumnos);
+      case 'Planes':
+        return const PagosScreen(view: PagosView.planes);
       case 'Cuenta':
         return const SettingsAccountScreen();
       case 'Institución':
@@ -107,6 +112,8 @@ class _DashboardHome extends StatefulWidget {
 }
 
 class _DashboardHomeState extends State<_DashboardHome> {
+  bool _chimpyOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -169,7 +176,10 @@ class _DashboardHomeState extends State<_DashboardHome> {
         Positioned(
           right: isSmall ? 16 : 24,
           bottom: isSmall ? 16 : 24,
-          child: const ChimpyAssistant(),
+          child: ChimpyAssistant(
+            open: _chimpyOpen,
+            onToggle: () => setState(() => _chimpyOpen = !_chimpyOpen),
+          ),
         ),
       ],
     );

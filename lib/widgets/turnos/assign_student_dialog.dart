@@ -325,7 +325,7 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
                               child: Text(
                                   'No se encontraron alumnos disponibles',
                                   style: kaliColors.body(kaliColors.espresso
-                                      .withValues(alpha: 0.5))))
+                                      .withValues(alpha: 0.65))))
                           : ListView.separated(
                               itemCount: _filteredProfiles.length,
                               separatorBuilder: (_, __) => Divider(

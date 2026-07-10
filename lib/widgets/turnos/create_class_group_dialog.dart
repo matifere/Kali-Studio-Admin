@@ -195,7 +195,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                       filled: true,
                       fillColor: kaliColors.background,
                       hintStyle: kaliColors
-                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                          .body(kaliColors.espresso.withValues(alpha: 0.65)),
                       hintText: 'Ej. Reformer Pilates',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -214,7 +214,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                       filled: true,
                       fillColor: kaliColors.background,
                       hintStyle: kaliColors
-                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                          .body(kaliColors.espresso.withValues(alpha: 0.65)),
                       hintText: 'Ej. Nivel intermedio, traer mat propia',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -244,7 +244,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                                       fillColor: kaliColors.background,
                                       hintStyle: kaliColors.body(kaliColors
                                           .espresso
-                                          .withValues(alpha: 0.5)),
+                                          .withValues(alpha: 0.65)),
                                       border: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(12)),
@@ -292,7 +292,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                                 filled: true,
                                 fillColor: kaliColors.background,
                                 hintStyle: kaliColors.body(
-                                    kaliColors.espresso.withValues(alpha: 0.5)),
+                                    kaliColors.espresso.withValues(alpha: 0.65)),
                                 hintText: 'Ej. 8',
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12)),
@@ -317,7 +317,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                               filled: true,
                               fillColor: kaliColors.background,
                               hintStyle: kaliColors.body(
-                                  kaliColors.espresso.withValues(alpha: 0.5)),
+                                  kaliColors.espresso.withValues(alpha: 0.65)),
                               labelText: 'Hora de Inicio',
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12)),
@@ -336,7 +336,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                               filled: true,
                               fillColor: kaliColors.background,
                               hintStyle: kaliColors.body(
-                                  kaliColors.espresso.withValues(alpha: 0.5)),
+                                  kaliColors.espresso.withValues(alpha: 0.65)),
                               labelText: 'Hora de Fin',
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12)),
@@ -392,7 +392,7 @@ class _CreateClassGroupDialogState extends State<CreateClassGroupDialog> {
                       filled: true,
                       fillColor: kaliColors.background,
                       hintStyle: kaliColors
-                          .body(kaliColors.espresso.withValues(alpha: 0.5)),
+                          .body(kaliColors.espresso.withValues(alpha: 0.65)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(

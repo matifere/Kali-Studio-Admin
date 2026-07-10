@@ -471,7 +471,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
                 foregroundColor:
                     highlight ? kaliColors.espresso : kaliColors.warmWhite,
                 disabledBackgroundColor: highlight
-                    ? kaliColors.warmWhite.withValues(alpha: 0.5)
+                    ? kaliColors.warmWhite.withValues(alpha: 0.65)
                     : null,
                 elevation: 0,
                 shape: RoundedRectangleBorder(

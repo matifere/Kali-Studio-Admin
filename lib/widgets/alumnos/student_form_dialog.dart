@@ -378,13 +378,13 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       onSubmitted: onSubmitted,
       style: kaliColors.body(
         readOnly
-            ? kaliColors.espresso.withValues(alpha: 0.45)
+            ? kaliColors.espresso.withValues(alpha: 0.6)
             : kaliColors.espresso,
         size: 14,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.35),
+        hintStyle: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.5),
             size: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
