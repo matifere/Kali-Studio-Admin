@@ -18,6 +18,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   csv: ^6.0.0
+  excel: ^4.0.6
   file_saver: ^0.2.11
   url_launcher: ^6.3.0
   http: ^1.2.0

@@ -17,6 +17,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _paymentAliasController = TextEditingController();
+  final _cancellationHoursController = TextEditingController();
 
   bool _isLoading = false;
   bool _isLoadingData = true;
@@ -37,7 +38,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     try {
       final data = await Supabase.instance.client
           .from('institutions')
-          .select('name, address, phone, payment_alias')
+          .select('name, address, phone, payment_alias, cancellation_hours')
           .eq('id', instId)
           .single();
 
@@ -47,6 +48,8 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
           _addressController.text = data['address'] ?? '';
           _phoneController.text = data['phone'] ?? '';
           _paymentAliasController.text = data['payment_alias'] ?? '';
+          _cancellationHoursController.text =
+              (data['cancellation_hours'] ?? 2).toString();
           _isLoadingData = false;
         });
       }
@@ -64,6 +67,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _paymentAliasController.dispose();
+    _cancellationHoursController.dispose();
     super.dispose();
   }
 
@@ -84,6 +88,8 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             'address': _addressController.text.trim(),
             'phone': _phoneController.text.trim(),
             'payment_alias': _paymentAliasController.text.trim(),
+            'cancellation_hours':
+                int.parse(_cancellationHoursController.text.trim()),
           })
           .eq('id', instId);
 
@@ -204,6 +210,33 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                           kaliColors: kaliColors,
                           validator: (value) => value == null || value.isEmpty ? 'El alias de pago es requerido' : null,
                         ),
+                        const SizedBox(height: 20),
+
+                        _buildTextField(
+                          label:
+                              'Horas mínimas de anticipación para cancelar una reserva',
+                          controller: _cancellationHoursController,
+                          icon: Icons.schedule_rounded,
+                          kaliColors: kaliColors,
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            final parsed = int.tryParse(value?.trim() ?? '');
+                            if (parsed == null) {
+                              return 'Ingresá un número entero de horas';
+                            }
+                            if (parsed < 0 || parsed > 168) {
+                              return 'Debe estar entre 0 y 168 horas';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Los alumnos no podrán cancelar su reserva cuando falte menos de este tiempo para la clase. Usá 0 para permitir cancelar hasta el inicio.',
+                          style: kaliColors.body(
+                              kaliColors.espresso.withValues(alpha: 0.65),
+                              size: 13),
+                        ),
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
@@ -252,6 +285,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
     required IconData icon,
     required KaliColorsExtension kaliColors,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,6 +298,7 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
         TextFormField(
           controller: controller,
           validator: validator,
+          keyboardType: keyboardType,
           style: kaliColors.body(kaliColors.espresso),
           decoration: InputDecoration(
             prefixIcon:

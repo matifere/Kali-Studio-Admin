@@ -22,7 +22,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
   // El rol está en el JWT local — sin round trip a la base de datos.
   late final String _role = ProfileCache.role;
 
-  static const _blockedForAdmin = {'Entrenadores', 'Pagos'};
+  static const _blockedForAdmin = {'Entrenadores', 'Pagos', 'Planes'};
 
   @override
   void initState() {
@@ -93,8 +93,8 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                           if (_role != 'admin')
                             _buildMenuItem(Icons.fitness_center_outlined, 'Entrenadores'),
                           _buildMenuItem(Icons.calendar_today_outlined, 'Turnos'),
-                          if (_role != 'admin')
-                            _buildMenuItem(Icons.payment_outlined, 'Pagos'),
+                          _buildMenuItem(Icons.assignment_outlined, 'Rutinas'),
+                          if (_role != 'admin') _buildPagosMenu(kaliColors),
                         ],
                       ),
                       Column(
@@ -140,6 +140,84 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
         ),
         onTap: () => widget.onNavigate(title),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  /// "Pagos" se despliega en dos secciones: cobros/asignaciones de alumnos
+  /// y el catálogo de planes.
+  Widget _buildPagosMenu(KaliColorsExtension kaliColors) {
+    final isSectionActive = currentPage == 'Pagos' || currentPage == 'Planes';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          initiallyExpanded: isSectionActive,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+          backgroundColor: isSectionActive
+              ? kaliColors.espresso.withValues(alpha: 0.05)
+              : Colors.transparent,
+          collapsedBackgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          collapsedShape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          collapsedIconColor: kaliColors.espresso.withValues(alpha: 0.6),
+          iconColor: kaliColors.espresso.withValues(alpha: 0.6),
+          leading: Icon(
+            Icons.payment_outlined,
+            color: isSectionActive
+                ? kaliColors.espresso
+                : kaliColors.espresso.withValues(alpha: 0.6),
+          ),
+          title: AutoSizeText(
+            'Pagos',
+            maxLines: 1,
+            style: kaliColors.body(
+              isSectionActive
+                  ? kaliColors.espresso
+                  : kaliColors.espresso.withValues(alpha: 0.6),
+              weight: isSectionActive ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+          children: [
+            _buildPagosSubItem('Alumnos', 'Pagos', kaliColors),
+            _buildPagosSubItem('Planes', 'Planes', kaliColors),
+            const SizedBox(height: 4),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPagosSubItem(
+      String label, String page, KaliColorsExtension kaliColors) {
+    final isActive = currentPage == page;
+    return InkWell(
+      onTap: () => widget.onNavigate(page),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 56, top: 8, bottom: 8, right: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: AutoSizeText(
+                label,
+                maxLines: 1,
+                style: kaliColors.body(
+                  isActive
+                      ? kaliColors.espresso
+                      : kaliColors.espresso.withValues(alpha: 0.6),
+                  weight: isActive ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
