@@ -16,6 +16,7 @@ ssh_script.py
 activar_pago.sh
 desactivar_pago.sh
 scratch.dart
+flutter_crash_log.txt
 
 # Scripts peligrosos (dumps de DB, SSH, RLS — NO subir)
 scripts/drop_templates_ssh.py
