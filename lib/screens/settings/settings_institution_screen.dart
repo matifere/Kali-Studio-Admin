@@ -127,9 +127,12 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
             'address': _addressController.text.trim(),
             'phone': _phoneController.text.trim(),
             'payment_alias': _paymentAliasController.text.trim(),
-            if (logoUrl != null) 'logo_url': logoUrl,
+            'logo_url': logoUrl,
           })
           .eq('id', instId);
+          
+      ProfileCache.institutionNameNotifier.value = _nameController.text.trim();
+      ProfileCache.institutionLogoNotifier.value = logoUrl;
 
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -214,59 +217,79 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Center(
-                          child: GestureDetector(
-                            onTap: _pickImage,
-                            child: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: kaliColors.sand.withValues(alpha: 0.5),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: kaliColors.espresso.withValues(alpha: 0.2),
-                                      width: 2,
-                                    ),
-                                    image: _selectedImageBytes != null
-                                        ? DecorationImage(
-                                            image: MemoryImage(_selectedImageBytes!),
-                                            fit: BoxFit.cover,
-                                          )
-                                        : _currentLogoUrl != null
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: _pickImage,
+                                child: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: kaliColors.sand.withValues(alpha: 0.5),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: kaliColors.espresso.withValues(alpha: 0.2),
+                                          width: 2,
+                                        ),
+                                        image: _selectedImageBytes != null
                                             ? DecorationImage(
-                                                image: NetworkImage(_currentLogoUrl!),
+                                                image: MemoryImage(_selectedImageBytes!),
                                                 fit: BoxFit.cover,
                                               )
-                                            : null,
-                                  ),
-                                  child: (_selectedImageBytes == null && _currentLogoUrl == null)
-                                      ? Icon(
-                                          Icons.add_a_photo_rounded,
-                                          size: 40,
-                                          color: kaliColors.espresso.withValues(alpha: 0.5),
-                                        )
-                                      : null,
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: kaliColors.espresso,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: kaliColors.warmWhite,
-                                      width: 2,
+                                            : _currentLogoUrl != null
+                                                ? DecorationImage(
+                                                    image: NetworkImage(_currentLogoUrl!),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : null,
+                                      ),
+                                      child: (_selectedImageBytes == null && _currentLogoUrl == null)
+                                          ? Icon(
+                                              Icons.add_a_photo_rounded,
+                                              size: 40,
+                                              color: kaliColors.espresso.withValues(alpha: 0.5),
+                                            )
+                                          : null,
                                     ),
-                                  ),
-                                  child: Icon(
-                                    Icons.edit_rounded,
-                                    size: 16,
-                                    color: kaliColors.warmWhite,
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: kaliColors.espresso,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: kaliColors.warmWhite,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.edit_rounded,
+                                        size: 16,
+                                        color: kaliColors.warmWhite,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (_selectedImageBytes != null || _currentLogoUrl != null) ...[
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedImageBytes = null;
+                                      _currentLogoUrl = null;
+                                    });
+                                  },
+                                  icon: Icon(Icons.delete_outline_rounded, color: Colors.red.shade400, size: 18),
+                                  label: Text(
+                                    'Eliminar logo',
+                                    style: kaliColors.label(Colors.red.shade400),
                                   ),
                                 ),
                               ],
-                            ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 32),

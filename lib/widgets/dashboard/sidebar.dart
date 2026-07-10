@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DashboardSidebar extends StatefulWidget {
   final String currentPage;
@@ -31,6 +32,25 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.onNavigate('Alumnos');
       });
+    }
+    _loadInstitutionData();
+  }
+
+  Future<void> _loadInstitutionData() async {
+    final instId = ProfileCache.institutionId;
+    if (instId == null) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('institutions')
+          .select('name, logo_url')
+          .eq('id', instId)
+          .single();
+      if (mounted) {
+        ProfileCache.institutionNameNotifier.value = data['name'];
+        ProfileCache.institutionLogoNotifier.value = data['logo_url'];
+      }
+    } catch (e) {
+      debugPrint('Error loading institution for sidebar: $e');
     }
   }
 
@@ -63,21 +83,63 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Image.asset(
-                                      'assets/images/argity_logo.png',
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.contain,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    AutoSizeText(
-                                      'Argity',
-                                      style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
-                                      maxLines: 1,
-                                    ),
-                                  ],
+                                ListenableBuilder(
+                                  listenable: Listenable.merge([
+                                    ProfileCache.institutionNameNotifier,
+                                    ProfileCache.institutionLogoNotifier,
+                                  ]),
+                                  builder: (context, _) {
+                                    final logoUrl = ProfileCache.institutionLogoNotifier.value;
+                                    final name = ProfileCache.institutionNameNotifier.value;
+                                    final hasCustomLogo = logoUrl != null && logoUrl.isNotEmpty && name != null;
+                                    return Row(
+                                      children: [
+                                        hasCustomLogo
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  logoUrl,
+                                                  width: 40,
+                                                  height: 40,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : Image.asset(
+                                                'assets/images/argity_logo.png',
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.contain,
+                                              ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              AutoSizeText(
+                                                hasCustomLogo ? name : 'Argity',
+                                                style: kaliColors.heading(kaliColors.espresso, size: 28).copyWith(
+                                                  fontWeight: FontWeight.w800, 
+                                                  letterSpacing: -0.5, 
+                                                  height: 1.1
+                                                ),
+                                                maxLines: 1,
+                                                minFontSize: 14,
+                                              ),
+                                              if (hasCustomLogo) ...[
+                                                const SizedBox(height: 2),
+                                                AutoSizeText(
+                                                  'usando Argity Turnos',
+                                                  style: kaliColors.label(kaliColors.espresso.withValues(alpha: 0.6)).copyWith(fontSize: 11),
+                                                  maxLines: 1,
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 24),
                                 Divider(

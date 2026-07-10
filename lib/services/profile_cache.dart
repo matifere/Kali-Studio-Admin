@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Caché en memoria del perfil del usuario actual.
 ///
 /// Se carga una sola vez en [AuthWrapper] al iniciar sesión.
@@ -13,6 +15,9 @@ class ProfileCache {
   static bool _isProfileDisabled = false;
 
   static bool _hasCustomThemes = false;
+
+  static final ValueNotifier<String?> institutionNameNotifier = ValueNotifier(null);
+  static final ValueNotifier<String?> institutionLogoNotifier = ValueNotifier(null);
 
   static String get role => _role;
   static String? get institutionId => _institutionId;
@@ -58,5 +63,7 @@ class ProfileCache {
     _isActive = false;
     _isProfileDisabled = false;
     _hasCustomThemes = false;
+    institutionNameNotifier.value = null;
+    institutionLogoNotifier.value = null;
   }
 }
