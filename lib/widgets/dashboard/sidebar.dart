@@ -91,7 +91,7 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                                   builder: (context, _) {
                                     final logoUrl = ProfileCache.institutionLogoNotifier.value;
                                     final name = ProfileCache.institutionNameNotifier.value;
-                                    final hasCustomLogo = logoUrl != null && logoUrl.isNotEmpty && name != null;
+                                    final hasCustomLogo = logoUrl != null && logoUrl.isNotEmpty && name != null && ProfileCache.hasCustomLogo;
                                     return Row(
                                       children: [
                                         hasCustomLogo

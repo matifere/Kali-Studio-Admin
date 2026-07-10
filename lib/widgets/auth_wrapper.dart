@@ -101,6 +101,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       if (subData == null) {
         ProfileCache.updateHasCustomThemes(false);
+        ProfileCache.updateHasCustomLogo(false);
         return false;
       }
 
@@ -109,8 +110,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
       if (saasPlans != null && saasPlans['features'] != null) {
         final features = saasPlans['features'] as Map<String, dynamic>;
         ProfileCache.updateHasCustomThemes(features['custom_themes'] == true);
+        ProfileCache.updateHasCustomLogo(features['custom_logo'] == true);
       } else {
         ProfileCache.updateHasCustomThemes(false);
+        ProfileCache.updateHasCustomLogo(false);
       }
 
       final status = subData['status'] as String?;
@@ -125,6 +128,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     } catch (_) {
       // Fail-closed: ante cualquier error, denegar acceso
       ProfileCache.updateHasCustomThemes(false);
+      ProfileCache.updateHasCustomLogo(false);
       return false;
     }
   }

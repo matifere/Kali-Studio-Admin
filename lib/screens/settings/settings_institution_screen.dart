@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 
 class SettingsInstitutionScreen extends StatefulWidget {
   const SettingsInstitutionScreen({super.key});
@@ -76,6 +78,11 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
   }
 
   Future<void> _pickImage() async {
+    if (!ProfileCache.hasCustomLogo) {
+      context.read<NavigationBloc>().add(NavigationPageChanged('Suscripción'));
+      return;
+    }
+    
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
@@ -288,10 +295,34 @@ class _SettingsInstitutionScreenState extends State<SettingsInstitutionScreen> {
                                         color: kaliColors.warmWhite,
                                       ),
                                     ),
+                                    if (!ProfileCache.hasCustomLogo)
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(colors: [Color(0xFFEAB308), Color(0xFFF59E0B)]),
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: kaliColors.warmWhite, width: 2),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.star_rounded, color: Colors.white, size: 10),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                'PRO',
+                                                style: kaliColors.label(Colors.white).copyWith(fontWeight: FontWeight.bold, fontSize: 8),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
-                              if (_selectedImageBytes != null || _currentLogoUrl != null) ...[
+                              if (ProfileCache.hasCustomLogo && (_selectedImageBytes != null || _currentLogoUrl != null)) ...[
                                 const SizedBox(height: 12),
                                 TextButton.icon(
                                   onPressed: () {
