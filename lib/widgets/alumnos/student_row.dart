@@ -8,6 +8,7 @@ import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/alumnos/student_profile_dialog.dart';
 import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
+import 'package:argrity/widgets/alumnos/access_code_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Fila de la tabla que representa a un alumno.
@@ -169,8 +170,8 @@ class _StudentRowState extends State<StudentRow> {
                         const SizedBox(height: 2),
                         Text(
                           s.email,
-                          style: kaliColors
-                              .body(kaliColors.espresso.withValues(alpha: 0.65)),
+                          style: kaliColors.body(
+                              kaliColors.espresso.withValues(alpha: 0.65)),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -211,40 +212,57 @@ class _StudentRowState extends State<StudentRow> {
               ),
             ),
 
-            // Acciones
+            // Acciones: con 4 botones la celda queda corta en anchos chicos;
+            // FittedBox los achica proporcionalmente en vez de desbordar.
             Expanded(
               flex: 2,
-              child: Row(
-                children: [
-                  KaliIconButton.action(
-                    Icons.visibility_outlined,
-                    tooltip: 'Ver perfil',
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => StudentProfileDialog(student: s),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  KaliIconButton.action(
-                    Icons.edit_outlined,
-                    tooltip: 'Editar',
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => StudentFormDialog(student: s),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  KaliIconButton.action(
-                    Icons.delete_outline,
-                    tooltip: 'Eliminar',
-                    color: const Color(0xFFD4685C),
-                    onTap: () => _confirmDelete(context),
-                  ),
-                ],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    KaliIconButton.action(
+                      Icons.visibility_outlined,
+                      tooltip: 'Ver perfil',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              StudentProfileDialog(student: s),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    KaliIconButton.action(
+                      Icons.key_rounded,
+                      tooltip: 'Código de acceso',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AccessCodeDialog(student: s),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    KaliIconButton.action(
+                      Icons.edit_outlined,
+                      tooltip: 'Editar',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => StudentFormDialog(student: s),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    KaliIconButton.action(
+                      Icons.delete_outline,
+                      tooltip: 'Eliminar',
+                      color: const Color(0xFFD4685C),
+                      onTap: () => _confirmDelete(context),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
