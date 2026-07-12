@@ -34,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'state': 'b64:$encodedState',
         },
       );
-      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (!await launchUrl(url, webOnlyWindowName: '_self')) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
         }
