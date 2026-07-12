@@ -114,17 +114,26 @@ Deno.serve(async (req) => {
     // 3. Crear o actualizar usuario en Supabase
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: mpEmail,
       email_confirm: true,
       user_metadata: {
         full_name: mpFullName,
         mp_user_id: mpUserId,
+        role: "sudo"
       },
     });
 
     if (createError && createError.message !== "User already registered") {
       console.error("Error creando usuario en Supabase:", createError);
+    } else if (userData?.user?.id) {
+      // Upsert al perfil igual que lo hacía la app de Flutter
+      await supabaseAdmin.from('profiles').upsert({
+        id: userData.user.id,
+        email: mpEmail,
+        full_name: mpFullName,
+        role: 'sudo'
+      });
     }
 
     // 4. Generar Magic Link para auto-login y redirigir
