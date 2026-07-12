@@ -231,6 +231,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
         // Forzamos la navegación a la raíz si hubo un evento importante,
         // garantizando que no se dupliquen pantallas en el stack.
         if (event.event == AuthChangeEvent.signedIn ||
+            event.event == AuthChangeEvent.tokenRefreshed ||
             event.event == AuthChangeEvent.initialSession) {
           if (hasSession) {
             _navigatorKey.currentState?.pushAndRemoveUntil(
