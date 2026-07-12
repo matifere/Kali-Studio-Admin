@@ -120,20 +120,44 @@ Deno.serve(async (req) => {
       user_metadata: {
         full_name: mpFullName,
         mp_user_id: mpUserId,
-        role: "sudo"
+        role: "sudo",
+        mp_access_token: mpAccessToken
       },
     });
 
+    let userId = userData?.user?.id;
+
     if (createError && createError.message !== "User already registered") {
       console.error("Error creando usuario en Supabase:", createError);
-    } else if (userData?.user?.id) {
+    } else if (userId) {
       // Upsert al perfil igual que lo hacía la app de Flutter
       await supabaseAdmin.from('profiles').upsert({
-        id: userData.user.id,
+        id: userId,
         email: mpEmail,
         full_name: mpFullName,
         role: 'sudo'
       });
+    }
+
+    if (createError && createError.message === "User already registered") {
+      // Buscar al usuario existente
+      const { data: profiles } = await supabaseAdmin.from('profiles').select('id, institution_id').eq('email', mpEmail).limit(1);
+      if (profiles && profiles.length > 0) {
+        userId = profiles[0].id;
+        const institutionId = profiles[0].institution_id;
+        
+        // Actualizamos sus metadatos con el nuevo token
+        await supabaseAdmin.auth.admin.updateUserById(userId, {
+          user_metadata: { mp_access_token: mpAccessToken }
+        });
+
+        // Si ya tiene institución, actualizamos el token directamente
+        if (institutionId) {
+          await supabaseAdmin.from('institutions').update({
+            mp_token_secret_name: mpAccessToken
+          }).eq('id', institutionId);
+        }
+      }
     }
 
     // 4. Generar Magic Link para auto-login y redirigir

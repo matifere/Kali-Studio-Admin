@@ -60,6 +60,15 @@ class _InstitutionSelectionScreenState
         'address': adress,
       });
 
+      // Recuperar el token de MP que la Edge Function guardó en los metadatos
+      final mpToken = user?.userMetadata?['mp_access_token'];
+      if (mpToken != null) {
+        await Supabase.instance.client
+            .from('institutions')
+            .update({'mp_token_secret_name': mpToken})
+            .eq('id', instId);
+      }
+
       // Refrescamos el caché para que AuthWrapper enrute con datos actualizados
       // y no vuelva a mostrar esta pantalla mientras re-verifica el perfil.
       ProfileCache.set(
