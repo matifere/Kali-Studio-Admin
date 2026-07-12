@@ -4,6 +4,10 @@ import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/screens/register_screen.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/kali_text_field.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:argrity/utils/oauth_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class LoginScreen extends StatefulWidget {
@@ -23,6 +27,42 @@ class _LoginScreenState extends State<LoginScreen> {
     emailControl.dispose();
     contraControl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleMercadoPagoLogin(BuildContext context) async {
+    const String clientId = '5257839397807870';
+    const String redirectUri = 'https://dbturnos.argity.com/functions/v1/mp-auth-callback';
+    
+    if (kIsWeb) {
+      // Pasamos la URL pero evitando que empiece con http:// o https:// porque el WAF de MP lo bloquea
+      String appRedirect = Uri.base.origin;
+      String encodedState = base64Url.encode(utf8.encode(appRedirect));
+      final Uri url = Uri.https(
+        'auth.mercadopago.com',
+        '/authorization',
+        {
+          'client_id': clientId,
+          'response_type': 'code',
+          'platform_id': 'mp',
+          'redirect_uri': redirectUri,
+          'state': 'b64:$encodedState',
+        },
+      );
+      if (!await launchUrl(url, webOnlyWindowName: '_self')) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
+        }
+      }
+    } else {
+      // Para Escritorio (Win/Mac/Lin) o Móvil usamos un servidor web efímero
+      try {
+        await handleDesktopOAuth(clientId, redirectUri);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      }
+    }
   }
 
   Future<void> _handleForgotPassword() async {
@@ -296,6 +336,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                       )
                                     : const Text("ENTRAR"),
                               ),
+                            ),
+                            Column(
+                              children: [
+                                const Row(
+                                  spacing: 4,
+                                  children: [
+                                    Expanded(child: Divider()),
+                                    Text("o"),
+                                    Expanded(child: Divider()),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 54,
+                                  child: ElevatedButton.icon(
+                                    onPressed: isLoading ? null : () => _handleMercadoPagoLogin(context),
+                                    icon: isLoading
+                                        ? const SizedBox.shrink()
+                                        : const Icon(Icons.account_balance_wallet, size: 24),
+                                    label: isLoading
+                                        ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: kaliColors.warmWhite,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Text(
+                                            "INICIAR SESIÓN CON MERCADO PAGO",
+                                            style: kaliColors.label(kaliColors.warmWhite).copyWith(
+                                                  fontSize: 12,
+                                                  letterSpacing: 2,
+                                                ),
+                                          ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF009EE3), // Azul oficial de Mercado Pago
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(27),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             Column(
                               children: [
