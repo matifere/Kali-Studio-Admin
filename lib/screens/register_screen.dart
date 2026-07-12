@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
-import 'package:argrity/widgets/kali_text_field.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:argrity/utils/oauth_helper.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,43 +15,40 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController nameControl = TextEditingController();
-  final TextEditingController emailControl = TextEditingController();
-  final TextEditingController passControl = TextEditingController();
-  final TextEditingController passConfirmControl = TextEditingController();
-  bool _isPassObscured = true;
-  bool _isPassConfirmObscured = true;
-
-  @override
-  void dispose() {
-    nameControl.dispose();
-    emailControl.dispose();
-    passControl.dispose();
-    passConfirmControl.dispose();
-    super.dispose();
-  }
-
-  void _handleRegister(BuildContext context) {
-    if (nameControl.text.trim().isEmpty ||
-        emailControl.text.trim().isEmpty ||
-        passControl.text.isEmpty ||
-        passConfirmControl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor llena todos los campos')),
+  Future<void> _handleMercadoPagoRegister(BuildContext context) async {
+    const String clientId = '5257839397807870';
+    const String redirectUri = 'https://dbturnos.argity.com/functions/v1/mp-auth-callback';
+    
+    if (kIsWeb) {
+      // Pasamos la URL pero evitando que empiece con http:// o https:// porque el WAF de MP lo bloquea
+      String appRedirect = Uri.base.origin;
+      String encodedState = base64Url.encode(utf8.encode(appRedirect));
+      final Uri url = Uri.https(
+        'auth.mercadopago.com',
+        '/authorization',
+        {
+          'client_id': clientId,
+          'response_type': 'code',
+          'platform_id': 'mp',
+          'redirect_uri': redirectUri,
+          'state': 'b64:$encodedState',
+        },
       );
-      return;
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
+        }
+      }
+    } else {
+      // Para Escritorio (Win/Mac/Lin) o Móvil usamos un servidor web efímero
+      try {
+        await handleDesktopOAuth(clientId, redirectUri);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e')));
+        }
+      }
     }
-    if (passControl.text != passConfirmControl.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
-      return;
-    }
-    context.read<AuthBloc>().add(AuthRegisterRequested(
-          email: emailControl.text.trim(),
-          password: passControl.text,
-          fullName: nameControl.text.trim(),
-        ));
   }
 
   // ── Panel decorativo izquierdo (solo escritorio) ──────────────────────────
@@ -100,85 +100,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              "Ingresa los detalles para configurar el acceso administrativo al portal del estudio.",
+              "Únete utilizando tu cuenta de Mercado Pago para configurar el acceso administrativo al portal del estudio.",
               style: kaliColors.body(
                 kaliColors.clayDark,
                 size: 14,
               ),
             ),
-            const SizedBox(height: 32),
-            KaliTextField(
-              label: "NOMBRE COMPLETO",
-              hint: "Ej. Alejandra Rossi",
-              controller: nameControl,
-            ),
-            const SizedBox(height: 20),
-            KaliTextField(
-              label: "EMAIL DE TRABAJO",
-              hint: "admin@argrity.com",
-              controller: emailControl,
-            ),
-            const SizedBox(height: 20),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final passField = KaliTextField(
-                  label: "CONTRASEÑA",
-                  hint: "••••••••",
-                  obscureText: _isPassObscured,
-                  controller: passControl,
-                  suffixIcon:
-                      _isPassObscured ? Icons.visibility_off : Icons.visibility,
-                  onSuffixTap: () => setState(
-                    () => _isPassObscured = !_isPassObscured,
-                  ),
-                );
-                final confirmField = KaliTextField(
-                  label: "CONFIRMAR CONTRASEÑA",
-                  hint: "••••••••",
-                  obscureText: _isPassConfirmObscured,
-                  controller: passConfirmControl,
-                  suffixIcon: _isPassConfirmObscured
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  onSuffixTap: () => setState(
-                    () => _isPassConfirmObscured = !_isPassConfirmObscured,
-                  ),
-                );
-                // En espacios angostos apilamos los campos de contraseña.
-                if (constraints.maxWidth < 360) {
-                  return Column(
-                    children: [
-                      passField,
-                      const SizedBox(height: 20),
-                      confirmField,
-                    ],
-                  );
-                }
-                return Row(
-                  children: [
-                    Expanded(child: passField),
-                    const SizedBox(width: 16),
-                    Expanded(child: confirmField),
-                  ],
-                );
-              },
-            ),
             const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Esta sección está destinada exclusivamente a los administradores. Si sos un entrenador, debes iniciar sesión con las credenciales provistas por un administrador.",
+                      style: TextStyle(
+                        color: Colors.amber.shade900,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               height: 54,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : () => _handleRegister(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kaliColors.espresso,
-                  foregroundColor:
-                      kaliColors.getContrastColor(kaliColors.espresso),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                ),
-                child: isLoading
+              child: ElevatedButton.icon(
+                onPressed: isLoading ? null : () => _handleMercadoPagoRegister(context),
+                icon: isLoading
+                    ? const SizedBox.shrink()
+                    : const Icon(Icons.account_balance_wallet, size: 24), // Ícono representativo de billetera
+                label: isLoading
                     ? SizedBox(
                         width: 24,
                         height: 24,
@@ -188,12 +151,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       )
                     : Text(
-                        "CREAR CUENTA",
+                        "REGISTRARSE CON MERCADO PAGO",
                         style: kaliColors.label(kaliColors.warmWhite).copyWith(
                               fontSize: 12,
                               letterSpacing: 2,
                             ),
                       ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF009EE3), // Azul oficial de Mercado Pago
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(27),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 32),

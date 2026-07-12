@@ -2,6 +2,7 @@
   "workspace": [
     "./mp-webhook",
     "./create-saas-subscription",
-    "./check-expired-subscriptions"
+    "./check-expired-subscriptions",
+    "./mp-auth-callback"
   ]
 }
