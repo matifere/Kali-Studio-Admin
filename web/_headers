@@ -1,3 +1,14 @@
+# Cloudflare Pages — control de caché para Flutter web.
+# Flutter NO pone hash en los nombres de archivo (main.dart.js, assets/*,
+# canvaskit/*), así que nada puede cachearse sin revalidar: si no, después de
+# un deploy los navegadores siguen sirviendo la versión vieja (el Browser
+# Cache TTL de la zona de Cloudflare mete max-age=14400 en todo lo que este
+# archivo no pisa). "no-cache" permite guardar el archivo pero obliga a
+# revalidar con ETag en cada carga: 304 barato si no cambió, versión nueva
+# al instante si hubo deploy.
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
 /flutter_bootstrap.js
@@ -6,3 +17,13 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /manifest.json
   Cache-Control: no-cache, no-store, must-revalidate
+/version.json
+  Cache-Control: no-cache, no-store, must-revalidate
+/main.dart.js
+  Cache-Control: no-cache, must-revalidate
+/assets/*
+  Cache-Control: no-cache, must-revalidate
+/canvaskit/*
+  Cache-Control: no-cache, must-revalidate
+/icons/*
+  Cache-Control: no-cache, must-revalidate
