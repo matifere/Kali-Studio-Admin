@@ -20,3 +20,23 @@ EOF
 
 # 5. Compilar la aplicación para producción
 flutter build web --release
+
+# 6. Reemplazar el flutter_service_worker.js por uno autodestructivo
+# para limpiar el cache agresivo que haya quedado en los clientes.
+cat > build/web/flutter_service_worker.js <<'EOF'
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (event) {
+  event.waitUntil((async function () {
+    try {
+      var keys = await caches.keys();
+      await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    } catch (e) {}
+    try { await self.clients.claim(); } catch (e) {}
+    try {
+      var wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      wins.forEach(function (c) { try { c.navigate(c.url); } catch (e) {} });
+    } catch (e) {}
+    try { await self.registration.unregister(); } catch (e) {}
+  })());
+});
+EOF
