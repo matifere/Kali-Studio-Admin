@@ -8,6 +8,7 @@ import 'package:argrity/widgets/dashboard/chimpy_assistant.dart';
 import 'package:argrity/widgets/dashboard/sidebar.dart';
 import 'package:argrity/widgets/dashboard/stat_cards.dart';
 import 'package:argrity/widgets/dashboard/schedule_list.dart';
+import 'package:argrity/widgets/dashboard/join_qr_dialog.dart';
 import 'package:argrity/screens/alumnos_screen.dart';
 import 'package:argrity/screens/entrenadores_screen.dart';
 import 'package:argrity/screens/turnos_screen.dart';
@@ -176,6 +177,17 @@ class _DashboardHomeState extends State<_DashboardHome> {
                   const SnackBar(content: Text('Código copiado al portapapeles')),
                 );
               }
+            },
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            tooltip: 'Ver código QR',
+            icon: Icon(Icons.qr_code_scanner_rounded, color: kaliColors.clayDark),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => JoinQrDialog(joinCode: code),
+              );
             },
           ),
         ],

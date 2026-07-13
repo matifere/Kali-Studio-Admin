@@ -78,15 +78,17 @@ BEGIN
 END \$\$;
 "
 
+CONTAINER_NAME=${DB_CONTAINER:-supabase-db}
+
 if [ -n "$SUPABASE_DB_URL" ]; then
   echo "Usando conexión directa a la base de datos (modo producción) a través del contenedor local..."
-  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i supabase-db psql \"$SUPABASE_DB_URL\"" << EOF
+  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i $CONTAINER_NAME psql \"$SUPABASE_DB_URL\"" << EOF
 $SERVER_PASS
 $SQL
 EOF
 else
   # Ejecutamos el SQL a través de SSH pasando la contraseña de sudo en la primera línea del stdin
-  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i supabase-db psql -U postgres -d postgres" << EOF
+  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i $CONTAINER_NAME psql -U postgres -d postgres" << EOF
 $SERVER_PASS
 $SQL
 EOF

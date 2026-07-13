@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Script para desactivar/cancelar suscripciones manualmente en la base de datos de Supabase.
-# Se conecta por SSH al servidor de producción y ejecuta los comandos SQL en el contenedor supabase-db.
-
 if [ -z "$1" ]; then
   echo "================================================================"
   echo "Uso: ./desactivar_pago.sh <email_del_usuario>"
@@ -21,47 +18,44 @@ else
 fi
 
 EMAIL=$1
+CONTAINER_NAME=${DB_CONTAINER:-supabase-db}
 
-echo "Conectando al servidor ($SERVER_IP) para dar de baja..."
-echo "Usuario a desactivar: $EMAIL"
+echo "Conectando al servidor ($SERVER_IP) para desactivar pago..."
+echo "Usuario: $EMAIL"
 
-# Bloque SQL a ejecutar
 SQL="
 DO \$\$
 DECLARE
     v_institution_id uuid;
 BEGIN
-    -- 1. Buscar la institución asociada al email
     SELECT institution_id INTO v_institution_id FROM profiles WHERE email = '$EMAIL' LIMIT 1;
     
     IF v_institution_id IS NULL THEN
         RAISE EXCEPTION 'ERROR: No se encontró ninguna institución asociada al email %', '$EMAIL';
     END IF;
 
-    RAISE NOTICE 'Institución encontrada: %', v_institution_id;
-
-    -- 2. Cancelar la suscripción y fijar el fin del periodo a AYER para forzar el bloqueo
     UPDATE tenant_subscriptions 
     SET status = 'cancelled', 
-        current_period_end = NOW() - INTERVAL '1 day', 
         updated_at = NOW()
     WHERE institution_id = v_institution_id;
 
-    RAISE NOTICE '❌ Suscripción y acceso dados de baja exitosamente para %', '$EMAIL';
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'ERROR: La institución % no tiene ninguna suscripción activa.', v_institution_id;
+    END IF;
+
+    RAISE NOTICE '❌ Suscripción desactivada (cancelada) exitosamente para %', '$EMAIL';
 END \$\$;
 "
 
 if [ -n "$SUPABASE_DB_URL" ]; then
-  echo "Usando conexión directa a la base de datos (modo producción)..."
-  psql "$SUPABASE_DB_URL" << EOF
-$SQL
-EOF
-else
-  # Ejecutamos el SQL a través de SSH pasando la contraseña de sudo en la primera línea del stdin
-  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i supabase-db psql -U postgres -d postgres" << EOF
+  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i $CONTAINER_NAME psql \"$SUPABASE_DB_URL\"" << EOI
 $SERVER_PASS
 $SQL
-EOF
+EOI
+else
+  ssh $SERVER_USER@$SERVER_IP "sudo -S docker exec -i $CONTAINER_NAME psql -U postgres -d postgres" << EOI
+$SERVER_PASS
+$SQL
+EOI
 fi
-
 echo "Proceso terminado."
