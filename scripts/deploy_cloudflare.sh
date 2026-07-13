@@ -21,7 +21,12 @@ EOF
 # 5. Compilar la aplicación para producción
 flutter build web --release
 
-# 6. Reemplazar el flutter_service_worker.js por uno autodestructivo
+# 6. Invalidar caché agresivamente inyectando timestamps en los archivos generados
+TIMESTAMP=$(date +%s)
+sed -i "s|src=\"flutter_bootstrap.js\"|src=\"flutter_bootstrap.js?v=$TIMESTAMP\"|g" build/web/index.html
+sed -i "s|\"mainJsPath\":\"main.dart.js\"|\"mainJsPath\":\"main.dart.js?v=$TIMESTAMP\"|g" build/web/flutter_bootstrap.js
+
+# 7. Reemplazar el flutter_service_worker.js por uno autodestructivo
 # para limpiar el cache agresivo que haya quedado en los clientes.
 cat > build/web/flutter_service_worker.js <<'EOF'
 self.addEventListener('install', function () { self.skipWaiting(); });
