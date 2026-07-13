@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:argrity/utils/oauth_helper.dart';
+import 'package:argrity/utils/mp_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class LoginScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleMercadoPagoLogin(BuildContext context) async {
     const String clientId = '5257839397807870';
-    const String redirectUri = 'https://dbturnos.argity.com/functions/v1/mp-auth-callback';
+    final String redirectUri = getMpRedirectUri();
     
     if (kIsWeb) {
       // Pasamos la URL pero evitando que empiece con http:// o https:// porque el WAF de MP lo bloquea

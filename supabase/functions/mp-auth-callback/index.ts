@@ -63,8 +63,18 @@ Deno.serve(async (req) => {
     }
 
     // 1. Obtener Access Token de Mercado Pago
-    // Kong proxy puede modificar req.url, así que usamos SUPABASE_PUBLIC_URL para reconstruir la URL original
-    const publicUrl = Deno.env.get("SUPABASE_PUBLIC_URL") || "https://dbturnos.argity.com";
+    // Kong proxy puede modificar req.url, así que usamos headers o SUPABASE_PUBLIC_URL para reconstruir la URL original
+    let publicUrl = Deno.env.get("SUPABASE_PUBLIC_URL");
+    if (!publicUrl) {
+      const forwardedHost = req.headers.get("x-forwarded-host");
+      const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+      if (forwardedHost) {
+        publicUrl = `${forwardedProto}://${forwardedHost}`;
+      } else {
+        const reqUrl = new URL(req.url);
+        publicUrl = `${reqUrl.protocol}//${reqUrl.host}`;
+      }
+    }
     const redirectUri = `${publicUrl}/functions/v1/mp-auth-callback`;
 
     const tokenResponse = await fetch("https://api.mercadopago.com/oauth/token", {

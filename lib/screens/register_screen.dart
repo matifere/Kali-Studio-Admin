@@ -6,6 +6,7 @@ import 'package:argrity/bloc/auth/auth_bloc.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:argrity/utils/oauth_helper.dart';
+import 'package:argrity/utils/mp_utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,7 +18,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _handleMercadoPagoRegister(BuildContext context) async {
     const String clientId = '5257839397807870';
-    const String redirectUri = 'https://dbturnos.argity.com/functions/v1/mp-auth-callback';
+    final String redirectUri = getMpRedirectUri();
     
     if (kIsWeb) {
       // Pasamos la URL pero evitando que empiece con http:// o https:// porque el WAF de MP lo bloquea
