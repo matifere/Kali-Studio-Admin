@@ -7,7 +7,7 @@
 # revalidar con ETag en cada carga: 304 barato si no cambió, versión nueva
 # al instante si hubo deploy.
 
-/
+/*
   Cache-Control: no-cache, no-store, must-revalidate
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
