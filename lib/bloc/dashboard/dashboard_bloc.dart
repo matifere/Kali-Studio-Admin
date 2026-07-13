@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'dart:math';
 import 'package:argrity/services/profile_cache.dart';
 
 part 'dashboard_event.dart';
@@ -25,6 +26,29 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
       // Las stats deben ser solo de la institución del usuario.
       final instId = ProfileCache.institutionId;
+
+      String? joinCode;
+      if (instId != null) {
+        try {
+          final instData = await supabase
+              .from('institutions')
+              .select('join_code')
+              .eq('id', instId)
+              .maybeSingle();
+          joinCode = instData?['join_code'] as String?;
+          if (joinCode == null || joinCode.isEmpty) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            final rnd = Random();
+            joinCode = String.fromCharCodes(Iterable.generate(
+                8, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+            await supabase
+                .from('institutions')
+                .update({'join_code': joinCode}).eq('id', instId);
+          }
+        } catch (e) {
+          // Si falla la generación/lectura del código, no bloqueamos el dashboard
+        }
+      }
 
       // Ambas queries en paralelo
       var sessionsQuery = supabase
@@ -96,6 +120,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         capacidadTotalHoy: capacidadTotal,
         ingresosMensuales: ingresos,
         vencimientosProximos: vencimientosProximos,
+        joinCode: joinCode,
         isLoading: false,
         hasLoaded: true,
       ));

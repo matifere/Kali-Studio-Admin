@@ -8,7 +8,6 @@ import 'package:argrity/widgets/alumnos/student_avatar.dart';
 import 'package:argrity/widgets/common/kali_icon_button.dart';
 import 'package:argrity/widgets/alumnos/student_profile_dialog.dart';
 import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
-import 'package:argrity/widgets/alumnos/access_code_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Fila de la tabla que representa a un alumno.
@@ -229,17 +228,6 @@ class _StudentRowState extends State<StudentRow> {
                           context: context,
                           builder: (context) =>
                               StudentProfileDialog(student: s),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    KaliIconButton.action(
-                      Icons.key_rounded,
-                      tooltip: 'Código de acceso',
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AccessCodeDialog(student: s),
                         );
                       },
                     ),

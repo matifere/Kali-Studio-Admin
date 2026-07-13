@@ -9,6 +9,7 @@ class DashboardState {
   final bool isLoading;
   final bool hasLoaded;
   final String? error;
+  final String? joinCode;
 
   DashboardState({
     this.turnosActivosHoy = 0,
@@ -19,6 +20,7 @@ class DashboardState {
     this.isLoading = false,
     this.hasLoaded = false,
     this.error,
+    this.joinCode,
   });
 
   DashboardState copyWith({
@@ -30,6 +32,7 @@ class DashboardState {
     bool? isLoading,
     bool? hasLoaded,
     String? error,
+    String? joinCode,
   }) {
     return DashboardState(
       turnosActivosHoy: turnosActivosHoy ?? this.turnosActivosHoy,
@@ -40,6 +43,7 @@ class DashboardState {
       isLoading: isLoading ?? this.isLoading,
       hasLoaded: hasLoaded ?? this.hasLoaded,
       error: error,
+      joinCode: joinCode ?? this.joinCode,
     );
   }
 
