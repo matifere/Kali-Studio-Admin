@@ -30,13 +30,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       String? joinCode;
       if (instId != null) {
         try {
+          print('DASHBOARD: instId is $instId');
           final instData = await supabase
               .from('institutions')
               .select('join_code')
               .eq('id', instId)
               .maybeSingle();
+          print('DASHBOARD: instData is $instData');
           joinCode = instData?['join_code'] as String?;
           if (joinCode == null || joinCode.isEmpty) {
+            print('DASHBOARD: joinCode is null/empty, generating new one...');
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             final rnd = Random();
             joinCode = String.fromCharCodes(Iterable.generate(
@@ -44,10 +47,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
             await supabase
                 .from('institutions')
                 .update({'join_code': joinCode}).eq('id', instId);
+            print('DASHBOARD: generated and updated joinCode: $joinCode');
+          } else {
+            print('DASHBOARD: found existing joinCode: $joinCode');
           }
         } catch (e) {
-          // Si falla la generación/lectura del código, no bloqueamos el dashboard
+          print('DASHBOARD ERROR IN QR: $e');
         }
+      } else {
+        print('DASHBOARD: instId is NULL');
       }
 
       // Ambas queries en paralelo
@@ -114,6 +122,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         ingresos += price.toDouble();
       }
 
+      print('DASHBOARD: Emitting state with joinCode: $joinCode, ingresos: $ingresos');
       emit(state.copyWith(
         turnosActivosHoy: turnosHoy,
         alumnosPresentesHoy: alumnosPresentes,
@@ -125,6 +134,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         hasLoaded: true,
       ));
     } catch (e) {
+      print('DASHBOARD BLOC ERROR: $e');
       emit(state.copyWith(
         isLoading: false,
         error: 'Error al cargar estadísticas: $e',
