@@ -7,6 +7,8 @@ import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:argrity/utils/oauth_helper.dart';
 import 'package:argrity/utils/mp_utils.dart';
+import 'package:argrity/widgets/kali_text_field.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,10 +18,51 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController nameControl = TextEditingController();
+  final TextEditingController emailControl = TextEditingController();
+  final TextEditingController contraControl = TextEditingController();
+  final TextEditingController confirmContraControl = TextEditingController();
+  bool _isPassObscured = true;
+  bool _isConfirmPassObscured = true;
+
+  @override
+  void dispose() {
+    nameControl.dispose();
+    emailControl.dispose();
+    contraControl.dispose();
+    confirmContraControl.dispose();
+    super.dispose();
+  }
+
+  void _handleRegister(BuildContext context) {
+    if (nameControl.text.trim().isEmpty ||
+        emailControl.text.trim().isEmpty ||
+        contraControl.text.isEmpty ||
+        confirmContraControl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor llena todos los campos')),
+      );
+      return;
+    }
+
+    if (contraControl.text != confirmContraControl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Las contraseñas no coinciden')),
+      );
+      return;
+    }
+
+    context.read<AuthBloc>().add(AuthRegisterRequested(
+          fullName: nameControl.text.trim(),
+          email: emailControl.text.trim(),
+          password: contraControl.text,
+        ));
+  }
+
   Future<void> _handleMercadoPagoRegister(BuildContext context) async {
     const String clientId = '5257839397807870';
     final String redirectUri = getMpRedirectUri();
-    
+
     if (kIsWeb) {
       // Pasamos la URL pero evitando que empiece con http:// o https:// porque el WAF de MP lo bloquea
       String appRedirect = Uri.base.origin;
@@ -37,7 +80,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (!await launchUrl(url, webOnlyWindowName: '_self')) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
         }
       }
     } else {
@@ -46,8 +90,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await handleDesktopOAuth(clientId, redirectUri);
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Error: $e')));
         }
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin(BuildContext context) async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? Uri.base.origin : null,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -101,47 +160,121 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              "Únete utilizando tu cuenta de Mercado Pago para configurar el acceso administrativo al portal del estudio.",
+              "Crea tu cuenta de administrador usando tu correo o con Mercado Pago.",
               style: kaliColors.body(
                 kaliColors.clayDark,
                 size: 14,
               ),
             ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.shade200),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      "Esta sección está destinada exclusivamente a los administradores. Si sos un entrenador, debes iniciar sesión con las credenciales provistas por un administrador.",
-                      style: TextStyle(
-                        color: Colors.amber.shade900,
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: KaliTextField(
+                    label: "NOMBRE COMPLETO",
+                    hint: "Juan Pérez",
+                    controller: nameControl,
+                    suffixIcon: Icons.person_outline,
                   ),
-                ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: KaliTextField(
+                    label: "EMAIL",
+                    hint: "tu@ejemplo.com",
+                    controller: emailControl,
+                    suffixIcon: Icons.mail_outline,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: KaliTextField(
+                    label: "CONTRASEÑA",
+                    hint: "••••••••",
+                    controller: contraControl,
+                    obscureText: _isPassObscured,
+                    suffixIcon: _isPassObscured
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    onSuffixTap: () =>
+                        setState(() => _isPassObscured = !_isPassObscured),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: KaliTextField(
+                    label: "CONFIRMAR",
+                    hint: "••••••••",
+                    controller: confirmContraControl,
+                    obscureText: _isConfirmPassObscured,
+                    suffixIcon: _isConfirmPassObscured
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    onSuffixTap: () => setState(
+                        () => _isConfirmPassObscured = !_isConfirmPassObscured),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: FilledButton(
+                onPressed: isLoading ? null : () => _handleRegister(context),
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(27),
+                  ),
+                ),
+                child: isLoading
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: kaliColors.warmWhite,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "CREAR CUENTA",
+                        style: kaliColors.label(kaliColors.warmWhite).copyWith(
+                              fontSize: 12,
+                              letterSpacing: 2,
+                            ),
+                      ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Expanded(child: Divider()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "O",
+                    style: kaliColors.body(kaliColors.clayDark, size: 12),
+                  ),
+                ),
+                const Expanded(child: Divider()),
+              ],
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: isLoading ? null : () => _handleMercadoPagoRegister(context),
+                onPressed: isLoading
+                    ? null
+                    : () => _handleMercadoPagoRegister(context),
                 icon: isLoading
                     ? const SizedBox.shrink()
-                    : const Icon(Icons.account_balance_wallet, size: 24), // Ícono representativo de billetera
+                    : const Icon(Icons.account_balance_wallet,
+                        size: 24), // Ícono representativo de billetera
                 label: isLoading
                     ? SizedBox(
                         width: 24,
@@ -159,9 +292,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                       ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF009EE3), // Azul oficial de Mercado Pago
+                  backgroundColor:
+                      const Color(0xFF009EE3), // Azul oficial de Mercado Pago
                   foregroundColor: Colors.white,
                   elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(27),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: isLoading ? null : () => _handleGoogleLogin(context),
+                icon: isLoading
+                    ? const SizedBox.shrink()
+                    : Image.network(
+                        'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png',
+                        height: 24,
+                      ),
+                label: isLoading
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: kaliColors.clay,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        "REGISTRARSE CON GOOGLE",
+                        style: kaliColors.label(kaliColors.espresso).copyWith(
+                              fontSize: 12,
+                              letterSpacing: 2,
+                            ),
+                      ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: kaliColors.espresso,
+                  elevation: 0,
+                  side: BorderSide(color: Colors.grey.shade300),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(27),
                   ),
@@ -236,6 +409,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // lado; en celular, una sola columna con el formulario a ancho completo.
         final bool isWide = MediaQuery.of(context).size.width >= 800;
         return Scaffold(
+          appBar: AppBar(),
           backgroundColor: kaliColors.background,
           body: Center(
             child: SingleChildScrollView(

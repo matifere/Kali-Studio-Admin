@@ -66,6 +66,19 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin(BuildContext context) async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? Uri.base.origin : null,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
   Future<void> _handleForgotPassword() async {
     final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
     final emailCtrl = TextEditingController(text: emailControl.text.trim());
@@ -420,6 +433,47 @@ class _LoginScreenState extends State<LoginScreen> {
                                       backgroundColor: const Color(0xFF009EE3), // Azul oficial de Mercado Pago
                                       foregroundColor: Colors.white,
                                       elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(27),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 54,
+                                  child: ElevatedButton.icon(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () => _handleGoogleLogin(context),
+                                    icon: isLoading
+                                        ? const SizedBox.shrink()
+                                        : Image.network(
+                                            'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png',
+                                            height: 24,
+                                          ),
+                                    label: isLoading
+                                        ? SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              color: kaliColors.clay,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Text(
+                                            "INICIAR SESIÓN CON GOOGLE",
+                                            style: kaliColors.label(kaliColors.espresso).copyWith(
+                                                  fontSize: 12,
+                                                  letterSpacing: 2,
+                                                ),
+                                          ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: kaliColors.espresso,
+                                      elevation: 0,
+                                      side: BorderSide(color: Colors.grey.shade300),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(27),
                                       ),
