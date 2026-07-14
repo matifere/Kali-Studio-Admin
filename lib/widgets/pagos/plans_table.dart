@@ -1,3 +1,9 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:argrity/utils/oauth_helper.dart';
+import 'package:argrity/utils/mp_utils.dart';
+import 'package:argrity/services/profile_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:argrity/theme/kali_colors_extension.dart';
@@ -17,6 +23,7 @@ class _PlansTableState extends State<PlansTable> {
   List<Map<String, dynamic>> _plans = [];
   bool _isLoading = true;
   String? _error;
+  bool _hasMpToken = true;
 
   @override
   void initState() {
@@ -32,9 +39,27 @@ class _PlansTableState extends State<PlansTable> {
           .select(
               'id, name, description, price, currency, max_reservations_per_month, is_active')
           .order('name', ascending: true);
+      final instId = ProfileCache.institutionId;
+      bool hasMpToken = true;
+      if (instId != null) {
+        try {
+          final instRes = await Supabase.instance.client
+              .from('institutions')
+              .select('mp_token_secret_name')
+              .eq('id', instId)
+              .maybeSingle();
+          if (instRes != null) {
+            hasMpToken = instRes['mp_token_secret_name'] != null;
+          }
+        } catch (_) {
+          // Si falla por RLS o no existe la columna, asumimos true por defecto o lo manejamos silenciando
+        }
+      }
+
       if (mounted) {
         setState(() {
           _plans = List<Map<String, dynamic>>.from(res);
+          _hasMpToken = hasMpToken;
           _isLoading = false;
         });
       }
@@ -44,6 +69,40 @@ class _PlansTableState extends State<PlansTable> {
           _error = 'Error al cargar planes: $e';
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  Future<void> _handleMercadoPagoLink(BuildContext context) async {
+    const String clientId = '5257839397807870';
+    final String redirectUri = getMpRedirectUri();
+    
+    if (kIsWeb) {
+      String appRedirect = Uri.base.origin;
+      String encodedState = base64Url.encode(utf8.encode(appRedirect));
+      final Uri url = Uri.https(
+        'auth.mercadopago.com',
+        '/authorization',
+        {
+          'client_id': clientId,
+          'response_type': 'code',
+          'platform_id': 'mp',
+          'redirect_uri': redirectUri,
+          'state': 'b64:$encodedState',
+        },
+      );
+      if (!await launchUrl(url, webOnlyWindowName: '_self')) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir Mercado Pago')));
+        }
+      }
+    } else {
+      try {
+        await handleDesktopOAuth(clientId, redirectUri);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
       }
     }
   }
@@ -259,9 +318,28 @@ class _PlansTableState extends State<PlansTable> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Planes del Estudio',
-            style: kaliColors.headingItalic(kaliColors.espresso, size: 22),
+          Row(
+            children: [
+              Text(
+                'Planes del Estudio',
+                style: kaliColors.headingItalic(kaliColors.espresso, size: 22),
+              ),
+              if (!_hasMpToken && !_isLoading) ...[
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  onPressed: () => _handleMercadoPagoLink(context),
+                  icon: const Icon(Icons.link, size: 16),
+                  label: const Text('Vincular Mercado Pago'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF009EE3),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    elevation: 0,
+                  ),
+                ),
+              ],
+            ],
           ),
           Row(
             children: [
