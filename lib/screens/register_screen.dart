@@ -34,6 +34,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  Future<void> _confirmAdminRole(BuildContext context, VoidCallback onConfirm) async {
+    final kaliColors = Theme.of(context).extension<KaliColorsExtension>()!;
+    final isTrainer = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: kaliColors.warmWhite,
+        title: Text(
+          "¿Eres Administrador?",
+          style: kaliColors.heading(kaliColors.espresso),
+        ),
+        content: Text(
+          "El registro de usuario está pensado únicamente para los administradores del estudio. Si eres un entrenador, debes esperar a que tu administrador cree tu cuenta y te asigne las credenciales correspondientes.",
+          style: kaliColors.body(kaliColors.clayDark, size: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              "Soy entrenador",
+              style: kaliColors.label(kaliColors.clayDark),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: FilledButton.styleFrom(
+              backgroundColor: kaliColors.espresso,
+            ),
+            child: Text(
+              "Soy administrador",
+              style: kaliColors.label(kaliColors.warmWhite),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (isTrainer == false) {
+      onConfirm();
+    } else if (isTrainer == true) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
   void _handleRegister(BuildContext context) {
     if (nameControl.text.trim().isEmpty ||
         emailControl.text.trim().isEmpty ||
@@ -52,11 +98,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    context.read<AuthBloc>().add(AuthRegisterRequested(
-          fullName: nameControl.text.trim(),
-          email: emailControl.text.trim(),
-          password: contraControl.text,
-        ));
+    _confirmAdminRole(context, () {
+      context.read<AuthBloc>().add(AuthRegisterRequested(
+            fullName: nameControl.text.trim(),
+            email: emailControl.text.trim(),
+            password: contraControl.text,
+          ));
+    });
   }
 
   Future<void> _handleMercadoPagoRegister(BuildContext context) async {
@@ -270,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: ElevatedButton.icon(
                 onPressed: isLoading
                     ? null
-                    : () => _handleMercadoPagoRegister(context),
+                    : () => _confirmAdminRole(context, () => _handleMercadoPagoRegister(context)),
                 icon: isLoading
                     ? const SizedBox.shrink()
                     : const Icon(Icons.account_balance_wallet,
@@ -307,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               width: double.infinity,
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: isLoading ? null : () => _handleGoogleLogin(context),
+                onPressed: isLoading ? null : () => _confirmAdminRole(context, () => _handleGoogleLogin(context)),
                 icon: isLoading
                     ? const SizedBox.shrink()
                     : Image.network(

@@ -296,25 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           spacing: 28,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: kaliColors.sand,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.badge_outlined, color: kaliColors.clayDark, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      "Entrenadores: Usá las credenciales provistas por tu administrador.",
-                                      style: kaliColors.body(kaliColors.clayDark, size: 13),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+
                             KaliTextField(
                               label: "EMAIL",
                               hint: "tu@ejemplo.com",
@@ -381,30 +363,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber.shade50,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.amber.shade200),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.admin_panel_settings_outlined, color: Colors.amber.shade800, size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          "Administradores: Ingresá con tu cuenta de Mercado Pago asociada al estudio.",
-                                          style: TextStyle(
-                                            color: Colors.amber.shade900,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
+
                                 SizedBox(
                                   width: double.infinity,
                                   height: 54,
