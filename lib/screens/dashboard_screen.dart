@@ -132,9 +132,10 @@ class _DashboardHomeState extends State<_DashboardHome> {
     return 'Buenas noches,';
   }
 
-  Widget _buildJoinCode(BuildContext context, String? code, KaliColorsExtension kaliColors) {
+  Widget _buildJoinCode(
+      BuildContext context, String? code, KaliColorsExtension kaliColors) {
     if (code == null) return const SizedBox.shrink();
-    final formatted = code.length == 8 ? '${code.substring(0,4)}-${code.substring(4)}' : code;
+    final formatted = code;
     return Container(
       margin: const EdgeInsets.only(top: 24),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -152,17 +153,25 @@ class _DashboardHomeState extends State<_DashboardHome> {
               color: kaliColors.warmWhite,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.qr_code_2_rounded, color: kaliColors.espresso.withValues(alpha: 0.8)),
+            child: Icon(Icons.qr_code_2_rounded,
+                color: kaliColors.espresso.withValues(alpha: 0.8)),
           ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Código de acceso para alumnos', style: kaliColors.label(kaliColors.espresso.withValues(alpha: 0.8))),
+              Text('Código de acceso para alumnos',
+                  style: kaliColors
+                      .label(kaliColors.espresso.withValues(alpha: 0.8))),
               const SizedBox(height: 2),
               SelectableText(
                 formatted,
-                style: TextStyle(fontFamily: 'monospace', fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 2, color: kaliColors.espresso),
+                style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: kaliColors.espresso),
               ),
             ],
           ),
@@ -174,7 +183,8 @@ class _DashboardHomeState extends State<_DashboardHome> {
               await Clipboard.setData(ClipboardData(text: formatted));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Código copiado al portapapeles')),
+                  const SnackBar(
+                      content: Text('Código copiado al portapapeles')),
                 );
               }
             },
@@ -182,7 +192,8 @@ class _DashboardHomeState extends State<_DashboardHome> {
           const SizedBox(width: 8),
           IconButton(
             tooltip: 'Ver código QR',
-            icon: Icon(Icons.qr_code_scanner_rounded, color: kaliColors.clayDark),
+            icon:
+                Icon(Icons.qr_code_scanner_rounded, color: kaliColors.clayDark),
             onPressed: () {
               showDialog(
                 context: context,
@@ -230,7 +241,8 @@ class _DashboardHomeState extends State<_DashboardHome> {
                     BlocBuilder<DashboardBloc, DashboardState>(
                       builder: (context, state) {
                         if (state.isLoading) return const SizedBox.shrink();
-                        return _buildJoinCode(context, state.joinCode, kaliColors);
+                        return _buildJoinCode(
+                            context, state.joinCode, kaliColors);
                       },
                     ),
                     const SizedBox(height: 32),
