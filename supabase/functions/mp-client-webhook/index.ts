@@ -21,12 +21,40 @@ Deno.serve(async (req) => {
       return new Response("Missing institution_id", { status: 400 });
     }
 
-    const payload = await req.json().catch(() => ({}));
-    console.log(`[mp-client-webhook] type=${payload.type} action=${payload.action}`);
+    let payload = null;
+    try {
+      payload = await req.json();
+      console.log(`[mp-client-webhook] Payload JSON:`, JSON.stringify(payload));
+    } catch (e) {
+      console.log(`[mp-client-webhook] No JSON body, checking query params`);
+    }
 
-    // Solo nos interesan los pagos
-    if (payload.type === "payment" && payload.data?.id) {
-      const paymentId = payload.data.id;
+    let paymentId = "";
+
+    // 1. Intentar sacar el paymentId del JSON
+    if (payload) {
+      if ((payload.type === "payment" || payload.topic === "payment") && payload.data?.id) {
+        paymentId = payload.data.id;
+      } else if (payload.action && payload.action.startsWith("payment.") && payload.data?.id) {
+        paymentId = payload.data.id;
+      }
+    }
+
+    // 2. Fallback: Intentar sacarlo de los Query Params (Formato IPN antiguo)
+    if (!paymentId) {
+      const topic = url.searchParams.get("topic") || url.searchParams.get("type");
+      if (topic === "payment") {
+        paymentId = url.searchParams.get("id") || url.searchParams.get("data.id") || "";
+        console.log(`[mp-client-webhook] Detectado por query param: topic=${topic} id=${paymentId}`);
+      }
+    }
+
+    if (!paymentId) {
+      console.log("[mp-client-webhook] Ignorando evento: no es un pago o falta ID");
+      return new Response("OK", { status: 200, headers: corsHeaders });
+    }
+
+    if (paymentId) {
 
       const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
       const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
