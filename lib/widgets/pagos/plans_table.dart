@@ -248,6 +248,30 @@ class _PlansTableState extends State<PlansTable> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(kaliColors),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kaliColors.sand,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: kaliColors.clay.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline_rounded, color: kaliColors.espresso, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Información sobre pagos: Si optas por automatizar cobros con Mercado Pago, tené en cuenta que existen comisiones por transacción y el dinero puede demorar en liberarse según tu cuenta. Siempre tenés la opción de no automatizar y coordinar pagos por transferencia bancaria u otros medios.',
+                      style: kaliColors.body(kaliColors.espresso, size: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(40.0),
