@@ -182,11 +182,16 @@ class TurnosRepository {
   }) async {
     final inserts = <Map<String, dynamic>>[];
 
-    // 1. Inscripción actual focalizada
+    // 1. Inscripción actual focalizada. Si el alumno ya tuvo una reserva en
+    //    esta clase (p. ej. la canceló), la fila sigue existiendo por la
+    //    constraint unique_user_session: el upsert la reactiva en vez de
+    //    chocar con un INSERT duplicado.
     inserts.add({
       'user_id': userId,
       'session_id': session.id,
       'status': 'confirmed',
+      'cancelled_at': null,
+      'cancelled_by': null,
     });
 
     // 2. Si marcamos recurrencia, proyectamos sobre las clases futuras de la
@@ -270,6 +275,8 @@ class TurnosRepository {
                 'user_id': userId,
                 'session_id': sessionId,
                 'status': 'confirmed',
+                'cancelled_at': null,
+                'cancelled_by': null,
               });
               resCount[som] = currCount + 1;
               enrolledSessionIds.add(sessionId);
@@ -280,7 +287,9 @@ class TurnosRepository {
     }
 
     if (inserts.isNotEmpty) {
-      await _client.from('reservations').insert(inserts);
+      await _client
+          .from('reservations')
+          .upsert(inserts, onConflict: 'user_id,session_id');
     }
   }
 
