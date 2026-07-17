@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/activity/activity_bloc.dart';
 import 'package:argrity/models/class_session.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/repositories/turnos_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'turnos_event.dart';
 part 'turnos_state.dart';
@@ -11,6 +14,8 @@ part 'turnos_state.dart';
 class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
   final ActivityBloc? _activityBloc;
   final TurnosRepository _repository;
+  RealtimeChannel? _realtimeChannel;
+  Timer? _realtimeDebounce;
 
   TurnosBloc({ActivityBloc? activityBloc, required TurnosRepository repository})
       : _activityBloc = activityBloc,
@@ -28,6 +33,39 @@ class TurnosBloc extends Bloc<TurnosEvent, TurnosState> {
     on<TurnoStudentAttendanceToggled>(_onTurnoStudentAttendanceToggled);
     on<TurnosFilterChanged>(_onFilterChanged);
     on<HolidayAdded>(_onHolidayAdded);
+    _initRealtime();
+  }
+
+  void _initRealtime() {
+    _realtimeChannel = Supabase.instance.client
+        .channel('turnos_calendar')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'reservations',
+            callback: (_) => _scheduleRealtimeReload())
+        .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'class_sessions',
+            callback: (_) => _scheduleRealtimeReload())
+      ..subscribe();
+  }
+
+  // Los eventos llegan en ráfagas (p. ej. una inscripción recurrente inserta
+  // varias reservas); el debounce colapsa la ráfaga en una sola recarga.
+  void _scheduleRealtimeReload() {
+    _realtimeDebounce?.cancel();
+    _realtimeDebounce = Timer(const Duration(milliseconds: 400), () {
+      if (!isClosed) add(TurnosLoadRequested(state.currentWeekStart));
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _realtimeDebounce?.cancel();
+    _realtimeChannel?.unsubscribe();
+    return super.close();
   }
 
   Future<void> _onHolidayAdded(
