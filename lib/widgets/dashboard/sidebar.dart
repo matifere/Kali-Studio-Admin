@@ -105,9 +105,9 @@ class _DashboardSidebarState extends State<DashboardSidebar> {
                                                 ),
                                               )
                                             : Image.asset(
-                                                'assets/images/argity_logo.png',
-                                                width: 40,
-                                                height: 40,
+                                                'assets/images/logo_naranja.png',
+                                                width: 32,
+                                                height: 32,
                                                 fit: BoxFit.contain,
                                               ),
                                         const SizedBox(width: 12),

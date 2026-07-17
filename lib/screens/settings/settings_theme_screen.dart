@@ -93,8 +93,13 @@ class SettingsThemeScreen extends StatelessWidget {
               children: [
                 _ThemeCard(
                   themeId: 'default',
-                  title: 'Café (Default)',
+                  title: 'Nuevo (Default)',
                   themeColors: KaliColorsExtension.defaultTheme,
+                ),
+                _ThemeCard(
+                  themeId: 'classic',
+                  title: 'Café (Clásico)',
+                  themeColors: KaliColorsExtension.classicTheme,
                 ),
                 _ThemeCard(
                   themeId: 'ocean',

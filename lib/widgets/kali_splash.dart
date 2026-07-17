@@ -56,7 +56,7 @@ class _KaliSplashState extends State<KaliSplash>
               ScaleTransition(
                 scale: _scale,
                 child: Image.asset(
-                  'assets/images/argity_logo.png',
+                  'assets/images/logo_naranja.png',
                   width: 96,
                   height: 96,
                   fit: BoxFit.contain,

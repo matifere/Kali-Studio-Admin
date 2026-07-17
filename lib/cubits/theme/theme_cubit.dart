@@ -67,6 +67,9 @@ class ThemeCubit extends Cubit<ThemeState> {
       case 'magenta':
         colors = isDarkMode ? KaliColorsExtension.magentaDarkTheme : KaliColorsExtension.magentaTheme;
         break;
+      case 'classic':
+        colors = isDarkMode ? KaliColorsExtension.classicDarkTheme : KaliColorsExtension.classicTheme;
+        break;
       case 'default':
       default:
         colors = isDarkMode ? KaliColorsExtension.darkTheme : KaliColorsExtension.defaultTheme;

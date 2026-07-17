@@ -13,6 +13,9 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
   final Color sageLight;
   final Color warmWhite;
   final Color background;
+  final Color error;
+  final Color warning;
+  final Color success;
 
   const KaliColorsExtension({
     required this.typography,
@@ -26,11 +29,14 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     required this.sageLight,
     required this.warmWhite,
     required this.background,
+    this.error = const Color(0xFFFF5F57),
+    this.warning = const Color(0xFFFFBD2E),
+    this.success = const Color(0xFF28CA41),
   });
 
   // ─── Variantes predefinidas ───────────────────────────────────────────────
 
-  static final KaliColorsExtension defaultTheme = KaliColorsExtension(
+  static final KaliColorsExtension classicTheme = KaliColorsExtension(
     espresso: Color(0xFF2C1F14),
     espressoL: Color(0xFF3D2B1A),
     clay: Color(0xFFC4A882),
@@ -44,7 +50,7 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     typography: KaliTypography.defaultTypography,
   );
 
-  static final KaliColorsExtension darkTheme = KaliColorsExtension(
+  static final KaliColorsExtension classicDarkTheme = KaliColorsExtension(
     espresso: Color(0xFFF5F0E8),
     espressoL: Color(0xFF37474F),
     clay: Color(0xFFC4A882), // Accent keeping brand identity
@@ -57,6 +63,36 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     background: Color(0xFF000000),
     typography: KaliTypography.darkTypography,
   );
+
+  // Nuevo tema predeterminado (Naranja Argity)
+  static final KaliColorsExtension defaultTheme = KaliColorsExtension(
+    espresso: Color(0xFF1A1814), // Casi negro con tinte cálido (textos fuertes)
+    espressoL: Color(0xFF5B4730), // Marrón oscuro (textos secundarios)
+    clay: Color(0xFFF5A623), // Naranja Argity (acento)
+    clayDark: Color(0xFFE8960C), // Naranja oscuro
+    sand: Color(0xFFF1EDE6), // Fondos de tarjetas
+    sand2: Color(0xFFE8E0D2), // Beige medio
+    sage: Color(0xFFA08F7D), // Marrones apagados / grisáceos
+    sageLight: Color(0xFFEDE8DF),
+    warmWhite: Color(0xFFFAF7F2), // Crema muy claro (fondo principal)
+    background: Color(0xFFFDFAF5), // Crema alternativo
+    typography: KaliTypography.defaultTypography,
+  );
+
+  static final KaliColorsExtension darkTheme = KaliColorsExtension(
+    espresso: Color(0xFFFAF7F2), // Texto principal claro
+    espressoL: Color(0xFFE8E0D2), // Texto secundario
+    clay: Color(0xFFF5A623), // Acento Naranja Argity (se mantiene)
+    clayDark: Color(0xFFE8960C),
+    sand: Color(0xFF2C2620), // Fondos de tarjetas oscuros
+    sand2: Color(0xFF383025), // Variantes de profundidad
+    sage: Color(0xFFA08060), // Textos muted / secundarios
+    sageLight: Color(0xFF7A6550),
+    warmWhite: Color(0xFF1A1814), // Fondo oscuro principal
+    background: Color(0xFF25211B), // Fondo oscuro secundario / profundidad
+    typography: KaliTypography.darkTypography,
+  );
+
 
   static final KaliColorsExtension oceanTheme = KaliColorsExtension(
     espresso: Color(0xFF0D47A1),
@@ -154,6 +190,9 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
     Color? sageLight,
     Color? warmWhite,
     Color? background,
+    Color? error,
+    Color? warning,
+    Color? success,
     KaliTypography? typography,
   }) {
     return KaliColorsExtension(
@@ -167,6 +206,9 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
       sageLight: sageLight ?? this.sageLight,
       warmWhite: warmWhite ?? this.warmWhite,
       background: background ?? this.background,
+      error: error ?? this.error,
+      warning: warning ?? this.warning,
+      success: success ?? this.success,
       typography: typography ?? this.typography,
     );
   }
@@ -190,6 +232,9 @@ class KaliColorsExtension extends ThemeExtension<KaliColorsExtension> {
       sageLight: Color.lerp(sageLight, other.sageLight, t)!,
       warmWhite: Color.lerp(warmWhite, other.warmWhite, t)!,
       background: Color.lerp(background, other.background, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      success: Color.lerp(success, other.success, t)!,
       typography: typography.lerp(other.typography, t),
     );
   }

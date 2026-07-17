@@ -267,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Image.asset(
-                        'assets/images/argity_logo.png',
+                        'assets/images/logo_naranja.png',
                         width: 88,
                         height: 88,
                         fit: BoxFit.contain,
