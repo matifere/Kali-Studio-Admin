@@ -72,10 +72,12 @@ class _AssignStudentDialogState extends State<AssignStudentDialog> {
         }
       }
 
-      // 3. Fetch reservations for the month
+      // 3. Fetch reservations for the month (excluyendo canceladas; el .or
+      //    preserva las de status NULL legacy que cuentan como confirmadas).
       final resRes = await client
           .from('reservations')
-          .select('user_id, class_sessions!inner(date)')
+          .select('user_id, status, class_sessions!inner(date)')
+          .or('status.is.null,status.neq.cancelled')
           .gte('class_sessions.date', startIso)
           .lte('class_sessions.date', endIso);
 
