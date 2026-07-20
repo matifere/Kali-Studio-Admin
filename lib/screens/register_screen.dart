@@ -147,10 +147,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleGoogleLogin(BuildContext context) async {
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: kIsWeb ? Uri.base.origin : null,
-      );
+      if (kIsWeb) {
+        await Supabase.instance.client.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: Uri.base.origin,
+        );
+      } else {
+        await handleDesktopGoogleOAuth();
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
