@@ -10,6 +10,8 @@ import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/widgets/kali_splash.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/cubits/theme/theme_cubit.dart';
+import 'package:argrity/services/update_service.dart';
+import 'package:argrity/screens/force_update_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -33,15 +35,30 @@ class _AuthWrapperState extends State<AuthWrapper> {
   /// Mientras sea false, el stream listener NO puede sobreescribir _isActive
   /// para evitar la race condition que causa bypass del paywall.
   bool _subscriptionChecked = false;
+  
+  bool _updateChecked = false;
+  AppUpdateInfo? _updateInfo;
+
   StreamSubscription<List<Map<String, dynamic>>>? _profileSub;
   StreamSubscription<List<Map<String, dynamic>>>? _subscriptionSub;
 
   @override
   void initState() {
     super.initState();
-    _checkProfile().then((_) {
-      // Recién después de verificar la suscripción habilitamos el listener.
-      _listenProfileChanges();
+    // 1. Primero chequeamos actualizaciones bloqueantes
+    UpdateService.checkForUpdates().then((info) {
+      if (!mounted) return;
+      setState(() {
+        _updateChecked = true;
+        _updateInfo = info;
+      });
+
+      // 2. Si NO hay actualización obligatoria, continuamos el flujo normal
+      if (info == null) {
+        _checkProfile().then((_) {
+          _listenProfileChanges();
+        });
+      }
     });
   }
 
@@ -224,6 +241,17 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Esperamos a que termine el chequeo de actualizaciones
+    if (!_updateChecked) {
+      return const KaliSplash();
+    }
+
+    // 2. Si hay actualización, bloqueamos la app entera
+    if (_updateInfo != null) {
+      return ForceUpdateScreen(updateInfo: _updateInfo!);
+    }
+
+    // 3. Flujo normal de auth
     // Hasta que el perfil esté confirmado mostramos el splash con branding
     // en lugar de un scaffold en blanco.
     if (!_profileChecked) {
