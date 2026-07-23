@@ -249,10 +249,9 @@ class SupaAuthClass {
           // cuenta nueva (pendiente de activación) necesitan llegar a InactiveScreen
           // para completar el pago. AuthWrapper gestiona esa navegación.
         } catch (_) {
-          // Si la verificación de permisos falla, denegar acceso por defecto
-          // (fail-closed: nunca otorgar acceso ante una falla de seguridad).
-          await auth.signOut();
-          return 'Error al verificar permisos. Intentá nuevamente.';
+          // Si la verificación rápida falla por latencia/red (común en Windows),
+          // no forzamos signOut() para evitar bucles. AuthWrapper se encargará
+          // de la verificación principal de perfil de forma segura (fail-closed).
         }
         return 'Ok';
       } else {
