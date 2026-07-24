@@ -263,7 +263,7 @@ class _KaliAppViewState extends State<_KaliAppView> {
     return BlocBuilder<ThemeCubit, ThemeState>(builder: (context, themeState) {
       return MaterialApp(
         navigatorKey: _navigatorKey,
-        title: 'Argity',
+        title: 'ArgityTurnos',
         theme: themeState.themeData,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [

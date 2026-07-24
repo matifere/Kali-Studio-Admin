@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Kali Studio" "\0"
-            VALUE "FileDescription", "Kali Studio Admin" "\0"
+            VALUE "CompanyName", "ArgityTurnos" "\0"
+            VALUE "FileDescription", "ArgityTurnos" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "argrity" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Kali Studio. All rights reserved." "\0"
-            VALUE "OriginalFilename", "argrity.exe" "\0"
-            VALUE "ProductName", "Kali Studio Admin" "\0"
+            VALUE "InternalName", "argity_turnos" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 ArgityTurnos. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ArgityTurnos.exe" "\0"
+            VALUE "ProductName", "ArgityTurnos" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
