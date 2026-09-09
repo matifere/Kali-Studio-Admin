@@ -133,35 +133,63 @@ Deno.serve(async (req) => {
   }
 });
 
-// ── Desactiva institución y sus perfiles sudo ─────────────────────────────────
-async function deactivateInstitution(
-  supabase: ReturnType<typeof createClient>,
-  institutionId: string,
-  reason: string,
-) {
+// ── Desactiva institución o aplica plan futuro ─────────────────────────────────
+async function deactivateInstitution(supabase, institutionId, reason) {
   console.log(`[deactivateInstitution] institution=${institutionId} reason=${reason}`);
-
-  // Mapear estado de MP a estado interno
-  const internalStatus = reason === "cancelled" ? "cancelled"
-    : reason === "expired" ? "expired"
-    : reason === "paused" ? "paused"
-    : "cancelled"; // fallback para 'not_found', 'pending', etc.
-
-  await supabase
+  
+  const { data: sub } = await supabase
     .from("tenant_subscriptions")
-    .update({ status: internalStatus })
-    .eq("institution_id", institutionId);
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({ is_active: false })
+    .select("current_period_end, next_saas_plan_id")
     .eq("institution_id", institutionId)
-    .eq("role", "sudo");
+    .maybeSingle();
 
+  // Si tiene un vencimiento futuro, no cortamos acceso todavía
+  if (sub?.current_period_end) {
+    const end = new Date(sub.current_period_end);
+    if (end > new Date()) {
+      console.log(`[deactivateInstitution] El periodo vence el ${end.toISOString()}. Mantenemos acceso.`);
+      await supabase.from("tenant_subscriptions").update({ status: "cancelled" }).eq("institution_id", institutionId);
+      return;
+    }
+  }
+
+  // Si llegamos acá, el periodo terminó o no tenía. Verificamos si hay plan futuro.
+  if (sub?.next_saas_plan_id) {
+    console.log(`[deactivateInstitution] Periodo expirado, migrando al plan futuro: ${sub.next_saas_plan_id}`);
+    
+    // Obtenemos si el plan futuro es gratuito
+    const { data: nextPlan } = await supabase
+      .from("saas_plans")
+      .select("price")
+      .eq("id", sub.next_saas_plan_id)
+      .maybeSingle();
+      
+    if (nextPlan && Number(nextPlan.price) === 0) {
+      await supabase.from("tenant_subscriptions").update({
+        saas_plan_id: sub.next_saas_plan_id,
+        next_saas_plan_id: null,
+        status: "active",
+        mp_preapproval_id: null,
+        current_period_end: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString()
+      }).eq("institution_id", institutionId);
+      return; // Migrado a gratis, no desactivar
+    } else {
+      // Es un downgrade a plan pago (raro, pero posible). Queda inactivo a la espera de pago.
+      await supabase.from("tenant_subscriptions").update({
+        saas_plan_id: sub.next_saas_plan_id,
+        next_saas_plan_id: null,
+        status: "pending",
+        mp_preapproval_id: null
+      }).eq("institution_id", institutionId);
+    }
+  } else {
+    // Sin plan futuro, cancelar normalmente
+    const internalStatus = reason === "cancelled" ? "cancelled" : reason === "expired" ? "expired" : reason === "paused" ? "paused" : "cancelled";
+    await supabase.from("tenant_subscriptions").update({ status: internalStatus }).eq("institution_id", institutionId);
+  }
+
+  // Cortamos acceso
+  const { error } = await supabase.from("profiles").update({ is_active: false }).eq("institution_id", institutionId).eq("role", "sudo");
   if (error) console.error("[deactivateInstitution] Error al actualizar profiles:", error);
-
-  await supabase
-    .from("institutions")
-    .update({ is_active: false })
-    .eq("id", institutionId);
+  await supabase.from("institutions").update({ is_active: false }).eq("id", institutionId);
 }

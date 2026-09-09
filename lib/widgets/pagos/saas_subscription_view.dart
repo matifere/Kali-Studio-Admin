@@ -76,7 +76,7 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
       // 2. Fetch de la suscripción actual de la institución
       final subData = await Supabase.instance.client
           .from('tenant_subscriptions')
-          .select('*, saas_plans(*)')
+          .select('*, saas_plans!saas_plan_id(*)')
           .eq('institution_id', institutionId)
           .maybeSingle();
 
@@ -103,6 +103,43 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
     try {
+      final currentFeatures = _currentSubscription?['saas_plans']?['features'] as Map<String, dynamic>? ?? {};
+      final newFeatures = plan['features'] as Map<String, dynamic>? ?? {};
+      
+      bool isDowngrade = false;
+      for (final key in currentFeatures.keys) {
+        if (currentFeatures[key] == true && newFeatures[key] != true) {
+          isDowngrade = true;
+          break;
+        }
+      }
+
+      if (isDowngrade && _currentSubscription?['status'] == 'active') {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Confirmar Cambio'),
+              content: const Text('Estás eligiendo un plan con menos funcionalidades. Mantendrás los beneficios actuales hasta el final de tu ciclo de facturación, y luego pasarás al nuevo plan. ¿Deseas continuar?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Continuar'),
+                ),
+              ],
+            );
+          }
+        );
+        if (confirm != true) {
+          setState(() => _isProcessing = false);
+          return;
+        }
+      }
+
       final institutionId = ProfileCache.institutionId;
       if (institutionId == null) {
         throw Exception('Institución no encontrada.');
@@ -119,6 +156,17 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
       if (response.status != 200) {
         throw Exception(response.data['error'] ??
             'Error desconocido al crear la suscripción.');
+      }
+
+      final responseStatus = response.data['status'] as String?;
+      if (responseStatus == 'downgrade_scheduled') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.data['message'] ?? 'Cambio programado con éxito.')),
+          );
+          await _fetchData();
+        }
+        return;
       }
 
       final initPoint = response.data['init_point'] as String?;
@@ -442,20 +490,23 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${plan['price']}',
+                (plan['price'] == 0 || plan['price'] == '0' || plan['price'] == 0.0) 
+                    ? 'GRATIS' 
+                    : '\$${plan['price']}',
                 style: kaliColors.heading(
                     highlight ? kaliColors.warmWhite : kaliColors.espresso,
                     size: 40),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0, left: 4),
-                child: Text(
-                  '${plan['currency']}/${(plan['interval'] == 'year' || plan['billing_cycle'] == 'yearly' || (plan['name'] ?? '').toString().toLowerCase().contains('anual')) ? 'año' : 'mes'}',
-                  style: kaliColors.body(
-                      highlight ? kaliColors.sand : kaliColors.clayDark,
-                      size: 14),
+              if (!(plan['price'] == 0 || plan['price'] == '0' || plan['price'] == 0.0))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+                  child: Text(
+                    '${plan['currency']}/${(plan['interval'] == 'year' || plan['billing_cycle'] == 'yearly' || (plan['name'] ?? '').toString().toLowerCase().contains('anual')) ? 'año' : 'mes'}',
+                    style: kaliColors.body(
+                        highlight ? kaliColors.sand : kaliColors.clayDark,
+                        size: 14),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 32),

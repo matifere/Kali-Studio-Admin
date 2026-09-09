@@ -16,6 +16,7 @@ class ProfileCache {
 
   static bool _hasCustomThemes = false;
   static bool _hasCustomLogo = false;
+  static bool _hasNotifications = false;
 
   static final ValueNotifier<String?> institutionNameNotifier = ValueNotifier(null);
   static final ValueNotifier<String?> institutionLogoNotifier = ValueNotifier(null);
@@ -27,6 +28,7 @@ class ProfileCache {
   static bool get isSudo => _role == 'sudo';
   static bool get hasCustomThemes => _hasCustomThemes;
   static bool get hasCustomLogo => _hasCustomLogo;
+  static bool get hasNotifications => _hasNotifications;
 
   /// true si el caché fue poblado al menos una vez (sesión activa previa).
   static bool get isLoaded => _loaded;
@@ -61,6 +63,10 @@ class ProfileCache {
     _hasCustomLogo = value;
   }
 
+  static void updateHasNotifications(bool value) {
+    _hasNotifications = value;
+  }
+
   static void clear() {
     _role = 'client';
     _institutionId = null;
@@ -70,6 +76,7 @@ class ProfileCache {
     _isProfileDisabled = false;
     _hasCustomThemes = false;
     _hasCustomLogo = false;
+    _hasNotifications = false;
     institutionNameNotifier.value = null;
     institutionLogoNotifier.value = null;
   }

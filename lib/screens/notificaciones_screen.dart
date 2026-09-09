@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:argrity/bloc/alumnos/alumnos_bloc.dart';
 import 'package:argrity/bloc/notifications/notifications_cubit.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
+import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 
 class NotificacionesScreen extends StatefulWidget {
   const NotificacionesScreen({super.key});
@@ -144,8 +146,61 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                 ),
                 const SizedBox(height: 32),
                 
-                // Formulario principal
-                Container(
+                if (!ProfileCache.hasNotifications)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: kaliColors.warmWhite,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: kaliColors.espresso.withValues(alpha: 0.1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kaliColors.espresso.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.lock_outline_rounded, 
+                            size: 64, 
+                            color: kaliColors.espresso.withValues(alpha: 0.4)),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Función Premium',
+                          style: kaliColors.heading(kaliColors.espresso, size: 24),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'El envío de notificaciones automáticas y recordatorios a alumnos es una funcionalidad exclusiva de los planes premium.',
+                          textAlign: TextAlign.center,
+                          style: kaliColors.body(kaliColors.espresso.withValues(alpha: 0.7), size: 16),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            context.read<NavigationBloc>().add(
+                                  NavigationPageChanged('Suscripción'),
+                                );
+                          },
+                          icon: const Icon(Icons.star_rounded),
+                          label: const Text('Mejorar Plan'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kaliColors.espresso,
+                            foregroundColor: kaliColors.warmWhite,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  // Formulario principal
+                  Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: kaliColors.warmWhite,
@@ -440,6 +495,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                     ),
                   ),
                 ),
+                ],
               ],
             ),
           ),

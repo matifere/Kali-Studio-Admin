@@ -25,29 +25,30 @@ class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   Widget _buildCurrentPage(String page) {
+    // ignore: prefer_const_constructors
     switch (page) {
       case 'Alumnos':
-        return const AlumnosScreen();
+        return AlumnosScreen();
       case 'Entrenadores':
-        return const EntrenadoresScreen();
+        return EntrenadoresScreen();
       case 'Turnos':
-        return const TurnosScreen();
+        return TurnosScreen();
       case 'Rutinas':
-        return const RutinasScreen();
+        return RutinasScreen();
       case 'Notificaciones':
-        return const NotificacionesScreen();
+        return NotificacionesScreen();
       case 'Pagos':
-        return const PagosScreen(view: PagosView.alumnos);
+        return PagosScreen(view: PagosView.alumnos);
       case 'Planes':
-        return const PagosScreen(view: PagosView.planes);
+        return PagosScreen(view: PagosView.planes);
       case 'Cuenta':
-        return const SettingsAccountScreen();
+        return SettingsAccountScreen();
       case 'Institución':
-        return const SettingsInstitutionScreen();
+        return SettingsInstitutionScreen();
       case 'Suscripción':
-        return const SettingsSubscriptionScreen();
+        return SettingsSubscriptionScreen();
       case 'Tema':
-        return const SettingsThemeScreen();
+        return SettingsThemeScreen();
       default:
         return const _DashboardHome();
     }

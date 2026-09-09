@@ -112,13 +112,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final subData = await Supabase.instance.client
           .from('tenant_subscriptions')
-          .select('status, current_period_end, saas_plans(features)')
+          .select('status, current_period_end, saas_plans!saas_plan_id(features)')
           .eq('institution_id', institutionId)
           .maybeSingle();
 
       if (subData == null) {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
+        ProfileCache.updateHasNotifications(false);
         return false;
       }
 
@@ -128,9 +129,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
         final features = saasPlans['features'] as Map<String, dynamic>;
         ProfileCache.updateHasCustomThemes(features['custom_themes'] == true);
         ProfileCache.updateHasCustomLogo(features['custom_logo'] == true);
+        ProfileCache.updateHasNotifications(features['notifications'] == true);
       } else {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
+        ProfileCache.updateHasNotifications(false);
       }
 
       final status = subData['status'] as String?;
@@ -146,6 +149,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       // Fail-closed: ante cualquier error, denegar acceso
       ProfileCache.updateHasCustomThemes(false);
       ProfileCache.updateHasCustomLogo(false);
+      ProfileCache.updateHasNotifications(false);
       return false;
     }
   }
@@ -276,6 +280,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         },
       );
     }
-    return const DashboardScreen();
+    // ignore: prefer_const_constructors
+    return DashboardScreen();
   }
 }
