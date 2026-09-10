@@ -17,6 +17,8 @@ class ProfileCache {
   static bool _hasCustomThemes = false;
   static bool _hasCustomLogo = false;
   static bool _hasNotifications = false;
+  static int? _maxStudents;
+  static int? _maxCoaches;
 
   static final ValueNotifier<String?> institutionNameNotifier = ValueNotifier(null);
   static final ValueNotifier<String?> institutionLogoNotifier = ValueNotifier(null);
@@ -29,18 +31,22 @@ class ProfileCache {
   static bool get hasCustomThemes => _hasCustomThemes;
   static bool get hasCustomLogo => _hasCustomLogo;
   static bool get hasNotifications => _hasNotifications;
+  static int? get maxStudents => _maxStudents;
+  static int? get maxCoaches => _maxCoaches;
 
   /// true si el caché fue poblado al menos una vez (sesión activa previa).
   static bool get isLoaded => _loaded;
 
-  /// Último resultado conocido de is_active && suscripción válida.
-  /// Evita que AuthWrapper muestre InactiveScreen en un remount mientras
-  /// re-verifica el perfil de un usuario que ya estaba activo.
-  static bool get isActive => _isActive;
+  /// Combinación del estado de la institución/suscripción y la cuenta.
+  /// Si esto es false, el usuario no debe acceder a la app (InactiveScreen).
+  static bool get isActive => _isActive && !_isProfileDisabled;
   static bool get isProfileDisabled => _isProfileDisabled;
 
-  static void set(
-      {required String role, String? institutionId, String? fullName}) {
+  static void set({
+    required String role,
+    String? institutionId,
+    String? fullName,
+  }) {
     _role = role;
     _institutionId = institutionId;
     _fullName = fullName;
@@ -67,6 +73,14 @@ class ProfileCache {
     _hasNotifications = value;
   }
 
+  static void updateMaxStudents(int? value) {
+    _maxStudents = value;
+  }
+
+  static void updateMaxCoaches(int? value) {
+    _maxCoaches = value;
+  }
+
   static void clear() {
     _role = 'client';
     _institutionId = null;
@@ -77,6 +91,8 @@ class ProfileCache {
     _hasCustomThemes = false;
     _hasCustomLogo = false;
     _hasNotifications = false;
+    _maxStudents = null;
+    _maxCoaches = null;
     institutionNameNotifier.value = null;
     institutionLogoNotifier.value = null;
   }

@@ -249,7 +249,10 @@ class _EntrenadoresTableState extends State<EntrenadoresTable> {
             ),
           ),
           const SizedBox(width: 8),
-          AddTrainerButton(onTrainerCreated: _onTrainerCreated),
+          AddTrainerButton(
+            currentTrainerCount: _trainers.length,
+            onTrainerCreated: _onTrainerCreated,
+          ),
           const SizedBox(width: 8),
           KaliIconButton(
             Icons.refresh_rounded,

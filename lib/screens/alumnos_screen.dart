@@ -8,6 +8,7 @@ import 'package:argrity/widgets/alumnos/alumnos_stat_cards.dart';
 import 'package:argrity/widgets/alumnos/student_directory.dart';
 import 'package:argrity/widgets/alumnos/student_form_dialog.dart';
 import 'package:argrity/services/profile_cache.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 
 /// Pantalla de gestión de alumnos.
 ///
@@ -139,29 +140,63 @@ class _AddStudentButtonState extends State<_AddStudentButton> {
                 ]
               : [],
         ),
-        child: TextButton.icon(
-          onPressed: () {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => const StudentFormDialog(),
+        child: BlocBuilder<AlumnosBloc, AlumnosState>(
+          builder: (context, state) {
+            return TextButton.icon(
+              onPressed: () {
+                if (state is AlumnosLoaded) {
+                  final activeCount = state.students.where((s) => s.isActive).length;
+                  final maxLimit = ProfileCache.maxStudents;
+                  
+                  if (maxLimit != null && activeCount >= maxLimit) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(
+                          'Límite de Alumnos Alcanzado',
+                          style: kaliColors.heading(kaliColors.espresso),
+                        ),
+                        content: Text(
+                          'Tu plan actual te permite gestionar hasta $maxLimit alumnos activos. Para seguir creciendo, te recomendamos mejorar tu plan.',
+                          style: kaliColors.body(kaliColors.espresso),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              context.read<NavigationBloc>().add(NavigationPageChanged('Suscripción'));
+                            },
+                            child: const Text('Mejorar Plan'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+                }
+
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const StudentFormDialog(),
+                );
+              },
+              icon: Icon(Icons.add, color: kaliColors.warmWhite, size: 18),
+              label: Text(
+                'Nuevo Alumno',
+                style: kaliColors.body(kaliColors.warmWhite, size: 14)
+                    .copyWith(fontWeight: FontWeight.w600),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+              ),
             );
           },
-          icon: Icon(Icons.add, color: kaliColors.warmWhite, size: 18),
-          label: Text(
-            'Añadir Alumno',
-            style: kaliColors.body(
-              kaliColors.warmWhite,
-              weight: FontWeight.w600,
-              size: 13,
-            ),
-          ),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-          ),
         ),
       ),
     );

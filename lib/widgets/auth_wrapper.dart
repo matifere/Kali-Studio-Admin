@@ -120,20 +120,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
         ProfileCache.updateHasNotifications(false);
+        ProfileCache.updateMaxStudents(null);
+        ProfileCache.updateMaxCoaches(null);
         return false;
       }
 
-      // Procesar features del plan (ej. custom_themes)
       final saasPlans = subData['saas_plans'];
       if (saasPlans != null && saasPlans['features'] != null) {
         final features = saasPlans['features'] as Map<String, dynamic>;
         ProfileCache.updateHasCustomThemes(features['custom_themes'] == true);
         ProfileCache.updateHasCustomLogo(features['custom_logo'] == true);
         ProfileCache.updateHasNotifications(features['notifications'] == true);
+        ProfileCache.updateMaxStudents(features['max_students'] as int?);
+        ProfileCache.updateMaxCoaches(features['max_coaches'] as int?);
       } else {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
         ProfileCache.updateHasNotifications(false);
+        ProfileCache.updateMaxStudents(null);
+        ProfileCache.updateMaxCoaches(null);
       }
 
       final status = subData['status'] as String?;
@@ -150,6 +155,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
       ProfileCache.updateHasCustomThemes(false);
       ProfileCache.updateHasCustomLogo(false);
       ProfileCache.updateHasNotifications(false);
+      ProfileCache.updateMaxStudents(null);
+      ProfileCache.updateMaxCoaches(null);
       return false;
     }
   }
