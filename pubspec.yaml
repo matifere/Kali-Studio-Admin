@@ -28,6 +28,7 @@ dependencies:
   auto_size_text: ^3.0.0
   qr_flutter: ^4.1.0
   package_info_plus: ^9.0.1
+  lottie: ^3.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -49,4 +50,5 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/lottie/
   uses-material-design: true

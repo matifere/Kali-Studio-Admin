@@ -9,6 +9,7 @@ import 'package:argrity/services/chimpy_service.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
 import 'package:argrity/widgets/dashboard/chimpy_face.dart';
+import 'package:argrity/bloc/navigation/navigation_bloc.dart';
 
 /// Chimpy: el mono asistente del dashboard.
 ///
@@ -50,7 +51,44 @@ class ChimpyAssistant extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         GestureDetector(
-          onTap: onToggle,
+          onTap: () {
+            if (!open && !ProfileCache.hasChimpy) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Row(
+                    children: [
+                      const ChimpyFace(size: 32),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Conocé a Chimpy',
+                        style: kaliColors.heading(kaliColors.espresso),
+                      ),
+                    ],
+                  ),
+                  content: Text(
+                    'Chimpy es nuestro asistente con inteligencia artificial. Él analiza tus clases, alumnos y pagos en tiempo real para darte resúmenes y consejos sobre tu negocio.\n\nMejorá tu plan para desbloquear su ayuda.',
+                    style: kaliColors.body(kaliColors.espresso),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cerrar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<NavigationBloc>().add(NavigationPageChanged('Suscripción'));
+                      },
+                      child: const Text('Mejorar Plan'),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            }
+            onToggle();
+          },
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: Material(

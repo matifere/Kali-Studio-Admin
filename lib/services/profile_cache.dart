@@ -17,6 +17,7 @@ class ProfileCache {
   static bool _hasCustomThemes = false;
   static bool _hasCustomLogo = false;
   static bool _hasNotifications = false;
+  static bool _hasChimpy = false;
   static int? _maxStudents;
   static int? _maxCoaches;
 
@@ -31,6 +32,7 @@ class ProfileCache {
   static bool get hasCustomThemes => _hasCustomThemes;
   static bool get hasCustomLogo => _hasCustomLogo;
   static bool get hasNotifications => _hasNotifications;
+  static bool get hasChimpy => _hasChimpy;
   static int? get maxStudents => _maxStudents;
   static int? get maxCoaches => _maxCoaches;
 
@@ -73,6 +75,10 @@ class ProfileCache {
     _hasNotifications = value;
   }
 
+  static void updateHasChimpy(bool value) {
+    _hasChimpy = value;
+  }
+
   static void updateMaxStudents(int? value) {
     _maxStudents = value;
   }
@@ -91,6 +97,7 @@ class ProfileCache {
     _hasCustomThemes = false;
     _hasCustomLogo = false;
     _hasNotifications = false;
+    _hasChimpy = false;
     _maxStudents = null;
     _maxCoaches = null;
     institutionNameNotifier.value = null;

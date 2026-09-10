@@ -120,6 +120,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
         ProfileCache.updateHasNotifications(false);
+        ProfileCache.updateHasChimpy(false);
         ProfileCache.updateMaxStudents(null);
         ProfileCache.updateMaxCoaches(null);
         return false;
@@ -131,12 +132,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ProfileCache.updateHasCustomThemes(features['custom_themes'] == true);
         ProfileCache.updateHasCustomLogo(features['custom_logo'] == true);
         ProfileCache.updateHasNotifications(features['notifications'] == true);
+        ProfileCache.updateHasChimpy(features['chimpy'] == true);
         ProfileCache.updateMaxStudents(features['max_students'] as int?);
         ProfileCache.updateMaxCoaches(features['max_coaches'] as int?);
       } else {
         ProfileCache.updateHasCustomThemes(false);
         ProfileCache.updateHasCustomLogo(false);
         ProfileCache.updateHasNotifications(false);
+        ProfileCache.updateHasChimpy(false);
         ProfileCache.updateMaxStudents(null);
         ProfileCache.updateMaxCoaches(null);
       }
@@ -155,6 +158,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       ProfileCache.updateHasCustomThemes(false);
       ProfileCache.updateHasCustomLogo(false);
       ProfileCache.updateHasNotifications(false);
+      ProfileCache.updateHasChimpy(false);
       ProfileCache.updateMaxStudents(null);
       ProfileCache.updateMaxCoaches(null);
       return false;
