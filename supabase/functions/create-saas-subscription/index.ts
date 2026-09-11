@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
     }
 
     // === MODO PRUEBAS: SALTAR MERCADO PAGO PARA PLANES PAGOS ===
-    const SKIP_MP_TESTING = true; // CAMBIAR A FALSE EN PRODUCCIÓN
+    const SKIP_MP_TESTING = false; // CAMBIAR A FALSE EN PRODUCCIÓN
 
     if (SKIP_MP_TESTING && Number(plan.price) > 0) {
       console.log(`[create-saas-subscription] BYPASS MODO PRUEBAS: Activando plan ${plan.name} sin cobrar.`);
