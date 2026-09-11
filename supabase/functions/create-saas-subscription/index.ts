@@ -256,11 +256,7 @@ Deno.serve(async (req) => {
           frequency: plan.interval === "year" || plan.billing_cycle === "yearly" || plan.name?.toLowerCase().includes("anual") ? 12 : 1,
           frequency_type: "months",
           transaction_amount: Number(plan.price),
-          currency_id: plan.currency ?? "ARS",
-          free_trial: {
-            frequency: 14,
-            frequency_type: "days"
-          }
+          currency_id: plan.currency ?? "ARS"
         },
         back_url: backUrl,
         external_reference: institution_id,
