@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:argrity/services/profile_cache.dart';
 import 'package:argrity/theme/kali_colors_extension.dart';
+import 'package:argrity/widgets/auth_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -177,6 +178,19 @@ class _SaasSubscriptionViewState extends State<SaasSubscriptionView> {
         } else {
           throw Exception('No se pudo abrir el enlace de pago.');
         }
+      } else if (responseStatus == 'active') {
+        // Plan gratuito (sin init_point de MP)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('¡Plan gratuito activado con éxito!')),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AuthWrapper()),
+            (route) => false,
+          );
+        }
+        return;
       }
 
       if (mounted) {
