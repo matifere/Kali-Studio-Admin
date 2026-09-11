@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!MP_ACCESS_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Faltan variables de configuración en el servidor.");
+      throw new Error("Variables de entorno no configuradas.");
     }
 
     const { institution_id, saas_plan_id } = await req.json();
@@ -29,13 +29,22 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // La función corre con verify_jwt=false: validamos acá que el caller sea
-    // el sudo de la institución. Sin esto, cualquiera podría upsertear una
-    // tenant_subscription 'pending' (que AuthWrapper acepta como válida) para
-    // una institución arbitraria.
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    
+    // ==============================================================
+    // OPTIMIZACIÓN: Ejecutamos las consultas independientes en paralelo
+    // ==============================================================
+    const [
+      { data: userData, error: userError },
+      { data: plan, error: planError },
+      { data: currentSub }
+    ] = await Promise.all([
+      supabase.auth.getUser(token),
+      supabase.from("saas_plans").select("*").eq("id", saas_plan_id).single(),
+      supabase.from("tenant_subscriptions").select("status, mp_preapproval_id, saas_plans!saas_plan_id(features)").eq("institution_id", institution_id).maybeSingle()
+    ]);
+
     if (userError || !userData?.user) {
       return new Response(JSON.stringify({ error: "No autorizado" }), {
         status: 401,
@@ -43,6 +52,11 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (planError || !plan) {
+      throw new Error("El plan seleccionado no es válido o no existe.");
+    }
+
+    // Ahora verificamos permisos (depende de userData)
     const { data: callerProfile } = await supabase
       .from("profiles")
       .select("role, institution_id")
@@ -60,25 +74,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 1. Obtener datos del plan de nuestra DB
-    const { data: plan, error: planError } = await supabase
-      .from("saas_plans")
-      .select("*")
-      .eq("id", saas_plan_id)
-      .single();
-
-    if (planError || !plan) {
-      throw new Error("El plan seleccionado no es válido o no existe.");
-    }
-
     // === DETECCIÓN DE DOWNGRADE DE FUNCIONALIDADES ===
     let isDowngrade = false;
-    const { data: currentSub } = await supabase
-      .from("tenant_subscriptions")
-      .select("status, mp_preapproval_id, saas_plans!saas_plan_id(features)")
-      .eq("institution_id", institution_id)
-      .maybeSingle();
-
+    
     if (currentSub?.status === "active") {
       // Comparar features para ver si pierde alguna
       const oldFeatures = currentSub.saas_plans?.features || {};
@@ -129,17 +127,10 @@ Deno.serve(async (req) => {
 
     // 2. Manejo de planes gratuitos (evita error en Mercado Pago)
     if (Number(plan.price) === 0) {
-      // Verificamos si el usuario tenía una suscripción de pago y la cancelamos en MP
-      const { data: oldSub } = await supabase
-        .from("tenant_subscriptions")
-        .select("mp_preapproval_id, status")
-        .eq("institution_id", institution_id)
-        .maybeSingle();
-
-      if (oldSub?.status === "active" && oldSub.mp_preapproval_id) {
-        console.log(`[create-saas-subscription] Downgrade a GRATIS. Cancelando MP: ${oldSub.mp_preapproval_id}`);
+      if (currentSub?.status === "active" && currentSub.mp_preapproval_id) {
+        console.log(`[create-saas-subscription] Downgrade a GRATIS. Cancelando MP: ${currentSub.mp_preapproval_id}`);
         try {
-          const cancelRes = await fetch(`https://api.mercadopago.com/preapproval/${oldSub.mp_preapproval_id}`, {
+          const cancelRes = await fetch(`https://api.mercadopago.com/preapproval/${currentSub.mp_preapproval_id}`, {
             method: "PUT",
             headers: {
               "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
@@ -148,7 +139,7 @@ Deno.serve(async (req) => {
             body: JSON.stringify({ status: "cancelled" })
           });
           if (!cancelRes.ok) {
-            console.error(`Error cancelando en MP: ${cancelRes.status} ${await cancelRes.text()}`);
+            console.error(`Error cancelando en MP: ${cancelRes.status}`);
           }
         } catch (err) {
           console.error("Error en fetch de cancelación:", err);
@@ -190,17 +181,6 @@ Deno.serve(async (req) => {
     if (SKIP_MP_TESTING && Number(plan.price) > 0) {
       console.log(`[create-saas-subscription] BYPASS MODO PRUEBAS: Activando plan ${plan.name} sin cobrar.`);
       
-      const { data: oldSub } = await supabase
-        .from("tenant_subscriptions")
-        .select("mp_preapproval_id, status")
-        .eq("institution_id", institution_id)
-        .maybeSingle();
-
-      if (oldSub?.status === "active" && oldSub.mp_preapproval_id) {
-        // En pruebas no hace falta cancelar en MP real si saltamos MP, pero lo dejamos por consistencia
-        console.log(`[create-saas-subscription] Cancelando MP viejo en modo pruebas: ${oldSub.mp_preapproval_id}`);
-      }
-
       const { error: dbError } = await supabase
         .from("tenant_subscriptions")
         .upsert(
@@ -230,13 +210,6 @@ Deno.serve(async (req) => {
     // ==============================================================
 
     // 3. Crear un preapproval_plan en MP con el institution_id codificado en back_url.
-    //
-    // Usamos preapproval_plan directamente (sin preapproval individual) porque
-    // el endpoint /preapproval requiere permisos adicionales en cuentas de prueba.
-    //
-    // El institution_id se pasa en el back_url para que el webhook pueda
-    // identificar qué institución completó la suscripción.
-    // MercadoPago no acepta URLs locales o HTTP. Usamos un dominio válido como fallback en local.
     let baseUrl = Deno.env.get("SUPABASE_PUBLIC_URL") || SUPABASE_URL;
     if (!baseUrl.startsWith("https://")) {
       baseUrl = "https://dbturnos.argity.com";
@@ -275,16 +248,7 @@ Deno.serve(async (req) => {
       `[create-sub] Plan creado: ${mpData.id} init_point=${mpData.init_point}`,
     );
 
-    // 3. Registrar el intento de suscripción como 'pending' si no está activa.
-    // Si ya está activa (upgrade), no sobreescribimos el mp_preapproval_id 
-    // para poder cancelarlo cuando el usuario pague el nuevo.
-    const { data: existingSub } = await supabase
-      .from("tenant_subscriptions")
-      .select("status")
-      .eq("institution_id", institution_id)
-      .maybeSingle();
-
-    if (existingSub?.status !== "active") {
+    if (currentSub?.status !== "active") {
       const { error: dbError } = await supabase
         .from("tenant_subscriptions")
         .upsert(
