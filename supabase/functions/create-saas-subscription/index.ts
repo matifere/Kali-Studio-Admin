@@ -258,7 +258,7 @@ Deno.serve(async (req) => {
           transaction_amount: Number(plan.price),
           currency_id: plan.currency ?? "ARS",
           free_trial: {
-            frequency: 7,
+            frequency: 14,
             frequency_type: "days"
           }
         },
